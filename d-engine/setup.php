@@ -1,0 +1,9550 @@
+<?php
+
+if (!class_exists('DataBaseAbstract', false)) require_once( dirname(__FILE__).'/db.php');
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class DataBase extends DataBaseAbstract {
+	/**
+	 * @var mysqli
+	 * */
+	protected $link;
+	public function connect(DBCFG $cfg) {
+		$this->link = new mysqli();
+		$this->link->init();
+		$this->link->options(MYSQLI_INIT_COMMAND, 'SET names utf8');
+		$res = @$this->link->real_connect($cfg->hostspec, $cfg->username, $cfg->password, $cfg->database);
+		if (!$res) {
+			throw new ExceptionDB('DB connect failed');
+		}
+		$this->cfg = $cfg;
+	}
+	public function disconnect() {
+		$this->getLink()->close();
+	}
+	public function multiQuery($query) {
+		$this->getLink()->multi_query($query);
+		do {
+			if ($result = $this->getLink()->store_result()) {
+				$result->close();
+			}
+		} while ($this->getLink()->next_result());
+	}
+	public function ping() {
+		return $this->getLink()->ping();
+	}
+	public function escape ($string) {
+		$string = $this->getLink()->real_escape_string($string);
+		return $string;
+	}
+
+	/**
+	 * Выполнить запрос
+	 *
+	 * @param string $query
+	 * @param null $mode
+	 * @throws ExceptionDB
+	 * @return mysqli_result
+	 */
+	public function doquery($query, $mode = null) {
+		$dbresult = $this->getLink()->query($query, MYSQLI_STORE_RESULT);
+		if ($this->getLink()->error) {
+			$trace = print_r(getTraceReport(getTrace(), 7), true);
+			$msg   = sprintf('DB Error #%s %s with query: %s trace:%s', $this->link->errno, $this->link->error, $query, $trace);
+			throw new ExceptionDB($msg);
+		}
+		if ($mode == null) return;
+		//$dbresult = $this->link->use_result();
+		return $this->fetch($dbresult, $mode);
+	}
+	public function lastId() {
+		return $this->getLink()->insert_id;
+	}
+	protected function fetchField($dbresult) {
+		return $dbresult->fetch_field();
+	}
+	protected function fetchObject($dbresult) {
+		return $dbresult->fetch_object();
+	}
+	protected function fetchAssoc($dbresult) {
+		return $dbresult->fetch_assoc();
+	}
+	protected function fetchRow($dbresult) {
+		return $dbresult->fetch_row();
+	}
+	protected function fieldCount($dbresult) {
+		return $dbresult->field_count;
+	}
+	public function affectedRows() {
+		return $this->getLink()->affected_rows;
+	}
+	public function getFields($table) {
+		$query = sprintf('SHOW COLUMNS FROM %s%s', $this->cfg->prefix, $table);
+		return $this->query($query, DB_SELECT_OBJS);
+	}
+	/**
+	 * @return \mysqli
+	 */
+	public function getLink() {
+		if (!$this->link) {
+			$this->connect($this->cfg);
+		}
+		return $this->link;
+	}
+}
+
+/**
+ * фабрика объектов с поддержкой Deep Injection
+ *
+ * Class DI
+ */
+class DI {
+	/**
+	 * Создает экземпляр класса
+	 *
+	 * @param $className
+	 * @param null $argumentsArray
+	 * опционально ассоциативный массив аргументов, передаваемых в конструктор.
+	 * Неуказанные аргументы будут взяты из ObjectsPool или созданы автоматически
+	 * @return mixed
+	 */
+	static function create($className, $argumentsArray = null) {
+		$meta = new ReflectionClass($className);
+		$methodMeta = $meta->getConstructor();
+		$args = self::getArguments($methodMeta, $argumentsArray);
+		$object = (count($args) > 0) ? $meta->newInstanceArgs($args) : $object = new $className;
+		return $object;
+	}
+	static function invoke($class, $method, $argumentsArray = null) {
+		$methodMeta = new ReflectionMethod($class, $method);
+		$args   = self::getArguments($methodMeta, $argumentsArray);
+		return $methodMeta->invokeArgs($class, $args);
+	}
+	static function getArguments(ReflectionMethod $methodMeta, $argumentsArray = null) {
+		if ($argumentsArray == null) {
+			$argumentsArray = array();
+		}
+		$args   = array();
+		/* @var $method ReflectionMethod */
+		if ($methodMeta->getNumberOfParameters() > 0) {
+			$params = $methodMeta->getParameters();
+			foreach ($params as $param) {
+				/* @var $param ReflectionParameter */
+				$varname = $param->getName();
+				$argumentHasType = $param->getClass();
+				if (isset($argumentsArray[$varname])) {
+					/*
+					 * аргумент есть в переданном массиве
+					 */
+					$argument = $argumentsArray[$varname];
+				} else if ($argumentHasType) {
+					/*
+					 * аргумента нет в массиве, но если указан тип, то взять из ObjectsPool или создать новый экземпляр
+					 */
+					if (ObjectsPool::exist($argumentHasType->name)) {
+						$argument = ObjectsPool::get($argumentHasType->name);
+					}
+				} else if ($param->isDefaultValueAvailable()) {
+					/*
+					 * иначе попробовать значение по умолчанию
+					 */
+					$argument = $param->getDefaultValue();
+				} else {
+					throw new Exception("Method {$methodMeta->name} requires '{$varname}' parameter");
+				}
+				$args[$varname] = $argument;
+			}
+		}
+		return $args;
+	}
+}
+class AuthProxyDB extends DModelProxy {
+	protected $tableName  = 'rds_users';
+	protected $cookieName = 'cookieAuthKey';
+	static $readFromDBProxyClass = null;
+	protected $db;
+
+	function __construct() {
+		parent::__construct(); // TODO: Change the autogenerated stub
+		$this->db = ObjectsPool::get('DataBase');
+	}
+
+	public function saveAuthInSession($userId, $ip = 'any') {
+		if (!session_id())
+			session_start();
+		$sessionId = session_id();
+		$_SESSION = array(
+			'user_id'    => $userId,
+			'session_id' => $sessionId,
+			'ip'         => $ip
+		);
+		return $sessionId;
+	}
+	protected function checkAuth() {
+		$login    = $this->model->login;
+		$password = $this->model->password;
+		$sqlexpr  = sprintf("login = '%s' AND password = '%s'", $this->db->escape($login), $this->db->escape($password));
+		return $this->db->select($this->tableName, 'id', $sqlexpr, DB_SELECT_OBJ);
+	}
+	/**
+	 * Попытка авторизации
+	 */
+	function create() {
+		$userInfo = $this->checkAuth();
+		if ($userInfo == null) throw new ExceptionUser(s('error_invalidauth'));
+		$this->model->id = $userInfo->id;
+		/*
+		 * завести сессию
+		 */
+		$ip = getIP();
+		$this->saveAuthInSession($this->model->id, $ip);
+		/*
+		 * запомнить в куках
+		 */
+		if ($this->model->isPropertyExist('remembering') && $this->model->remembering) {
+			$key = md5(sprintf('%s %s%s', $this->model->id, time(), mt_rand(1000, 9999)));
+			setcookie($this->cookieName, $key, time() + 60 * 60 * 24 * 30, '/');
+			$key = md5($ip.$key);
+			$this->db->update($this->tableName, array('autologin' => $key), "id = {$this->model->id}");
+		}
+	}
+	/**
+	 * проверка авторизации по сессии
+	 */
+	function read($params = null) {
+		if (CONFIG::$USE_COOKIE_FOR_AUTH && isset($_COOKIE[$this->cookieName])) {
+			$key       = $_COOKIE[$this->cookieName];
+			$ip        = getIP();
+			$keyFromDB = md5($ip.$key);
+			$result    = $this->db->select($this->tableName, 'id', "autologin='$keyFromDB'", DB_SELECT_OBJ);
+			if ($result) {
+				$this->saveAuthInSession($result, $ip);
+			}
+		}
+		/*
+		 * check if we have userId in SESSION
+		 */
+		if (!session_id())
+			session_start();
+		if (isset($_SESSION['ip']) && ($_SESSION['ip'] == 'any')) {
+			$ipMatched = true; // для кросс-авторизации
+		} else {
+			$ip        = getIP();
+			$ipMatched = (@$_SESSION['ip'] == $ip);
+		}
+		if (empty($_SESSION['user_id'])
+			|| empty($_SESSION['session_id'])
+			|| !$ipMatched
+			|| ($_SESSION['session_id'] != session_id())
+		) {
+			$userId = null;
+		} else {
+			$userId = $_SESSION['user_id'];
+		}
+		if (($userId == null) || !is_numeric($userId)) {
+			return null;
+		}
+		/*
+		 * if have, get other info from the database
+		 */
+//		$info = $this->db->select($this->tableName, '*', "id = $userId", DB_SELECT_OBJ);
+//		dump($info);
+		if (! self::$readFromDBProxyClass instanceof DModelProxy) {
+			self::$readFromDBProxyClass = new DModelProxyDatabase($this->tableName);
+			$readProxy = self::$readFromDBProxyClass;
+			$readProxy->setFieldsRead('*');
+		} else {
+			$readProxy = self::$readFromDBProxyClass;
+		}
+		/* @var $readProxy DModelProxyDatabase */
+		$readProxy->model = $this->model;
+		$info = $readProxy->read($userId);
+		$readProxy->model = null;
+//		dump($info, 2);
+
+		if ($info) {
+			if (isset($info->password)) unset($info->password);
+			return $info;
+		}
+		/*
+		 * по умолчанию очистить модель - авторизация не удалась
+		 */
+		return null;
+	}
+	function setReadInfoProxy() {
+
+	}
+	function getReadInfoProxy() {
+
+	}
+	/**
+	 * Деавторизация
+	 */
+	function delete($params = null) {
+		if (CONFIG::$USE_COOKIE_FOR_AUTH) {
+			setcookie($this->cookieName, '', time() - 3600);
+		}
+		setcookie(session_name(), '', time() - 3600); // для удаления куки, чтобы при рефреше не заводилась сессия опять
+		session_destroy();
+		$this->model->setRawData(null);
+	}
+	function update() {
+	}
+}
+/**
+ * Прародитель объектов.
+ *
+ * @package objects
+ * @author DroN
+ * @copyright 2006
+ */
+abstract class DController implements Injectable {
+	/**
+	 * Деструктор экземпляра
+	 * Если объект состоял в реестре объектов, исключить его оттуда
+	 *
+	 */
+	function __destruct() {
+	}
+	function __construct() {
+	}
+	function injectDependences() {
+	}
+
+}
+abstract class DModelAbstract {
+	abstract function getModelInstance();
+	/**
+	 * Массив значений свойств
+	 *
+	 * все свойства модели виртуалные, реализованы посредством __get и __set
+	 * @var array
+	 */
+	protected $data = array();
+	/**
+	 * получить массив "чистых" значений свойств
+	 * @return array
+	 */
+	public function getRawData() {
+		return $this->data;
+	}
+	/**
+	 * Массив измененных свойств.
+	 *
+	 * Изменяется при каждом присваивании, в том числе значений по умолчанию.
+	 * Сбрасывается методом resetFieldsModified
+	 * @var array
+	 */
+	protected $dataChanged = array();
+	/**
+	 * Proxy
+	 * @var DModelProxy
+	 */
+	protected $proxy;
+	/**
+	 * Return proxy
+	 * @return DModelProxy
+	 */
+	final function getProxy() {
+		if (!$this->proxy instanceof DModelProxy) {
+			$this->proxy = $this->createProxy();
+		}
+		if ($this->proxy == null) trigger_error('Proxy is not set', E_USER_ERROR);
+		return $this->proxy;
+	}
+	/**
+	 * Загрузка данных в модель посредством прокси-объекта.
+	 *
+	 * Из полученного от прокси массива массивов берется первый элемент.
+	 * @param null $params
+	 * @return static
+	 */
+	final public function load($params = null) {
+		$this->beforeLoad($params);
+		$proxy = $this->getProxy();
+		$proxy->model = $this;
+		$data = $proxy->read($params);
+		$proxy->model = null;
+		if (($data != null) && (count($data) != 0)) {
+			$this->setRawData($data);
+		}
+		$this->afterLoad($params);
+		return $this;
+	}
+	/**
+	 * Колбэки на действия create-save-load-delete
+	 */
+	function beforeLoad() {}
+	function afterLoad() {}
+
+}
+/**
+ * LICENCE.
+ *
+ * Copyright (c) 2009, Andrei V.Nakhabov
+ * All rights reserved.
+ *
+ * 	Redistribution and use in source and binary forms, with or without modification,
+ * 	are permitted provided that the following conditions are met:
+ * 	    * Redistributions of source code must retain the above copyright notice,
+ * 	      this list of conditions and the following disclaimer.
+ * 	    * Redistributions in binary form must reproduce the above copyright notice,
+ *        this list of conditions and the following disclaimer in the documentation
+ *        and/or other materials provided with the distribution.
+ *      * Neither the name of author may be used to endorse or promote products derived from this
+ *        software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+abstract class FormElement {
+	public $attributes = array();
+	public $id;
+	public $name;
+	protected $bindToModelProperties = null;
+	public $isValueSet = false;
+	public $value;
+	/**
+	 * User's data
+	 * @var mixed
+	 */
+	public $tag;
+	static protected $UI_AUTO_ID = 0;
+	static public function getAutoId() {
+		self::$UI_AUTO_ID++;
+		return 'FormElement_'.self::$UI_AUTO_ID;
+	}
+	public function __construct($name = null, $value = null) {
+		if ($name != null) {
+			$this->name = $name;
+		}
+		if ($value != null) {
+			$this->value = $value;
+		}
+	}
+	/**
+	 * Получить список свойств, которые при вызове метода applyModel
+	 * должны быть взяты из модели и присвоены через setValue
+	 * (если это несколько полей (массив)
+	 * setValue также присвоит массив значений (полезно в TemplateInput))
+	 * @return array|string $field
+	 */
+	public function getModelPropertiesBinding() {
+		if ($this->bindToModelProperties == null) {
+			return $this->name;
+		} else {
+			return $this->bindToModelProperties;
+		}
+	}
+	/**
+	 * Установить список свойств, которые принимает элемент из модели данных
+	 * в методе applyModel
+	 * @param string|array $properties
+	 * несколько полей можно описать массивом или строкой через запятую
+	 * @return static
+	 */
+	public function bindToModelProperties($properties) {
+		if (is_string($properties) && (strpos($properties, ',') !== false)) {
+			$properties = explode(',', $properties);
+		}
+		$this->bindToModelProperties = $properties;
+		return $this;
+	}
+	/**
+	 * @param $a
+	 *
+	 * @return DForm
+	 */
+	public function addAttribute($a) {
+		if (is_array($a)) {
+			foreach ($a as $ai) {
+				$this->addAttribute($ai);
+			}
+			return $this;
+		}
+		if (preg_match('/^(.+)="(.*)"$/', $a, $patterns)) {
+			$this->attributes[$patterns[1]] = $patterns[2];
+		} else {
+			$this->attributes[$a] = $a;
+		}
+		return $this;
+	}
+	/**
+	 * Возращает атрибуты элемента
+	 * @return string $attributes
+	 */
+	public function getAttributesString() {
+		if (!is_array($this->attributes)) return '';
+		return implodeAssoc(' ', $this->attributes, '=', '"');
+	}
+	/**
+	 * @param $id
+	 * @return FormElement
+	 */
+	public function setId($id) {
+		$this->id = $id;
+		return $this;
+	}
+	public function getId() {
+		if ($this->id == null) {
+			$this->id = FormElement::getAutoId();
+		}
+		return $this->id;
+	}
+	public function getName() {
+		return $this->name;
+	}
+	/**
+	 * @param $name
+	 *
+	 * @return static
+	 */
+	public function setName($name) {
+		$this->name = $name;
+		return $this;
+	}
+	public function setValue($value) {
+		$argv = func_get_args();
+		if (count($argv) > 1) {
+			array_shift($argv);
+			$value = vsprintf($value, $argv);
+		}
+		$this->value      = $value;
+		$this->isValueSet = true;
+		return $this;
+	}
+	public function getValue() {
+		return $this->value;
+	}
+	abstract public function getHtml();
+	public function __toString() {
+		return (string)$this->getHtml(); // __toString should return string value, therefore typecasting is here
+	}
+	/**
+	 * Присвоить элементу значение из модели данных
+	 * @param DModel $model
+	 * @return FormElement $this
+	 */
+	public function applyModel(DModel $model) {
+		$properties = array_keys($model->getProperties());
+		$itemBoundToModelProperties = $this->getModelPropertiesBinding();
+		if ($itemBoundToModelProperties == '*') {
+			$itemBoundToModelProperties = $properties;
+		}
+		if (is_array($itemBoundToModelProperties)) {
+			$propertiesToSet = array_intersect($itemBoundToModelProperties, $properties);
+			$values          = array();
+			foreach ($propertiesToSet as $f) {
+				$values[$f] = $model->{$f};
+			}
+			$this->setValue($values);
+		} else {
+			if (in_array($itemBoundToModelProperties, $properties)) {
+				$this->setValue($model->{$itemBoundToModelProperties});
+			}
+		}
+		return $this;
+	}
+}
+
+/**
+ * Enter description here ...
+ */
+class FormElements extends FormElement implements Iterator {
+	static public $PREPEND = 0;
+	protected $elements;
+	protected $header, $footer;
+	/**
+	 * опциональная группа элементов в оконцовке группы
+	 * @var FormElements
+	 */
+	public $buttonsBox;
+	/**
+	 * @param FormElement $element
+	 * @param null $insertingPosition
+	 * @param bool $insertBeforeInsteadAfter
+	 *
+	 * @return static
+	 */
+	public function add(FormElement &$element, $insertingPosition = null, $insertBeforeInsteadAfter = false) {
+		if (! ($element instanceof FormElement)) {
+			trigger_error('Expected FormElement instance', E_USER_ERROR);
+		}
+		if ($insertingPosition === self::$PREPEND) {
+			if (is_array($this->elements)) {
+				array_unshift($this->elements, $element);
+			} else {
+				$this->elements[] = $element;
+			}
+		} elseif ($insertingPosition == null) {
+			$this->elements[] = $element;
+		} elseif ($insertingPosition instanceof FormElement) {
+			/*
+			 * найти позицию указанного элемента
+			 */
+			$foundAt = false;
+			foreach ($this->elements as $index => $e) {
+				if ($e == $insertingPosition) {
+					$foundAt = $index;
+					break;
+				}
+			}
+			if ($foundAt === false) {
+				trigger_error('Cant find element to insert at', E_USER_NOTICE);
+			}
+			if ($insertBeforeInsteadAfter) {
+				$insertAt = $foundAt;
+			} else {
+				$insertAt = $foundAt + 1;
+			}
+			array_splice($this->elements, $insertAt, 0, array($element));
+		} else {
+			trigger_error('Inserting Position should be specified with FormElement object', E_USER_ERROR);
+		}//end if
+		return $this;
+	}
+	/**
+	 * Получить первый элемент
+	 * @param bool $returnNullObject
+	 * @return FormElement
+	 */
+	public function getFirst($returnNullObject = false) {
+		if (!$this->elements) return ($returnNullObject) ? new NULLobject() : null;
+		$this->rewind();
+		return $this->current();
+	}
+	/**
+	 * найти индекс элемента в массиве
+	 * @param FormElement $element
+	 * @return int|null $index
+	 */
+	protected function getIndexOfElement(FormElement $element) {
+		foreach ($this->elements as $index => $e) {
+			if ($element == $e) {
+				return $index;
+			}
+		}
+		return null;
+	}
+	/**
+	 * Получить элемент по ID
+	 *
+	 * @param string $id
+	 * @return FormElement
+	 */
+	public function getById($id) {
+		/*
+		 * поиск по массиву
+		 */
+		foreach ($this->elements as $element) {
+			if ($element->id == $id) {
+				return $element;
+			}
+		}
+		return null;
+	}
+	public function importFrom(FormElements $imported) {
+		foreach ($imported as $elem) $this->add($elem);
+	}
+	public function remove(FormElement $element) {
+		$index = $this->getIndexOfElement($element);
+		if ($index !== null) {
+			array_splice($this->elements, $index, 1);
+		}
+		return $this;
+	}
+	public function removeByName($name) {
+		$elements = $this->getByName($name, false);
+		foreach ($elements as $element) {
+			$this->remove($element);
+		}
+		return $this;
+	}
+	public function removeAll() {
+		$this->elements = array();
+	}
+	public function isExist($id) {
+		$found = $this->getById($id);
+		return ($found !== null);
+	}
+	public function getElementsCount() {
+		return count($this->elements);
+	}
+	public function get($name) {
+		return $this->getByName($name, true);
+	}
+	/**
+	 * Получить группу элементов по имени
+	 *
+	 * @param string $name
+	 * @param bool $getFirst
+	 * возвращать первый элемент найденной группы
+	 * @return FormElement|FormElements
+	 */
+	public function getByName($name, $getFirst = false) {
+		$found = new FormElements();
+		foreach ($this as $elem) {
+			if (strpos($name, '/') === 0) {
+				if (preg_match($name, $elem->name)) $found->add($elem);
+			} else {
+				if ($elem->name == $name) $found->add($elem);
+			}
+			if ($elem instanceof FormElements ) {
+				$elemsInSubset = $elem->getByName($name);
+				if ($elemsInSubset instanceof FormElements) {
+					$found->importFrom($elemsInSubset);
+				}
+			}
+		}
+		if ($getFirst) return $found->getFirst();
+		return $found;
+	}
+	public function __get($field) {
+		$element = $this->get($field);
+		if ($element == null) {
+			trigger_error("No FormElement $field found", E_USER_ERROR);
+		}
+		return $element;
+	}
+	public function getHeader() {
+		return $this->header;
+	}
+	public function getFooter() {
+		return $this->footer;
+	}
+	const BUTTONS_BOX_TOP = 1;
+	const BUTTONS_BOX_BOTTOM = 2;
+	const HEADER = 4;
+	const FOOTER = 8;
+	/**
+	 * @param int $options
+	 * что выводить, по умолчанию:
+	 * self::BUTTONS_BOX_BOTTOM | self::HEADER | self::FOOTER
+	 *
+	 * @return string
+	 */
+	public function getHtml($options = 14) {
+		$out = '';
+		if (($options & self::HEADER) != 0) {
+			$out .= $this->getHeader();
+		}
+		$buttonsBox = $this->buttonsBox;
+		if (!$buttonsBox instanceof FormElements) {
+			$buttonsBox = null;
+		}
+		if ($buttonsBox && (($options & self::BUTTONS_BOX_TOP) != 0)) {
+			$out .= $this->buttonsBox->getHtml();
+		}
+		foreach ($this as $input) {
+			$out .= $input->getHtml();
+		}
+		if ($buttonsBox && (($options & self::BUTTONS_BOX_BOTTOM) != 0)) {
+			$out .= $this->buttonsBox->getHtml();
+		}
+		if (($options & self::FOOTER) != 0) {
+			$out .= $this->getFooter();
+		}
+		return $out;
+	}
+	public function setDesign($header, $footer) {
+		if ($header !== null) $this->header = $header;
+		if ($footer !== null) $this->footer = $footer;
+		return $this;
+	}
+	public function __toString() {
+		return $this->getHtml();
+	}
+	public function rewind() {
+		if (!is_array($this->elements)) return false;
+		return reset($this->elements);
+	}
+	/**
+	 * @return FormElement
+	 */
+	public function current() {
+		return current($this->elements);
+	}
+	public function key() {
+		return key($this->elements);
+	}
+	/**
+	 * @return FormElement
+	 */
+	public function next() {
+		return next($this->elements);
+	}
+	public function valid() {
+		if (!is_array($this->elements)) return false;
+		return !is_null($this->key());
+	}
+	/**
+	 * Присвоить значения из модели всем подходящим элементам формы
+	 * render DModel
+	 * @param DModel $model
+	 * @return DForm $this
+	 */
+	public function applyModel(DModel $model) {
+		foreach ($this as $item) {
+			$item->applyModel($model);
+		}
+		return $this;
+	}
+	/**
+	 * Сгенерировать группу элементов на основании модели данных.
+	 *
+	 * @param DModel|DModelAbstract $model
+	 * @param array[] $fieldToTypeMap
+	 * ассоциативный массив соответствия названий свойств модели
+	 * и класса создаваемого элемента.
+	 * Неуказанные свойства пропускаются, если не задан класс по умолчанию.
+	 * Можно задать класс по умолчанию с ключом 0.
+	 * Порядок следования элементов в форме соответствует порядку полей в карте,
+	 *а если они не указаны в карте, то порядку свойств в модели.
+	 *
+	 * @example
+	 * // создание 'группы' из одного элемента для свойства field
+	 * $fieldToTypeMap = array(
+	 *   'field' => 'TextArea' // для поля field будет создан элемент textarea
+	 * );
+	 * // создание группы с элементами для каждого свойства, неперечисленные свойства
+	 * // будут иметь тип по умолчанию
+	 * $fieldToTypeMap = array(
+	 *   'StaticInput', // по умолчанию все неописанные в массиве свойства будут иметь тип StaticInput
+	 *   'field' => 'TextArea' // для поля field будет создан элемент textarea
+	 * );
+	 * @return DForm
+	 */
+	static public function generateByModel(DModelAbstract $model, $fieldToTypeMap = null) {
+		if ($fieldToTypeMap == null) $fieldToTypeMap = self::generateFieldToTypeMap($model);
+		$properties = $model->getModelInstance()->getProperties();
+		if (array_key_exists(0, $fieldToTypeMap)) {
+			$defaultType = $fieldToTypeMap[0];
+		} else {
+			$defaultType = false;
+		}
+		$formClass = get_called_class();
+		$form = new $formClass;
+		/*
+		 * отсортировать свойства в соответствие с порядком полей в карте
+		 */
+		$fieldToTypeMapWODefault = $fieldToTypeMap;
+		if (isset($fieldToTypeMap[0])) {
+			unset($fieldToTypeMapWODefault[0]);
+		}
+		$map = array_keys($fieldToTypeMapWODefault);
+		ObjectsPool::put('generateByModelMap', array($map, array_keys($properties)));
+		uksort(
+		    $properties,
+		    function($a, $b) {
+			    list($map, $props) = ObjectsPool::get('generateByModelMap');
+			    $indexOfA          = array_search($a, $map);
+			    $indexOfB          = array_search($b, $map);
+			    if (($indexOfA === false) && ($indexOfB === false)) {
+					// обоих нет в карте, вернуть по порядку в изначальном массиве
+					$indexOfA = array_search($a, $props);
+					$indexOfB = array_search($b, $props);
+			    }
+				if (($indexOfA !== false) && ($indexOfB === false)) {
+					// первый есть в карте, второго нет, первый главней
+					return -1;
+				}
+				if (($indexOfA === false) && ($indexOfB !== false)) {
+					// второй есть в карте, первого нет, второй главней
+					return 1;
+				}
+				return ($indexOfA > $indexOfB) ? 1: -1;
+			}
+		);
+		ObjectsPool::remove('generateByModelMap');
+		/*
+		 * сгенерировать элементы формы
+		 */
+		foreach ($properties as $property) {
+			/* @var $property DModelProperty */
+			if (array_key_exists($property->name, $fieldToTypeMap)) {
+				$type = $fieldToTypeMap[$property->name];
+			} elseif ($defaultType !== false) {
+				$type = $defaultType;
+			} else {
+				// нет типа в карте, пропускаем
+				continue;
+			}
+			/* @var $form FormElements */
+			/* @var $item FormElement */
+			$item = new $type;
+			$item->setName($property->name);
+			$item->bindToModelProperties($property->name);
+			/*
+			 * В зависимости от типа поля и элемента сконфигурировать
+			 */
+			switch ($type) {
+				case 'Selector':
+					if (is_array($property->parameters)) {
+						$item->addOptions($property->parameters, true);
+					}
+					break;
+				default:
+					//noop
+					break;
+			}
+			$form->add($item);
+		}
+		return $form;
+	}
+	/**
+	 * генерирует подписи к элементам на основании их имен
+	 * с добавлением указанного префикса
+	 * @param string $prefix
+	 * префикс для использования в функции s
+	 * @return static
+	 */
+	public function generateLabels($prefix = '') {
+		foreach ($this as $element) {
+			if ($element instanceof LabeledInput) {
+				$elementName = $element->getName();
+				if (!empty($elementName)) {
+					$element->setLabel(s($prefix.$element->getName()));
+				}
+			}
+		} 
+		return $this;
+	}
+	/**
+	 * автоматическое создание карты тип сйойства - класс элемента формы
+	 * на основании предопределенной ассоциации
+	 * @param DModelAbstract $model
+	 * @param array $typesMap
+	 * ассоциативный массив соответствия типа свойства классу элемента.
+	 * Если не указан, используется карта по умолчанию.
+	 * @example
+	 * $typesMap = array(
+	 *     'int' => 'TextInput',
+	 *     'enum'=> 'Selector'
+	 * );
+	 * @return array $map
+	 */
+	static public function generateFieldToTypeMap(DModelAbstract $model, $typesMap = null) {
+		if ($typesMap == null) {
+			// default type as no-key item
+			$typesMap = array(
+			    'TextInput',
+			    'int'      => 'TextInput',
+			    'datetime' => 'DateInput',
+			    'date'     => 'DateInput',
+			    'blob'     => 'TextArea',
+			    'text'     => 'TextArea',
+			    'longtext' => 'TextArea',
+			    'enum'     => 'Selector',
+			    'set'      => 'Selector'
+			);
+		}
+		if (array_key_exists(0, $typesMap)) {
+			$defaultType = $typesMap[0];
+		} else {
+			$defaultType = false;
+		}
+		$map = array();
+		foreach ($model->getModelInstance()->getProperties() as $property) {
+			if (array_key_exists($property->type, $typesMap)) {
+				$map[$property->name] = $typesMap[$property->type];
+			} elseif ($defaultType !== false) {
+				$map[$property->name] = $defaultType;
+			} else {
+				continue;
+			}
+		}
+		return $map;
+	}
+}
+/**
+ * Enter description here ...
+ */
+class DForm extends FormElements {
+	static public $addTypedCSS = false;
+	public function __construct($obj = null) {
+		parent::__construct($obj);
+		$this->setDesign('<form id="%s" %s>', '</form>');
+		$this->addAttribute('method="POST"');
+	}
+	public function setAction($a) {
+		$this->addAttribute('action="'.$a.'"');
+		return $this;
+	}
+	public function getHeader() {
+		return sprintf($this->header, $this->id, $this->getAttributesString());
+	}
+	public function getFooter() {
+		return $this->footer;
+	}
+}
+/**
+ * Enter description here ...
+ */
+class FieldSet extends FormElements {
+	public $label;
+	public function __construct() {
+		parent::__construct();
+		$this->setDesign('<fieldset %3$s><legend>%1$s</legend>%2$s', '</fieldset>');
+	}
+	public function setLabel($label = '') {
+		$this->label = $label;
+		return $this;
+	}
+	public function getHeader() {
+		if ($this->id) $this->addAttribute("id = \"{$this->id}\"");
+		return sprintf(
+		    $this->header,
+		    (empty($this->label)) ? $this->name : $this->label,
+		    $this->value,
+		    $this->getAttributesString()
+		);
+	}
+}
+//namespace DEngine;
+if (!class_exists('DModelProxy', false)) {
+	require_once 'proxies.php';
+	require_once 'proxyDB.php';
+	require_once 'proxyDBJoin.php';
+}
+class DModel extends DModelAbstract {
+	function getModelInstance() {
+		return $this;
+	}
+	/**
+	 * Ассоциативный массив описателей свойств. Ключи - имена свойств.
+	 * @var DModelProperty[]
+	 */
+	protected $properties = array();
+	private $propertiesMasked = array();
+	function invoke($method, $data) {
+		if (!method_exists($this, $method)) {
+			trigger_error("There is no method named $method exists in the model", E_USER_ERROR);
+		}
+		$this->sets($data);
+		$this->$method();
+	}
+	/**
+	 * Добавить описатель свойства модели
+	 * @param string|DModelProperty $name
+	 * наименование или объект DModelProperty
+	 * @param string $type
+	 * @param string $typeParameters
+	 * @param mixed $defaultValue
+	 * @return static
+	 */
+	function addProperty($name, $type = null, $typeParameters = null, $defaultValue = null) {
+		if ($name instanceof DModelProperty) {
+			$this->properties[$name->name] = $name;
+		} else {
+			$this->properties[$name] = new DModelProperty($name, $type, $typeParameters, $defaultValue);
+		}
+		return $this;
+	}
+	/**
+	 * Временное "отключение" свойств, неперечисленных в аргументе
+	 * @param string $keepPropertiesOnly
+	 * @return static
+	 */
+	function maskPropertyList($keepPropertiesOnly) {
+		$this->maskReset();
+		if (!is_array($keepPropertiesOnly)) {
+			$keepPropertiesOnly = explode(',', $keepPropertiesOnly);
+		}
+		$this->propertiesMasked = $this->properties;
+		$mask = array_flip($keepPropertiesOnly);
+		$this->properties = array_intersect_key($this->properties, $mask);
+		return $this;
+	}
+	/**
+	 * сброс маски используемых свойств,
+	 * "включение" всех свойств
+	 * @return static
+	 */
+	function maskReset() {
+		if (count($this->propertiesMasked) == 0) return $this;
+		$this->properties = $this->propertiesMasked;
+		$this->propertiesMasked = array();
+		return $this;
+	}
+	/**
+	 * Получить описатель свойства
+	 * @param string $name
+	 * @return DModelProperty
+	 */
+	function getProperty($name) {
+		if (!$this->isPropertyExist($name)) return null;
+		return $this->properties[$name];
+	}
+	/**
+	 * Вернуть массив объектов описателей свойств модели
+	 * @return DModelProperty[]
+	 */
+	function getProperties() {
+		return $this->properties;
+	}
+	/**
+	 * Создать экземпляр модели
+	 */
+	function __construct($loadWith = null) {
+		$this->setup();
+		if (!($this instanceof DModelDynamic) && (count($this->properties) == 0)) {
+			trigger_error("There are no properties defined for model ".get_class($this));
+		}
+		if ($loadWith) {
+			$this->load($loadWith);
+		} else {
+			$this->applyDefaults();
+		}
+	}
+	function setup() {
+
+	}
+	/**
+	 * заменить "чистые" данные
+	 * @param array|object|null $data
+	 * @return static
+	 */
+	public function setRawData($data) {
+		$data = (array)$data;
+		$error = !is_array($data);
+		if (!$error && count($data) && !isAssoc($data)) {
+			trigger_error('setRawData accepts associative arrays or objects only', E_USER_ERROR);
+		}
+		$this->resetFieldsModified();
+		$this->data = $data;
+		return $this;
+	}
+	function fillWithDefaults() {
+		return $this->applyDefaults();
+	}
+	/**
+	 * Заполнить свойства значениями по умолчанию
+	 */
+	function applyDefaults() {
+		foreach ($this->properties as $property) {
+			/* @var $property DModelProperty */
+			if ($property->default !== null) {
+				$this->set($property->name, $property->default, true);
+			}
+		}
+	}
+	/**
+	 * Getter свойства.
+	 * Преобразует к нужному типу (если известный)
+	 * @param string $field
+	 * имя свойства
+	 * @param mixed $value
+	 * значение
+	 * @return mixed
+	 */
+	function getterConversions($field, $value) {
+		if ($value instanceof SQLvar) return $value;
+		if ($value !== null) {
+			switch ($this->getProperty($field)->type) {
+				case 'int':
+					$value = (int) $value;
+					break;
+				case 'decimal':
+				case 'float':
+				case 'double':
+					$value = (float)$value;
+					break;
+				default:
+					// no op
+					break;
+			}//end switch
+		}//end if is not null
+		return $value;
+	}
+	/**
+	 * @param $field
+	 * @param $value
+	 *
+	 * @return mixed
+	 * если возвращает null, то свойство не устаналивается
+	 */
+	function setterConversions($field, $value) {
+		return $value;
+	}
+	const CONVERSIONS_BYPASS = 1;
+	const CONVERSIONS_ADMIT = 2;
+	/**
+	 * Получить значение свойства
+	 * @param $field
+	 * @param int $bypassGetter
+	 * @return mixed
+	 * @throws Exception
+	 */
+	public final function get($field, $bypassGetter = self::CONVERSIONS_ADMIT) {
+		/*
+		 * если свойство неописано, предупредить
+		 */
+		if(!$this->isPropertyExist($field))
+			trigger_error("There is no '$field' property in the model <b>".get_class($this).'</b>', E_USER_ERROR);
+		if (!array_key_exists($field, $this->data)) {
+			$value = null;
+		} else {
+			$value = $this->data[$field];
+		}
+		if ($bypassGetter == self::CONVERSIONS_ADMIT) {
+			$value = $this->getterConversions($field, $value);
+		}
+		return $value;
+	}
+	private function set($field, $value, $bypassSetter = DModel::CONVERSIONS_ADMIT) {
+		if (!is_string($field)) {
+			trigger_error('Unable to set multiple fields, use setRawData or sets method instead', E_USER_ERROR);
+		}
+		if (!$this->isPropertyExist($field)) {
+			trigger_error("There is no '$field' property in the model <b>".get_class($this).'</b>', E_USER_ERROR);
+		}
+		/*
+		 * вызвать трансформацию данных
+		 */
+		if ($bypassSetter == self::CONVERSIONS_ADMIT) {
+			$value = $this->setterConversions($field, $value);
+		}
+		/*
+		 * проверить на совпадение с уже присвоенным значением
+		 */
+		$currentValue = $this->get($field, self::CONVERSIONS_BYPASS);
+		/*
+		 * если нет изменений, выйти
+		 */
+		if ($currentValue === $value) return $this;
+		/*
+		 * для чисел сравнение на изменение нестрогое,
+		 * "X" == X
+		 */
+		if (is_numeric($value) && is_numeric($currentValue)) {
+			if ($currentValue == $value) return $this;
+		}
+		/*
+		 * запомнить измененное поле
+		 */
+		$this->dataChanged[$field] = true;
+		/*
+		 * присвоить данные,
+		 * если NULL то удалить из массива (т.к. get вернет null у отсутствующего поля)
+		 */
+		if (($value === null) && array_key_exists($field, $this->data)) {
+			unset($this->data[$field]);
+		} else {
+			$this->data[$field] = $value;
+		}
+		return $this;
+	}
+	/**
+	 * получение значения свойства (magic getter)
+	 * @param string $field
+	 * @return mixed
+	 */
+	public final function __get($field) {
+		return $this->get($field);
+	}
+	/**
+	 * установление значения свойства (setter)
+	 * @param string $field
+	 * имя свойства
+	 * @param mixed $value
+	 * значение
+	 * @return DModel
+	 */
+	public function __set($field, $value) {
+		return $this->set($field, $value);
+	}
+	/**
+	 * Проверка существования свойства
+	 * @param string $field
+	 * имя свойства
+	 * @return bool
+	 */
+	public function isPropertyExist($field) {
+		if ($field == $this->keyName) return true;
+		return array_key_exists($field, $this->properties);
+	}
+	public function __unset($field) {
+		unset($this->data[$field]);
+		if (array_key_exists($field, $this->dataChanged)) {
+			unset($this->dataChanged[$field]);
+		}
+	}
+	/**
+	 * обработка функции isset($model->$field)
+	 * Присвоение значения по умолчанию также вернет true.
+	 * @param string $field
+	 * Имя свойства
+	 * @return bool
+	 */
+	public function __isset($field) {
+		$v = array_key_exists($field, $this->data);
+		if ($v == false) return false;
+		return ($this->$field !== null);
+	}
+	/**
+	 * Присвоение нескольких свойств массивом через setter
+	 * @param object[]|object $data
+	 * @return DModel
+	 */
+	public function sets($data) {
+		if (!is_array($data) && !is_object($data)) trigger_error('Data should be either array or object');
+		foreach($data as $f => $v) {
+			if ($this->isPropertyExist($f)) {
+				$this->set($f, $v);
+			}
+		}
+		return $this;
+	}
+	/**
+	 * сброс массива измененных данных
+	 */
+	public function resetFieldsModified() {
+		$this->dataChanged = array();
+	}
+	/**
+	 * Вернуть массив имен измененных свойств
+	 * @return array
+	 */
+	public function getFieldsModified() {
+		return array_keys($this->dataChanged);
+	}
+	public function changedAttributes () {
+		return $this->dataChanged;
+	}
+
+	/**
+	 * Вернуть как стандартный объект
+	 * @param mixed $bypassGetters
+	 * Флаг использования getter
+	 * @return object
+	 */
+	public function getAsStdObject($bypassGetters = self::CONVERSIONS_ADMIT) {
+		$data = new stdClass();
+		foreach ($this->properties as $f => $v) {
+			if (($bypassGetters == self::CONVERSIONS_ADMIT) || isset($this->$f)) {
+				$data->$f = $this->get($f, $bypassGetters);
+			}
+		}
+		return $data;
+	}
+	/**
+	 * Имя ключевого свойства
+	 * @var string
+	 */
+	public $keyName = 'id';
+	/**
+	 * Вернуть значение ключевого свойства модели
+	 * @return string
+	 */
+	public function getKeyValue() {
+		return $this->{$this->keyName};
+	}
+	/**
+	 * Установить значение ключа
+	 * @param $value
+	 *
+	 * @return DModel
+	 */
+	public function setKeyValue($value) {
+		$this->{$this->keyName} = $value;
+		return $this;
+	}
+	/**
+	 * объединить данные модели (когда несколько записей) с другой моделью того же класса
+	 * @param DModel $modelToCombineWith
+	 * модель, из которой будут взяты данные
+	 *
+	 * @return \DModel
+	 * @throws Exception
+	 */
+	function combineWith(DModel $modelToCombineWith) {
+		$class1 = get_class($this);
+		$class2 = get_class($modelToCombineWith);
+		if ($class1 != $class2) throw new Exception('Models should be instances of the same class to be combined');
+		$raw1 = $this->getRawData();
+		$raw2 = $modelToCombineWith->getRawData();
+		$rawC = array_merge($raw1, $raw2);
+		$this->setRawData($rawC);
+		return $this;
+	}
+	final public function create() {
+		$this->beforeCreate();
+		$proxy = $this->getProxy();
+		$proxy->model = $this;
+		$proxy->create();
+		$proxy->model = null;
+		$this->afterCreate();
+		return $this;
+	}
+	final public function save() {
+		/*
+		 * без ключа запрещать, юзай create
+		 */
+		$key = $this->getKeyValue();
+		if (empty($key)) {
+			throw new Exception("No key defined for model instance, use create() instead of save()");
+		}
+		$this->beforeSave();
+		// do Proxy.update or Proxy.create
+		$proxy = $this->getProxy();
+		$proxy->model = $this;
+		$proxy->update();
+		$proxy->model = null;
+		$this->afterSave();
+		return $this;
+	}
+	final public function delete($params = null) {
+		$this->beforeDelete($params);
+		$proxy = $this->getProxy();
+		$proxy->model = $this;
+		$proxy->delete($params);
+		$proxy->model = null;
+		$this->afterDelete($params);
+	}
+
+	function beforeCreate() {}
+	function beforeDelete() {}
+	function beforeSave() {}
+	function afterCreate() {}
+	function afterDelete() {}
+	function afterSave() {}
+}
+/**
+ * Описатель свойства модели.
+ * @author dron
+ */
+class DModelProperty {
+	public $name;
+	public $type;
+	public $typeOptions;
+	public $parameters;
+	public $parametersRaw;
+	public $isNull;
+	public $isKey;
+	public $default;
+	public $extra;
+	public $label;
+	function __toString() {
+		return $this->name;
+	}
+	function __construct($name, $type, $typeParameters = '', $default = null) {
+		$this->name          = $name;
+		$type                = explode(' ', $type);
+		$this->type          = array_shift($type);
+		$this->typeOptions   = $type;
+		$this->parametersRaw = $typeParameters;
+		$this->parameters    = $this->parseParams($typeParameters);
+		$this->default       = $default;
+		$this->label         = $name;
+	}
+	protected function parseParams($params) {
+		switch ($this->type) {
+			case 'set':
+			case 'enum':
+				if (!is_array($params)) {
+					$params = explode(',', str_replace("'", '', $params));
+				}
+				break;
+
+			default:
+				// noop
+				break;
+		}
+		return $params;
+	}
+	public function set($type, $typeParameters) {
+		$this->type       = $type;
+		$this->parameters = $this->parseParams($typeParameters);
+	}
+}
+if (!class_exists('DModelValidated', false)) require_once 'DModelValidated.php';
+/**
+ * Класс для динамического определения полей модели.
+ *
+ * Полезен, если модель не определена в отдельном файле, а определяется "в коде",
+ * например, если модель используется один раз в текущем файле и т.д.
+ */
+class DModelDynamic extends DModelValidated {
+	function __construct($properties = null) {
+		if ($properties != null) {
+			foreach ($properties as $property) {
+				if (!$property instanceof DModelProperty) trigger_error('Property should be defined with DModelProperty object', E_USER_ERROR);
+				$this->addProperty($property);
+			}
+		}
+		parent::__construct();
+	}
+	function createPropertyByValue($name, $value) {
+		if ($this->isPropertyExist($name)) {
+			trigger_error("Property $name already exists in the model", E_USER_ERROR);
+		}
+		$type = getType($value);
+		if ($type == 'object') {
+			$typeParam = get_class($value);
+		} else {
+			$typeParam = null;
+		}
+		$this->addProperty($name, $type, $typeParam);
+		$this->$name = $value;
+		return $this;
+	}
+}
+
+/**
+ * Представляет коллекцию моделей.
+ *
+ * На самом деле объект модели один, а данные моделей подставляются из массива при итерации.
+ */
+class DModelsCollection extends DModelAbstract implements Iterator {
+	/**
+	 * Экземпляр модели
+	 * @var DModel
+	 */
+	protected $model;
+	protected $modelClassName;
+	function __construct($modelClassName) {
+		if ($modelClassName instanceof DModel) {
+			$this->modelClassName = get_class($modelClassName);
+			$this->model = $modelClassName;
+		} else {
+			$this->modelClassName = $modelClassName;
+			$this->model = DI::create($modelClassName);
+		}
+		$this->proxy = $this->model->getProxy();
+	}
+	/**
+	 * добавить в конец коллекции пустой элемент и установить на него указатель
+	 * @param DModel $item
+	 * Либо объект модели, либо указатель заполнения создаваемого объекта
+	 * @return DModel
+	 */
+	public function add(DModel $item = null) {
+		if ($item == null) {
+			$item = new $this->modelClassName();
+		}
+		$this->data[] = $item->getRawData(DModel::CONVERSIONS_BYPASS);
+		$this->end();
+		return $this->current();
+	}
+	/**
+	 * @return DModel|DModelAbstract
+	 */
+	function getModelInstance() {
+		return $this->model;
+	}
+	/**
+	 * очистить данные модели
+	 * @return DModel
+	 */
+	public function clear() {
+		$this->data = array();
+		$this->indexOfAppliedData = null;
+		return $this;
+	}
+	/**
+	 * переставить указатель коллекции на указанный элемент или на последний
+	 * @param null $index
+	 * @return DModel
+	 */
+	public function forwardTo($index = null) {
+		if ($index === null) {
+			$this->data->end();
+		} else {
+			$this->data->rewind();
+			for ($i = 0; $i++; $i < $index) $this->data->next();
+		}
+		return $this;
+	}
+	/**
+	 * Устанавливает данные.
+	 * В ассоциативных массивах сбрасываются ключи.
+	 * @param array|object $data
+	 */
+	public function setRawData($data) {
+		if ($data === null) {
+			$data = array(); // для зануления данных
+		}
+		if (!is_array($data)) {
+			$data = array($data);
+		}
+		if (count($data)) {
+			foreach ($data as &$item) {
+				if (is_scalar($item)) {
+					trigger_error('setRawData accepts array of arrays only', E_USER_ERROR);
+				}
+				$item = (array)$item;
+			}
+		}
+		// тут можно добавить проверку на то, что массив содержит объекты
+		$this->data = array_values($data);
+		$this->dataChanged = array();
+		$this->rewind();
+	}
+	function getAsStdObjects() {
+		$this->rewind();
+		$res = array();
+		foreach($this as $item) {
+			$res[] = $item->getAsStdObject();
+		}
+		return $res;
+	}
+	/**
+	 * Вернуть коллекцию как ассоциативный массив
+	 * ключ => свойство
+	 * @param $valueFieldName
+	 * Имя свойства для значений массива
+	 *
+	 * @return array
+	 */
+	function getAsHash($valueFieldName) {
+		$res = array();
+		foreach ($this as $row) {
+			$res[$row->getKeyValue()] = $row->$valueFieldName;
+		}
+		return $res;
+	}
+	/*
+	 * Implementation of iterator interface
+	 */
+	/**
+	 * индекс данных, которыми заполнен объект модели
+	 * @var int
+	 */
+	private $indexOfAppliedData = null;
+	/**
+	 * количество записей в коллекции
+	 * @return int
+	 */
+	public function count() {
+		return count($this->data);
+	}
+	public function next() {
+		next($this->data);
+		return $this->current();
+	}
+	/**
+	 * @return DModel
+	 */
+	public function current() {
+		$data = current($this->data);
+		if ($data === false) return false;
+		$currentIndex = key($this->data);
+		/*
+		 * если указатель сдвинулся с момента последнего заполнения модели, то...
+		 */
+		if ($currentIndex !== $this->indexOfAppliedData) {
+			/*
+			 * данные модели переместить в массив (сохранить изменения),
+			 * равно как сохранить и список измененных полей
+			 */
+			if (array_key_exists($this->indexOfAppliedData, $this->data)) {
+				$this->data[$this->indexOfAppliedData] = $this->model->getRawData();
+				$this->dataChanged[$this->indexOfAppliedData] = $this->model->getFieldsModified();
+			}
+			/*
+			 * модель заполнить новыми данными и
+			 * информацией об измененных ранее полях
+			 */
+			if (array_key_exists($currentIndex, $this->dataChanged) && is_array($this->dataChanged[$currentIndex])) {
+				$fieldsModified  = $this->dataChanged[$currentIndex];
+				$changedFields   = array_intersect_key($data, array_flip($fieldsModified));
+				$unchangedFields = array_diff_key($data, $changedFields);
+				$this->model->setRawData($unchangedFields);// нельзя ставить $data так как тогда следующая строка не сработает из-за неизменности данных
+				$this->model->sets($changedFields);
+			} else {
+				$this->model->setRawData($data);
+			}
+			$this->indexOfAppliedData = $currentIndex;
+		}
+		return $this->model;
+	}
+	public function rewind() {
+		reset($this->data);
+		return $this->current();
+	}
+	public function end() {
+		$res = end($this->data);
+		if ($res === false) return false;
+		return $this->current();
+	}
+	public function key() {
+		return key($this->data);
+	}
+	public function valid() {
+		$res = $this->current() !== false;
+		/*
+		 * если достигли конца списка, то передвинуть на начало,
+		 * так как указатель стоит сейчас вне рамок,
+		 * и если присваивать объекту значения, будет присвоение в воздух.
+		 */
+		if ($res === false) $this->rewind();
+		return $res;
+	}
+	protected function createProxy() {
+		return $this->getModelInstance()->getProxy();
+	}
+	/*
+	 * методы load-create-delete-save должны вызывать методы модели на каждом экземпляре данных
+	 */
+	public function beforeLoad($params = null) {
+	}
+	public function afterLoad($params = null) {
+		$this->rewind();
+		foreach ($this as $row) {
+			$row->afterLoad($params);
+		}
+	}
+	/*
+	 * METHODS FROM UNDERSCORE
+	 */
+	public function pluck($field) {
+		$result = array();
+		foreach($this as $item) {
+			$result[] = $item->{$field};
+		}
+		return $result;
+	}
+}
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class CRUDcustomize {
+	/**
+	 * некие условия, будут переданы в CRUD операции прокси-объекта модели
+	 * (например часть SQL запроса после WHERE)
+	 * @var string
+	 */
+	public $conditions;
+	/**
+	 * Список полей через запятую
+	 *
+	 * @var string
+	 */
+	public $fields;
+	function __construct($f = '*', $w = 'true') {
+		$this->conditions = $w;
+		$this->fields = $f;
+	}
+	function __set($field, $value) {
+		trigger_error("No field $field exists");
+	}
+	function __get($field) {
+		trigger_error("No field $field exists");
+	}
+}
+/**
+ * Enter description here ...
+ * @author dron
+ *
+ * @property DModel $controller
+ * @property DModel $model
+ * @property FormElements $form
+ */
+class CRUDEnvelope extends DModelDynamic {
+	function __construct() {
+		parent::__construct(array(
+			new DModelProperty('controller', 'string'),
+			new DModelProperty('model', 'object required', 'DModelAbstract'),
+			new DModelProperty('form', 'object', 'FormElements')
+		));
+	}
+	function __toString() {
+		return "CRUDEnvelope";
+	}
+}
+class CRUDtemplates {
+	static public $linkToEditPage = 'not inited';
+	static public $linkToViewPage = 'not inited';
+	static public $linkToListPage = 'not inited';
+	static function init() {
+		self::$linkToEditPage = sprintf('<a href="%%s/{{row.id}}">%s</a>', s('edit'));
+		self::$linkToViewPage = sprintf('<a href="%%s/{{row.id}}">%s</a>', s('view'));
+		self::$linkToListPage = sprintf('<a href="%%s">%s</a>', s('backToList'));
+	}
+	public static function getLinkToEditPage() {
+		return self::$linkToEditPage;
+	}
+	public static function getLinkToListPage() {
+		return self::$linkToListPage;
+	}
+	public static function getLinkToViewPage() {
+		return self::$linkToViewPage;
+	}
+}
+
+if (!class_exists('CRUDEnvelope', false)) require_once dirname(__FILE__).'/CRUD_helpers.php';
+/**
+ * Контроллер CRUD.
+ */
+class CRUD extends DController {
+	static public $generateFormByDefault = true;
+	public $generateForm;
+	public function __construct() {
+		$this->customize   = new CRUDcustomize();
+		$this->dataForView = new CRUDEnvelope();
+		$this->usedPagerClass = CONFIG::$PAGERCLASS;
+		$this->generateForm = self::$generateFormByDefault;
+		parent::__construct();
+	}
+	/**
+	 * Имя класса модели для автосоздания
+	 * @var string
+	 */
+	protected $modelClassName;
+	protected $dataForView;
+	/**
+	 * @var DModelValidated
+	 */
+	protected $model;
+	/**
+	 * Получение модели
+	 * @return DModelValidated
+	 */
+	public function getModelInstance() {
+		if (!$this->model instanceof DModel) {
+			$this->model = $this->createModelInstance();
+		}
+		if ($this->customize->fields != '*') {
+			$this->model->maskPropertyList($this->customize->fields);
+		}
+		return $this->model;
+	}
+	/**
+	 * Метод создания модели (вызывается один раз)
+	 */
+	protected function createModelInstance() {
+		if (empty($this->modelClassName)) {
+			trigger_error('No model defined for '.get_class($this).' controller', E_USER_ERROR);
+		}
+		return DI::create($this->modelClassName);
+	}
+	public function setModelInstance(DModelAbstract $model) {
+		$this->model = $model;
+		return $this;
+	}
+	/**
+	 * Построение списка данных
+	 * @return string
+	 * HTML
+	 */
+	public function lists() {
+		if (!$this->generateForm) {
+			$args = func_get_args();
+			return call_user_func_array(array($this, 'getListModel'), $args);
+		}
+		/*
+		 * передать модель и форму в шаблонизатор
+		 */
+		$this->dataForView->controller = get_class($this);
+		$args = func_get_args();
+		$this->dataForView->model      = call_user_func_array(array($this, 'getListModel'), $args);
+		$this->dataForView->form       = $this->getListForm($this->dataForView->model);
+		$this->dataForView->validate();
+		return $this->dataForView;
+	}
+	protected $usedPagerClass = 'PagerHelperFull';
+	/**
+	 * Формирование модели данных для варианта отображения списка
+	 * @return DModelsCollection
+	 */
+	public function getListModel() {
+		$model = $this->getModelInstance();
+		$proxy = $model->getProxy();
+		$pager = $proxy->getPager();
+		if ($proxy && ($pager == null)) {
+			if ($this->usedPagerClass) {
+				$pager = new $this->usedPagerClass(CONFIG::$ITEMPERPAGE);
+				$proxy->setPager($pager);
+			}
+		}
+		$collection = new DModelsCollection($model);
+		$collection->load($this->customize->conditions);
+		/*
+		 * подготовить Pager
+		 */
+		if ($pager && ($proxy instanceof DModelProxyDatabase)) {
+			$pager->ownerClassName = get_class($this);
+			/* @var $proxy DModelProxyDatabase */
+			$pager->analyzeQuery($proxy->getLastQuery());
+		}
+		return $collection;
+	}
+	/**
+	 * Возвращает ассоциативный массив
+	 * имя_свойства_модели => класс FormElement
+	 * @param DModelsCollection $model
+	 * @return array
+	 */
+	public function getListModelToFormMap(DModelsCollection $model) {
+		$model = $model->getModelInstance();
+		$map   = DForm::generateFieldToTypeMap($model, array('StaticInput'));
+		/*
+		 * задать порядок следования элементов как у CRUD->customize->fields
+		 */
+		$mapNew = array();
+		if ($this->customize->fields != '*') {
+			$fieldsOrder = explode(',', $this->customize->fields);
+			foreach ($fieldsOrder as $f) {
+				if (array_key_exists($f, $map)) {
+					$mapNew[$f] = $map[$f];
+				}
+			}
+			$map = $mapNew;
+		}
+		$map[$model->keyName] = 'HiddenInput';
+		return $map;
+	}
+	/**
+	 * Формирование объекта DForm для представления каждой строки в таблице данных.
+	 * Header и footer формы при этом будут выведены один раз перед таблицей и после.
+	 * Также формируется группа элементов в свойстве buttonsBox для хранения кнопок и т.д.
+	 * (все что перед футером). Также будет выведено один раз.
+	 * @param DModelsCollection $model
+	 * @return DForm
+	 */
+	public function getListForm(DModelsCollection $model) {
+		/*
+		 * сформировать карту соответствия полей данных модели типу элемента для отображения
+		 * По умолчанию сделать все поля статичным текстом
+		 */
+		$dformMap = $this->getListModelToFormMap($model);
+		/*
+		 * сгенерировать форму для вывода каждой записи в модели данных
+		 */
+		$dform    = DForm::generateByModel($model, $dformMap);
+		/*
+		 * оформить форму
+		 */
+		$dform->addAttribute('class="crud list"');
+		$className = get_class($this);
+		/*
+		 * добавить поле-ссылку на show
+		 */
+		if (RDS::get()->is("access.{$className}.show")) {
+			$linkTpl = RDS::get()->is("access.{$className}.edit.new") ? CRUDtemplates::$linkToEditPage : CRUDtemplates::$linkToViewPage;
+			$t = new TemplateInput('linkToShowPage');
+			$t->bindToModelProperties('*')
+				->setTemplate(sprintf($linkTpl, Page::getUrl()));
+			$dform->add($t);
+		}
+		/*
+		 * Добавить чекбокс для удаляемых
+		 */
+		if (RDS::get()->is("access.{$className}.delete")) {
+			$key = $dform->get('id');
+			$dform->add(
+				(new Checkbox)->setName('checked'),
+				$key
+			);
+		}
+		return $dform;
+	}
+	/**
+	 * Show controller
+	 * @param int $id
+	 * @return string $html
+	 */
+	public function show($id = null) {
+		$model     = $this->getShowModel($id);
+		$className = get_class($this);
+		if (!$model->{$model->keyName} && !RDS::get()->is("access.{$className}.show.new")) {
+			accessDenied();
+		}
+		if (!$this->generateForm) {
+			return $model;
+		}
+		$dform = $this->getShowForm($model);
+		$this->dataForView->controller = get_class($this);
+		$this->dataForView->model      = $model;
+		$this->dataForView->form       = $dform;
+		return $this->dataForView;
+	}
+	public function getShowModel($id = null) {
+		$model = $this->getModelInstance();
+		if ($id) {
+			$model->load($id);
+		} else {
+			$model->applyDefaults();
+		}
+		return $model;
+	}
+	/**
+	 * Возвращает ассоциативный массив
+	 * имя_свойства_модели => класс FormElement
+	 * @param DModel $model
+	 * @return array
+	 */
+	public function getShowModelToFormMap(DModel $model) {
+		$map = DForm::generateFieldToTypeMap($model);
+		/*
+		 * задать порядок следования элементов как у CRUD->customize->fields
+		 */
+		if ($this->customize->fields != '*') {
+			$fieldsOrder = explode(',', $this->customize->fields);
+			foreach ($fieldsOrder as $f) {
+				if (array_key_exists($f, $map)) {
+					$mapNew[$f] = $map[$f];
+				}
+			}
+			$map = $mapNew;
+		}
+		$map[$model->keyName] = 'HiddenInput';
+		return $map;
+	}
+	/**
+	 * @param DModel $model
+	 *
+	 * @return DForm
+	 */
+	public function getShowForm(DModel $model) {
+		/*
+		 * сформировать карту соответствия полей данных модели типу элемента для отображения
+		 */
+		$dformMap = $this->getShowModelToFormMap($model);
+		/*
+		 * Поле со значением ключа сделать срытым
+		 */
+		foreach ($dformMap as $propertyName => &$dformType) {
+			if ($propertyName == $model->keyName) {
+				$dformType = 'HiddenInput';
+			}
+		}
+		/*
+		 * сгенерировать форму для вывода данных
+		 */
+		$dform = DForm::generateByModel($model, $dformMap);
+		/*
+		 * добавить лейблы
+		 */
+		foreach ($dform as $uiItem) {
+			if (($uiItem instanceof LabeledInput) && !empty($uiItem->name)) {
+				/* @var $uiItem LabeledInput */
+				$uiItem->setLabel(s($uiItem->name));
+			}
+		}
+		/*
+		 * добавить поле-ссылку на возврат к списку
+		 */
+		$className = get_class($this);
+		if (RDS::get()->is("access.{$className}.lists")
+			&& (($pos = strrpos(Page::getUrl(), '/')) !== false)
+		) {
+			$linkTpl = sprintf(CRUDtemplates::$linkToListPage, substr(Page::getUrl(), 0, $pos));
+			$t = new StaticInput('linkToListPage');
+			$t->setValue($linkTpl);
+			$dform->add($t);
+		}
+		return $dform;
+	}
+	/**
+	 * @var CRUDcustomize
+	 */
+	protected $customize;
+	public function validate(DModel $model) {
+	}
+	protected $justInserted;
+	public function edit() {
+		$model = $this->getModelInstance();
+		/*
+		 * если в запросе есть значение ключа, то update
+		 */
+		$this->justInserted = !isset($_REQUEST[$model->keyName]) || empty($_REQUEST[$model->keyName]);
+		if ($this->justInserted) {
+			$model->applyDefaults();
+		}
+		$model->sets($_REQUEST);
+		$this->validate($model);
+		if ($this->justInserted) {
+			$model->create();
+		} else {
+			$model->save();
+		}
+		$t = new HandlingResult('ok');
+		return $t->setResponse($model->getAsStdObject());
+	}
+	public function delete($id = null) {
+		if (!is_array($id)) $id = array($id);
+		DataValidationRule::checkDirect($id, 'a[]n%d', s('noelementsselected'));
+		$model      = $this->getModelInstance();
+		$modelClass = get_class($model);
+		$collection = new DModelsCollection($model);
+		$collection->setRawData(null);
+		foreach ($id as $i) {
+			$item = new $modelClass(DModel::DONT_FILL_WITH_DEFAULTS);
+			$item->__set($model->keyName, $i);
+			$collection->add($item);
+		}
+		$collection->delete($this->customize->conditions);
+		return new HandlingResult('OK');
+	}
+	/**
+	 * Создает стандартные пути для страниц списка, просмотра и создания
+	 *
+	 * @static
+	 *
+	 * @param string $url
+	 * Путь к странице списка (страницы просмотра и создания создаются из нее добавлением id и new)
+	 * @param string $className
+	 * имя CRUD-класса контроллера
+	 */
+	static public function createRoutesHelper($url, $className, $tpls = null) {
+		if (is_array($tpls)) {
+			$tplList = $tpls[0];
+			$tplShow = $tpls[1];
+		} else {
+			$tplList = $tplShow = null;
+		}
+		Router::get()->connect(Router::$GET, "^{$url}/?$", "$className/lists", $tplList);
+		Router::get()->connect(Router::$GET, "^{$url}/new$", "$className/show", $tplShow);
+		Router::get()->connect(Router::$GET, "^{$url}/(?P<id>\d+)$", "$className/show", $tplShow);
+	}
+}
+/**
+ * @package kernel
+ */
+abstract class CacheSlot {
+	protected $data;
+	function setData($data) {
+		$this->data = $data;
+		return $this;
+	}
+	public function getKey() {
+		return get_class($this);
+	}
+	abstract public function getTTL();
+	final public function load() {
+		$this->data = null;
+		$key  = $this->getKey();
+		$value = ObjectsPool::get('DataBase')->select('cache', '*', "`key` = '$key'", DB_SELECT_OBJ);
+		if ($value == null) {
+			$result = false;
+		} else {
+			$this->data = $value->data;
+			if (($value->bestBefore != null) && ($value->bestBefore < time())) {
+				$result = false;
+			} else {
+				$result = unserialize($value->data);
+			}
+		}
+		if ($result === false) {
+			$result = $this->onLoadFailed();
+		}
+		return $result;
+	}
+	/**
+	 * вызывается, если не удалось загрузить данные кеша методом load
+	 * @return bool
+	 */
+	public function onLoadFailed() {
+		return false;
+	}
+	final public function save($data) {
+		$ttl = $this->getTTL();
+		if ($ttl === 0) {
+			$this->invalidate();
+		} else {
+			$key = $this->getKey();
+			$ttl = $this->getTTL();
+			if ($ttl === null) {
+				$ttl = new SQLvar('NULL');
+			} else {
+				$ttl = time() + $ttl;
+			}
+			ObjectsPool::get('DataBase')->replace('cache', array('data' => serialize($data), 'key' => $key, 'bestBefore' => $ttl));
+		}
+	}
+	final public function invalidate() {
+		$key = $this->getKey();
+		ObjectsPool::get('DataBase')->update('cache', array('bestBefore' => -1), "`key` = '$key'");
+		$this->onClear();
+	}
+	/**
+	 * вызывается при очистке кеша
+	 */
+	public function onClear() {
+	}
+	private $tags = array();
+	final function addTag($tag) {
+		$this->tags[] = $tag;
+		return $this;
+	}
+}
+
+/**
+ * Класс самообновляемого кеша.
+ * При отсутствии данных и при их очистке вызывается метод getData, генерирующий новое содержимое кеша.
+ */
+abstract class CacheSlotSelfRefreshed extends CacheSlot {
+	public function onLoadFailed() {
+		parent::onLoadFailed();
+		$ruleToRefresh = 'CacheInvalidator.'.$this->getKey();
+		if (ObjectsPool::get('RDS')->is($ruleToRefresh)) {
+			$data = $this->getData();
+			$this->save($data);
+		} else {
+			$data = $this->data;
+		}
+		return $data;
+	}
+	abstract function getData();
+}
+
+/**
+ * Enter description here ...
+ */
+class DBFetchModes {
+	static public $INDEX_ARRAY = 0x08;
+	static public $INDEX_ASC   = 0x10;
+	static public $MASK_INDEX  = 0x18;
+
+	static public $ONE_ROW_KEEP = 0x100;
+	static public $ONE_ROW_FLAT = 0x080;
+	static public $MASK_ONE_ROW = 0x180;
+
+	static public $ITEM_IS_OBJECT = 0x1;
+	static public $ITEM_IS_ASC    = 0x2;
+	static public $ITEM_IS_ARRAY  = 0x3;
+	static public $ITEM_IS_XML    = 0x4;
+	static public $MASK_ITEM       = 0x7;
+
+	static public $ONE_FIELD_ITEM_FLAT = 0x20;
+	static public $ONE_FIELD_ITEM_KEEP = 0x40;
+	static public $MASK_FIELD          = 0x60;
+
+	static public $QUERY          = 5;
+	static public $FIRST_ROW_ONLY = 0x18;
+
+	static public $NO_CACHE = 0x200;
+}
+///			================================ ПРЕДОПРЕДЕЛЕННЫЕ СЦЕНАРИИ ВЫБОРКИ ============================
+/**
+ * Единственное значение
+ */
+define(
+    'DB_SELECT_ONE',
+    DBFetchModes::$FIRST_ROW_ONLY |
+    DBFetchModes::$ONE_ROW_FLAT
+);
+/**
+ * Только первый результат. Результат в виде объекта
+ */
+define(
+    'DB_SELECT_OBJ',
+    DBFetchModes::$FIRST_ROW_ONLY |
+    DBFetchModes::$ONE_ROW_FLAT |
+    DBFetchModes::$ITEM_IS_OBJECT |
+    DBFetchModes::$ONE_FIELD_ITEM_KEEP
+);
+/**
+ * Ассоциативный массив объектов
+ */
+define(
+    'DB_SELECT_OBJS',
+    DBFetchModes::$ITEM_IS_OBJECT |
+    DBFetchModes::$INDEX_ASC |
+    DBFetchModes::$ONE_ROW_KEEP
+);
+/**
+ * Результаты в ассоциативном массиве по ключу. Каждый результат в виде ассоциативного массива.
+ */
+define(
+    'DB_SELECT_ASC',
+    DBFetchModes::$ONE_ROW_KEEP |
+    DBFetchModes::$INDEX_ASC |
+    DBFetchModes::$ONE_FIELD_ITEM_FLAT |
+    DBFetchModes::$ITEM_IS_ASC
+);
+/**
+ * Результаты в массиве.
+ */
+define(
+    'DB_SELECT_COL',
+    DBFetchModes::$ONE_ROW_KEEP |
+    DBFetchModes::$INDEX_ARRAY |
+    DBFetchModes::$ONE_FIELD_ITEM_FLAT
+);
+/**
+ * Вернуть запрос
+ */
+define(
+    'DB_GETQUERY',
+    DBFetchModes::$QUERY
+);
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+abstract class DataBaseAbstract {
+	/**
+	 * Соединение с БД
+	 *
+	 * @var mixed
+	 */
+	protected $link;
+	/**
+	 * Config
+	 *
+	 * @var DBCFG
+	 */
+	protected $cfg;
+	protected $defaultFetchMode;
+	protected $requestCounter = 0;
+	public function setFetchMode($mode) {
+		$this->defaultFetchMode = $mode;
+	}
+	function __construct(DBCFG $cfg = null) {
+		$this->cfg = $cfg;
+		$this->defaultFetchMode = DBFetchModes::$INDEX_ASC |
+		DBFetchModes::$ONE_ROW_FLAT |
+		DBFetchModes::$ITEM_IS_OBJECT |
+		DBFetchModes::$ONE_FIELD_ITEM_FLAT;
+	}
+	function __destruct() {
+		if ($this->link) $this->disconnect();
+	}
+	abstract public function connect(DBCFG $cfg);
+	public function disconnect() {
+	}
+	public function reconnect() {
+		$this->connect($this->cfg);
+	}
+	protected $cache;
+	public $useCache = false;
+	public function getCache($key) {
+		if (!isset($this->cache[$key])) return false;
+		return $this->cache[$key];
+	}
+	public function setCache($key, $result) {
+		$this->cache[$key] = $result;
+	}
+	public function multiQuery($queries) {
+		$queries = explode(';', $queries);
+		foreach ($queries as $query) {
+			$this->query($query);
+		}
+	}
+	public function escape ($string) {
+		return $string;
+	}
+	public function query($query, $mode =  null) {
+		if ($this->getFetchMode($mode) == DBFetchModes::$QUERY) return $query;
+		$dbresult = false;
+		$useCache = (($mode != null) && $this->useCache && ( ($mode & DBFetchModes::$NO_CACHE) != DBFetchModes::$NO_CACHE));
+		if ($useCache)
+			$dbresult = $this->getCache(md5($mode.$query));
+		if ( $dbresult !== false) {
+			Debug::message('query', $query, 'DB CASHED');
+			return $dbresult;
+		}
+		$res = $this->doquery($query, $mode);
+		if ($useCache) $this->setCache(md5($mode.$query), $res);
+		$this->requestCounter++;
+		Debug::message('query', $query, 'DB');
+		return $res;
+	}
+	abstract protected function doquery($query, $mode =  null);
+	public function ping() {
+	}
+	/**
+	 * Получить количество выполненных запросов
+	 *
+	 * @return int
+	 */
+	public function getRequestCount() {
+		return $this->requestCounter;
+	}
+	private function getMasked($mode, $mask) {
+		$result = $mode & $mask;
+		if ($result === 0) $result = $this->defaultFetchMode & $mask;
+		return $result;
+	}
+	protected function getAloneRowMode($mode) {
+		return $this->getMasked($mode, DBFetchModes::$MASK_ONE_ROW);
+	}
+	protected function getAloneFieldMode($mode) {
+		return $this->getMasked($mode, DBFetchModes::$MASK_FIELD);
+	}
+	protected function getFetchMode($mode) {
+		return $this->getMasked($mode, DBFetchModes::$MASK_ITEM);
+	}
+	protected function getRowMode($mode) {
+		return $this->getMasked($mode, DBFetchModes::$MASK_INDEX);
+	}
+
+	abstract public function lastId();
+	abstract public function affectedRows();
+	/**
+	 * возвращает информацию о первом поле результата
+	 * @param mixed $dbresult
+	 * результат выполнения запроса
+	 * @return stdClass
+	 * возвращает объект с полями
+	 * name - имя поля
+	 * type - тип поля
+	 */
+	abstract protected function fetchField($dbresult);
+	/**
+	 * выбирает из результата запроса строку как объект
+	 * @param mixed $dbresult
+	 */
+	abstract protected function fetchObject($dbresult);
+	/**
+	 * выбирает из результата запроса строку как ассоциативный массив
+	 * @param mixed $dbresult
+	 */
+	abstract protected function fetchAssoc($dbresult);
+	abstract protected function fetchRow($dbresult);
+	/**
+	 * возвращает количество полей в результате выборки
+	 * @param int $dbresult
+	 */
+	abstract protected function fieldCount($dbresult);
+	protected function fetch($dbresult, $mode) {
+		$firstFieldName = $this->fetchField($dbresult)->name;
+
+		$indexMode        = $this->getRowMode($mode);
+		$itemMode         = $this->getFetchMode($mode);
+		$oneFieldItemMode = $this->getAloneFieldMode($mode);
+		$oneRawMode       = $this->getAloneRowMode($mode);
+
+		$out = null;
+		$index = 0;
+		$minimumFieldsToFlat = 2;
+		while (1) {
+			switch ($itemMode) {
+				case DBFetchModes::$ITEM_IS_OBJECT:
+					$r = $this->fetchObject($dbresult);
+					if (isset($r->$firstFieldName)) $index = @$r->$firstFieldName;
+					break;
+
+				case DBFetchModes::$ITEM_IS_ASC:
+					$r     = $this->fetchAssoc($dbresult);
+					$index = $r[$firstFieldName];
+					break;
+
+				case DBFetchModes::$ITEM_IS_ARRAY:
+					$minimumFieldsToFlat = 1;
+					$r = $this->fetchRow($dbresult);
+					$index++;
+					break;
+
+				default:
+					//noop
+					break;
+			}//end switch
+			if (!$r) break;
+			switch ($oneFieldItemMode) {
+				case DBFetchModes::$ONE_FIELD_ITEM_FLAT:
+					if ($this->fieldCount($dbresult) <= $minimumFieldsToFlat) {
+						foreach ($r as $f => $v); // перематываем на последнее поле в элементе
+						$r = $v; // заменяем элемент на значение поле
+					}
+					break;
+
+				default:
+					//noop
+					break;
+				//case DBFetchModes::$ONE_FIELD_ITEM_KEEP:
+			}
+			switch ($indexMode) {
+				case DBFetchModes::$INDEX_ARRAY:
+					$out[] = $r;
+					break;
+
+				case DBFetchModes::$INDEX_ASC:
+					$out[$index] = $r;
+					break;
+
+				case DBFetchModes::$FIRST_ROW_ONLY:
+					return $r;
+					break;
+
+				default:
+					throw new ExceptionDB('DB Error: illegal fetch parameter given');
+					break;
+			}
+		}//end while
+		return ( (count($out) == 1) && ($oneRawMode == DBFetchModes::$ONE_ROW_FLAT) ) ? reset($out) : $out;
+	}
+	abstract public function getFields($table);
+	static public function reflect($table) {
+		$result = (object)array('fields' => ObjectsPool::get('DataBase')->getFields($table));
+		foreach ($result->fields as $name => $field) {
+			if ($field->Key == 'PRI') {
+				$result->key = clone $field;
+			}
+		}
+		return $result;
+	}
+	/**
+	 * ЧАСТНЫЕ СЛУЧАИ ЗАПРОСОВ
+	 */
+	/**
+	 * @param string $table
+	 * Имя таблицы
+	 * @param string $fields
+	 * поля через запятую (будет вставлено между Select и WHERE)
+	 * @param string $postfix
+	 * Условия запроса , будет вставлено после WHERE
+	 * @param int $type
+	 * Тип выборки
+	 * @return mixed
+	 */
+	function select($table, $fields = '*', $postfix = '1', $type = DB_GETQUERY) {
+		if ($type instanceof DBSelect ) {
+			/* @var $type DBSelect */
+			$T = $type->addTable($table);
+			if ($fields != null) $T->addFields($fields);
+			if ($postfix !== null) {
+				if (strpos($postfix, '%s') !== false) $postfix = str_replace('%s', $T->getName(), $postfix);
+				$type->addWhere($postfix);
+			}
+			return $T;
+		}
+		$tables = explode(',', $table);
+		foreach ($tables as &$table) {
+			$table = trim($table);
+			$table = sprintf('`%s%s` as `%s`', CONFIG::$DB->prefix, $table, $table);
+		}
+		$query = sprintf('SELECT %s FROM %s WHERE %s', $fields, implode(',', $tables), $postfix);
+		return $this->query($query, $type);
+	}
+	private function updateGetParamsArray($values) {
+		$vars = array();
+		foreach ($values as $key => $value) {
+			if ($value instanceof SQLvar) {
+				$vars[] = sprintf('`%s`=%s', $key, $value->__toString());// ->toString() is to support php prior 5.2
+			} elseif (is_scalar($value)) {
+				$vars[] = sprintf("`%s`='%s'", $key, $this->escape($value));
+			} else {
+				trigger_error('Not scalar value given to write in db! Key is '.$key, E_USER_ERROR);
+			}
+		}
+		return $vars;
+	}
+
+	/**
+	 * @param string $table
+	 * Имя таблицы
+	 * @param array $values
+	 * ассоциативный массив вставляемых значений вида "название поля" => "значение"
+	 * @param string $query
+	 * В переменную будет помещен SQL запрос
+	 * @param string $sqlOption
+	 * @return int
+	 * Last id
+	 */
+	function insert($table, $values, &$query = null, $sqlOption = '') {
+		$vars = $this->updateGetParamsArray($values);
+		$query = sprintf(
+			'INSERT %s INTO '.$this->cfg->prefix.$table.' SET %s',
+			$sqlOption,
+			implode(',', $vars)
+		);
+		$this->query($query);
+		return $this->lastId();
+	}
+	function insertOrUpdate($table, $values, &$query = null) {
+		$vars = $this->updateGetParamsArray($values);
+		$query = sprintf(
+			'INSERT %1$s INTO '.$this->cfg->prefix.$table.' SET %2$s  ON DUPLICATE KEY UPDATE %2$s',
+			'',
+			implode(',', $vars)
+		);
+		$this->query($query);
+		return $this->lastId();
+	}
+
+	/**
+	 * @param string $table
+	 * Имя таблицы
+	 * @param array $values
+	 * ассоциативный массив вставляемых значений вида "название поля" => "значение"
+	 * @param string $where
+	 * Условие вставки, будет вставлено в запрос UPDATE после WHERE
+	 * @param null $query
+	 * @return mixed
+	 */
+	function update($table, $values, $where, &$query = null) {
+		if (count($values) == 0) return;
+		$vars = $this->updateGetParamsArray($values);
+		$query = sprintf(
+			'UPDATE '.$this->cfg->prefix.$table.' SET %s WHERE %s',
+			implode(',', $vars),
+			$where
+		);
+		$this->query($query);
+		return $this->affectedRows();
+	}
+
+	/**
+	 * @param string $table
+	 * Имя таблицы
+	 * @param string $where
+	 * Условие вставки, будет вставлено в запрос после WHERE
+	 * @param null $query
+	 * @throws Exception
+	 * @internal param bool $emptywhere Флаг подтверждения удаления в случае пустого $where* Флаг подтверждения удаления в случае пустого $where
+	 */
+	function delete($table, $where, &$query = null) {
+		if (empty($where)) throw new Exception('WHERE_state_missing');
+		$query = sprintf('DELETE FROM %1$s%2$s WHERE %3$s', $this->cfg->prefix, $table, $where);
+		$this->doquery($query);
+	}
+	function replace($table, $values) {
+		$keys   = array_keys($values);
+		$values = array_values($values);
+		for ($i = 0; $i < count($values); $i++) {
+			if ($values[$i] instanceof SQLvar) {
+				$values[$i] = $values[$i]->__toString(); // to support php prior 5.2
+			} elseif (strpos($values[$i], 'sql:') === 0) {
+				$values[$i] = (str_replace('sql:', '', $values[$i]));
+				trigger_error('prefix sql: is deprecated ', E_USER_ERROR);
+			} else
+				$values[$i] = "'".$this->escape($values[$i])."'";
+		}
+		//dump($values);
+		$query = sprintf(
+			'REPLACE INTO '.$this->cfg->prefix.$table.' (`%s`) VALUES (%s)',
+			implode('`,`', $keys),
+			implode(',', $values)
+		);
+		return $this->query($query);
+	}
+
+}
+/**
+ * Для описания значений, не требующих экранирования, как то SQL функции, например NOW().
+ */
+class SQLvar {
+	private $value;
+	function __construct($value) {
+		$this->value = $value;
+	}
+	function __toString() {
+		return $this->value;
+	}
+}
+
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+abstract class DBabstract {
+	protected $name;
+	function __construct($name) {
+		$this->name = $name;
+	}
+	public function getName() {
+		return $this->name;
+	}
+	function __toString() {
+		return $this->name;
+	}
+}
+/**
+ * Объект поля.
+ */
+class DBField extends DBabstract {
+	public $value;
+	public function setValue($v) {
+		$this->value = $v;
+	}
+	public function getValue() {
+		return $this->value;
+	}
+	protected $key;
+	public function setKey() {
+		$this->key = true;
+	}
+	public function clearKey() {
+		$this->key = false;
+	}
+	public function isKey() {
+		return $this->key;
+	}
+	/**
+	 * Задействовано ли поле в сортировке
+	 *
+	 * @var ENUM[null, 'asc', 'desc']
+	 */
+	public $order = null;
+	/**
+	 * Является ли поле выбираемым в части SELECT X
+	 *
+	 * @var bool
+	 */
+	public $selectable = false;
+	/**
+	 * Условия выборки для данного поля
+	 *
+	 * @var string
+	 */
+	private $where;
+	/**
+	 * Псевдоним поля
+	 *
+	 * @var string
+	 */
+	private $alias;
+	/**
+	 * @var DBTable
+	 */
+	private $tableOwner;
+	/**
+	 * Установить таблицу-владельца
+	 *
+	 * @param DBTable $table
+	 */
+	public function setTable(DBTable $table) {
+		$this->tableOwner = $table;
+	}
+	/**
+	 * Получить имя таблицы владельца
+	 *
+	 * @return string
+	 */
+	public function getTable() {
+		return $this->tableOwner->getName();
+	}
+	/**
+	 * Вернуть объект родительской таблицы
+	 *
+	 * @return DBTable
+	 */
+	public function getOwner() {
+		return $this->tableOwner;
+	}
+	/**
+	 * Конструктор
+	 *
+	 * @param string $name
+	 * Имя
+	 * @param DBTable $owner
+	 * Таблица владелец
+	 */
+	function __construct($name, DBTable $owner) {
+		$name = trim($name);
+		parent::__construct($name);
+		if (strpos($name, ' as ') !== false) {
+			$this->alias = substr($name, strpos($name, ' as ') + 4);
+			$this->name  = substr($name, 0, strpos($name, ' as '));
+		}
+		$this->setTable($owner);
+	}
+	/**
+	 * Получить строку для подстановки в SELECT X
+	 *
+	 * @return string
+	 * name [as alias]
+	 */
+	public function getQueryName() {
+		$r = $this->name;
+		if ($this->alias) $r = $r.' as '.$this->alias;
+		return $r;
+	}
+	/**
+	 * Получить имя переменной в выборке (алиас, если есть)
+	 *
+	 * @return string
+	 */
+	public function getAlias() {
+		if (!$this->alias) return $this->getName();
+		else return $this->alias;
+	}
+	/**
+	 * Добавить условия выборки, связанное с данным полем
+	 *
+	 * @param string $expr
+	 * часть условия после переменной
+	 * <code>
+	 * $field->addWhere(' = 0');
+	 * </code>
+	 */
+	public function addWhere($expr) {
+		$this->where[] = $expr;
+	}
+	/**
+	 * получить строку условий выборки относящихся к данному полю
+	 *
+	 * @return string
+	 */
+	public function getWhere() {
+		if (count($this->where) == 0) return false;
+		return  $this->getTable().'.'.$this->getName().implode(' AND ', $this->where);
+	}
+}
+/**
+ * Коллекция полей.
+ */
+class DBFields implements Iterator {
+	private $fields = array();
+	/**
+	 * Добавить поле
+	 *
+	 * @param DBField $n
+	 */
+	public function add(DBField $n) {
+		if (strpos($n->getAlias(), "'") === false) {
+			$this->fields[$n->getAlias()] = $n;
+		} else {
+			$this->fields[] = $n;
+		}
+	}
+	public function remove($name) {
+		if ($this->is($name)) unset($this->fields[$name]);
+	}
+	/**
+	 * вернуть количество полей в коллекции
+	 *
+	 * @return int
+	 */
+	public function count() {
+		return count($this->fields);
+	}
+	/**
+	 * Очистить коллекцию
+	 *
+	 */
+	public function clear() {
+		$this->fields = array();
+	}
+	/**
+	 * Проверить на наличие в списке полей поля с заданным именем
+	 *
+	 * @param string $name
+	 * @return bool
+	 */
+	public function is($name) {
+		return array_key_exists($name, $this->fields);
+	}
+	public function next() {
+		return next($this->fields);
+	}
+	public function current() {
+		return current($this->fields);
+	}
+	public function rewind() {
+		return reset($this->fields);
+	}
+	public function key() {
+		return key($this->fields);
+	}
+	public function valid() {
+		return $this->current() !== false;
+	}
+}
+/**
+ * Объект таблицы.
+ */
+class DBTable extends DBabstract {
+	/**
+	 * список полей
+	 *
+	 * @var DBFields
+	 */
+	private $fields;
+	/**
+	 * Является ли таблица присоединенной через join
+	 *
+	 * @var bool
+	 */
+	public $joined = false;
+	public $lastId;
+	public $alias;
+	private $updateFieldsList = array();
+	/**
+	 * Задать список ссылок на  DBField для обновления их значений на last_insert_id этой таблицы
+	 *
+	 * @param DBField $args
+	 * через запятую
+	 */
+	public function updateOnLastId($args) {
+		$this->updateFieldsList = func_get_args();
+	}
+	/**
+	 * Получить last_insert_id и обновить ждущие этого поля
+	 *
+	 */
+	public function setLastId() {
+		$this->lastId = db_lastid();
+		if (is_array($this->updateFieldsList) && ($this->lastId))
+		foreach ($this->updateFieldsList as $field) $field->setValue($this->lastId);
+	}
+	/**
+	 * Конструктор
+	 *
+	 * @param string $name
+	 * Название таблицы
+	 */
+	function __construct($name) {
+		parent::__construct($name);
+		if (strpos($name, ' as ') !== false) {
+			$this->alias = substr($name, strpos($name, ' as ') + 4);
+			$this->name  = substr($name, 0, strpos($name, ' as '));
+		}
+		$this->fields = new DBFields($this);
+	}
+	/**
+	 * Возвратить коллекцию полей
+	 *
+	 * @return DBFields
+	 */
+	public function getFields() {
+		//if ($this->fields->count() == 0) $this->addField('*');
+		return $this->fields;
+	}
+	/**
+	 * Получить объект поля по имени
+	 *
+	 * @param string $name
+	 * @return DBField
+	 */
+	public function &getField($name) {
+		if (!$this->fields->is($name)) {
+			$msg = "Field <b>$name</b> not found among fileds of <b>$this->name</b> table";
+			throw new ExceptionCMS($msg);
+		}
+		foreach ($this->fields as $field) {
+			if ($field->getName() == $name) return $field;
+		}
+	}
+	public function removeField($name) {
+		$this->fields->remove($name);
+	}
+	/**
+	 * Добавить поле
+	 *
+	 * @param string $name
+	 * @return DBField
+	 */
+	public function addField($name) {
+		//if (strpos($name, ',') !== false) return $this->addFields($name);
+		if ($this->fields->is($name)) {
+			$f = $this->getField($name);
+		} else {
+			$f = $this->mkField($name);
+		}
+		$f->selectable = true;
+		return $f;
+	}
+	public function isFieldExist($name) {
+		return $this->fields->is($name);
+	}
+	/**
+	 * Добавить невыбираемое поле
+	 *
+	 * @param string $name
+	 * @return DBField
+	 */
+	public function mkField($name) {
+		$field = $this->field($name);
+		$this->fields->add($field);
+		return $field;
+	}
+	/**
+	 * Добавить несколько полей, перечисленных в формате field1 [as alias1], ..., fieldN [as aliasN]
+	 *
+	 * @param string $names
+	 * строка имен полей
+	 * @return DBFields
+	 */
+	public function addFields($names) {
+		preg_match_all(getSQLparseRegex(), $names, $matches);
+		foreach ($matches['var'] as $i => $t) {
+			if (empty($matches['alias'][$i])) {
+				$this->addField($t);
+			} else {
+				$this->addField(sprintf('sql:%s as %s', $matches['var'][$i], $matches['alias'][$i]));
+			}
+		}
+		return $this->getFields();
+	}
+	/**
+	 * создать объект поля
+	 *
+	 * @param string $name
+	 * имя поля
+	 * @return DBField
+	 */
+	public function field($name) {
+		return new DBField($name, $this);
+	}
+
+}
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+abstract class DBOperation {
+	protected $tables = array();
+	/**
+	 * Добавить таблицу
+	 *
+	 * @param string $name
+	 * @return DBTable
+	 */
+	public function addTable($name) {
+		$table          = new DBTable($name);
+		$this->tables[] = $table;
+		return $table;
+	}
+	/**
+	 * Проверить, добавлена ли таблица с таким именем
+	 *
+	 * @param string $name
+	 * @return bool
+	 */
+	public function isTableAdded($name) {
+		foreach ($this->tables as $index => $table) if ($table->getName() == $name) return $index;
+		return false;
+	}
+	/**
+	 * Получить таблицу по имени
+	 *
+	 * @param string $name
+	 * @return DBTable
+	 */
+	public function getTable($name) {
+		$index = $this->isTableAdded($name);
+		if ($index !== false) return $this->tables[$index];
+		return null;
+	}
+	/**
+	 * Добавить таблицу, если таблицы с таким именем ещё нет
+	 *
+	 * @param string $name
+	 * @return DBTable
+	 */
+	public function addTableOnce($name) {
+		$table = $this->getTable($name);
+		if ($table === null) $table = $this->addTable($name);
+		return $table;
+	}
+	public function run($mode) {
+		return dbQuery($this->render(), $mode);
+	}
+	/**
+	 * построить запрос
+	 *
+	 * @return string
+	 */
+	abstract public function render();
+}
+/**
+ * Объект запроса SELECT.
+ */
+class DBSelect extends DBOperation {
+	/**
+	 * сортировка выборки
+	 *
+	 * @var DBFields
+	 */
+	private $order;
+	/**
+	 * Условия выборки
+	 *
+	 * @var string[]
+	 */
+	private $where = array();
+	public $extra;
+	/**
+	 * пределы выборки
+	 *
+	 * @var string
+	 */
+	private $limit;
+	function __construct() {
+		$this->order = new DBFields();
+	}
+	/**
+	 * Добавить таблицу как join
+	 *
+	 * @param string $name
+	 * @return DBTable
+	 */
+	public function joinTable($name) {
+		$table         = $this->addTable($name);
+		$table->joined = true;
+		return $table;
+	}
+	/**
+	 * Добавить таблицу как join
+	 *
+	 * @param string $name
+	 * @return DBTable
+	 */
+	public function addJoin($name) {
+		return $this->joinTable($name);
+	}
+	/**
+	 * Очистить список сортировок
+	 *
+	 */
+	public function clearOrder() {
+		foreach ($this->order as &$f) $f->orderable = false;
+		$this->order->clear();
+	}
+	/**
+	 * Добавить поле, по которому следует сортировать выборку
+	 *
+	 * @param DBField $field
+	 * @param bool $desc
+	 * обратный порядок
+	 */
+	public function addOrder(DBField $field, $desc = false) {
+		$field->order = ($desc) ? 'desc' : 'asc';
+		$this->order->add($field);
+	}
+	/**
+	 * Связать таблицы двумя полями
+	 *
+	 * @param DBField $f1
+	 * поле первой таблицы
+	 * @param DBField $f2
+	 * поле второй таблицы
+	 */
+	public function bindTablesWith(DBField &$f1, DBField &$f2) {
+		if ($f1->getOwner()->joined) {
+			$a = &$f1;
+			$b = &$f2;
+		} else {
+			$a = &$f2;
+			$b = &$f1;
+		}
+		$a->addWhere(' = '.$b->getTable().'.'.$b->getName());
+	}
+	/**
+	 * Добавить условие выборки
+	 *
+	 * @param string $expr
+	 */
+	public function addWhere($expr) {
+		if (!empty($expr))
+			$this->where[] = $expr;
+	}
+	/**
+	 * получить строку условий
+	 *
+	 * @return string
+	 */
+	public function getWhere() {
+		if (count($this->where) == 0) $this->where = array('1');
+		return implode(' AND ', $this->where);
+	}
+	/**
+	 * Установить пределы выборки
+	 *
+	 * @param от $start
+	 * int
+	 * @param до $amount
+	 * int
+	 */
+	public function setLimit($start, $amount = null) {
+		if ($amount == null) {
+			$this->limit = $start;
+		} else {
+			$this->limit = $start.','.$amount;
+		}
+	}
+	/**
+	 * построить SELECT запрос
+	 *
+	 * @return string
+	 */
+	public function render() {
+		$query = 'SELECT ';
+		/*
+		 * FIELDS
+		 */
+		$fields = array();
+		foreach ($this->tables as $table) {
+			foreach ($table->getFields() as $field) {
+				if (!$field->selectable) continue;
+				if ($field->getName() == null) continue;
+				if (strpos($field->getName(), 'sql:') !== false) {
+					$fields[] = substr($field->getQueryName(), 4);
+				} else {
+					$prefixTableName = ($field->getTable() === null) ? '' : $field->getTable().'.';
+					$fields[]        = $prefixTableName.$field->getQueryName();
+				}
+			}
+		}
+		$query .= implode(',', $fields);
+		$query .= ' FROM ';
+		/*
+		 * TABLES
+		 */
+		$names  = array();
+		$joined = array();
+		$joinOn = array();
+		foreach ($this->tables as $table) {
+			if ($table->getName() === null) continue;
+			$alias = ($table->alias) ? $table->alias : $table->getName();
+			$name  = CONFIG::getDBCfg()->prefix.$table->getName().' as '.$alias;
+			/* @var $table DBTable */
+			if ($table->joined) {
+				$joined[] = $name;
+				foreach ($table->getFields() as $field) {
+					if ($tmp = $field->getWhere()) $joinOn[] = $tmp;
+				}
+			} else {
+				$names[] = $name;
+				foreach ($table->getFields() as $field) {
+					if ($tmp = $field->getWhere()) $this->addWhere($tmp);
+				}
+			}
+		}
+		$query .= implode(', ', $names);
+		/*
+		 * JOIN
+		 */
+		if (count($joined) > 0) {
+			$query .= ' LEFT JOIN ';
+			$query .= implode(', ', $joined);
+			if (count($joinOn) > 0) {
+				$query .= ' ON (';
+				$query .= implode(' AND ', $joinOn);
+				$query .= ')';
+			}
+		}
+		/*
+		 * WHERE
+		 */
+		$query .= ' WHERE ';
+		$query .= $this->getWhere();
+		$query .= ' '.$this->extra;
+		/*
+		 * ORDER
+		 */
+		if ($this->order->count() > 0) {
+			$query .= ' ORDER BY ';
+			$order  = array();
+			foreach ($this->order as $field) {
+				$order[] = $field->getAlias().(($field->order == 'desc') ? ' DESC ' : ' ASC ');
+			}
+			$query .= implode(',', $order);
+		}
+		/*
+		 * LIMIT
+		 */
+		if (!empty($this->limit)) $query .= ' LIMIT '.$this->limit;
+		return $query;
+	}
+}
+
+/**
+ * LICENCE
+ *
+ * Copyright (c) 2009, Andrei V.Nakhabov
+ * All rights reserved.
+ *
+ * 	Redistribution and use in source and binary forms, with or without modification,
+ * 	are permitted provided that the following conditions are met:
+ * 	    * Redistributions of source code must retain the above copyright notice,
+ * 	      this list of conditions and the following disclaimer.
+ * 	    * Redistributions in binary form must reproduce the above copyright notice,
+ *        this list of conditions and the following disclaimer in the documentation
+ *        and/or other materials provided with the distribution.
+ *      * Neither the name of author may be used to endorse or promote products derived from this
+ *        software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+if (!class_exists('DForm')) require_once('CMS/DForm/DForm.php');
+if (!class_exists('UsualInput')) require_once('CMS/DForm/rootinputs.php');
+/**
+ * Элемент <input type="text" />
+ */
+class TextInput extends LabeledInput {
+	public function getHtml() {
+		$this->type = 'text';
+		return parent::getHtml();
+	}
+}
+/**
+ * Элемент <input type="file" />
+ */
+class FileInput extends LabeledInput {
+	/**
+	 * переопределен код parent::getHtml,
+	 * т.к.value файлового ввода просто выводится как html ниже
+	 * @return string $out
+	 */
+	public function getHtml() {
+		$value = $this->getValue();
+		$this->setValue('');
+		$this->type = 'file';
+		$class      = get_class($this);
+		$out        = '';
+		if (!$this->noExtraHtml)
+			$out .= sprintf('<span class="dfFormElement df%s">', $class);
+		$labelHTML = $this->getLabelHtml();
+		if ($this->labelFirst) $out  .= $labelHTML;
+		$out .= parent::getHtml();
+		if (!$this->labelFirst) $out .= $labelHTML;
+		$out .= $value;
+		if (!$this->noExtraHtml)
+			$out .= '</span>';
+		return $out;
+	}
+}
+/**
+ * Элемент <input type="hidden" />
+ */
+class HiddenInput extends UsualInput {
+	public function getHtml() {
+		$this->setType('hidden');
+		return parent::getHtml();
+	}
+}
+/**
+ * Элемент выводит необработанное значение value
+ */
+class RawInput extends FormElement {
+	public function getHtml() {
+		return $this->value;
+	}
+}
+/**
+ * Элемент оформляет value метками (label) и другим html-кодом
+ */
+class StaticInput extends LabeledInput {
+	public function getHtml() {
+		$out = '';
+		if ($this->label) {
+			$out .= sprintf('<label>%s</label>', $this->label);
+		}
+		if (array_key_exists('class', $this->attributes)) {
+			$this->attributes['class'] .= ' ';
+		} else {
+			$this->attributes['class'] = '';
+		}
+		$this->attributes['class'] .= 'dfFormElement dfStatic';
+		$out .= sprintf('<span %s>%s</span>', $this->getAttributesString(), $this->value);
+		return $out;
+	}
+}
+/**
+ * ReadOnly.
+ *
+ * Элемент представляет собой hiddenInput и видимый StaticInput
+ * с настраиваемым содержимым, по умолчанию равным value.
+ */
+class ReadonlyInput extends LabeledInput {
+	protected $valueShown = false;
+	public function setValueShown($value) {
+		$this->valueShown = $value;
+		return $this;
+	}
+	public function getHtml() {
+		$out = '';
+		if ($this->label) {
+			$out .= sprintf('<label>%s</label>', $this->label);
+		}
+		if (array_key_exists('class', $this->attributes)) {
+			$this->attributes['class'] .= ' ';
+		} else {
+			$this->attributes['class'] = '';
+		}
+		$this->attributes['class'] .= 'dfFormElement dfStatic';
+		if ($this->valueShown === false) $this->valueShown = $this->value;
+		$out .= sprintf(
+		    '<span %1$s>%2$s</span><input type="hidden" name="%3$s" value="%4$s" />',
+		    $this->getAttributesString(),
+		    $this->valueShown,
+		    $this->name,
+		    $this->value
+		);
+		return $out;
+	}
+}
+/**
+ * Элемент выводит в качестве значения для LabeledInput построенный шаблон, в который передан value
+ */
+class TemplateInput extends LabeledInput {
+	protected $tpl     = 'no template for TemplateInput';
+	protected $tplType = VC_SIMPLE;
+	public function setTemplate($tpl, $type = VC_SIMPLE) {
+		$this->tpl     = $tpl;
+		$this->tplType = $type;
+		return $this;
+	}
+	public function getHtml() {
+		$out = '';
+		if ($this->label) {
+			$out .= sprintf('<label>%s</label>', $this->label);
+		}
+		if (is_string($this->value)) $value = array('value' => $this->value);
+		else $value = $this->value;
+		if ($this->tplType == VC_SIMPLE) {
+			$out .= '<span>'.View::factory($this->tplType, $this->tpl)
+				->assign($value)->get().'</span>';
+		} else {
+			$out = renderTemplate($this->tpl, $value);
+		}
+		return $out;
+	}
+}
+/**
+ * Элемент <input type="password" />
+ */
+class PasswordInput extends LabeledInput {
+	public function getHtml() {
+		$this->type = 'password';
+		return parent::getHtml();
+	}
+}
+/**
+ * Элемент <button type="button" />
+ */
+class Button extends LabeledInput {
+	public function getHtml() {
+		if (!$this->type) $this->type = 'button';
+		$out = '';
+		if (DForm::$addTypedCSS) {
+			$css = sprintf(' class="%s%s" ', DForm::$addTypedCSS, $this->type);
+		} else {
+			$css = '';
+		}
+		$vars     = array($this->type);
+		$template = '<button type="%s"';
+		if ($this->id) {
+			$vars[]    = $this->id;
+			$template .= ' id="%s"';
+		}
+		if ($this->name) {
+			$vars[]    = $this->name;
+			$template .= ' name="%s"';
+		}
+		if ($this->value) {
+			$vars[]    = $this->value;
+			$template .= ' value="%s"';
+		}
+		$vars[]    = $this->getAttributesString();
+		$vars[]    = $css;
+		$vars[]    = $this->label;
+		$template .= ' %s %s>%s</button>';
+
+		$out .= vsprintf($template, $vars);
+		return $out;
+	}
+}
+/**
+ * Элемент <button type="submit" />
+ */
+class Submit extends Button {
+	public function getHtml() {
+		$this->type = 'submit';
+		return parent::getHtml();
+	}
+}
+/**
+ * Элемент <textarea>
+ */
+class TextArea extends LabeledInput {
+	public function getHtml() {
+		$out = '<span class="dfFormElement dfTextArea">';
+		$attributes       = $this->getAttributesString();
+		$this->attributes = '';
+		$out .= parent::getHtml();
+		$out .= sprintf(
+		    '<textarea id="%1$s" name="%2$s" %4$s>%3$s</textarea>',
+		    $this->id,
+		    $this->name,
+		    htmlspecialchars($this->value, ENT_COMPAT, 'UTF-8'),
+		    $attributes
+		);
+		$out .= '</span>';
+		return $out;
+	}
+}
+/**
+ * Элемент <input type="checkbox" />
+ */
+class Checkbox extends LabeledInput {
+	private $checked = false;
+	public function getHtml() {
+		$this->labelFirst = false;
+		if (!$this->type) $this->type = 'checkbox';
+		$preserveAttributes = $this->attributes;
+		if ($this->checked) $this->addAttribute('checked');
+		if (empty($this->id)) $this->id = 'input_'.(FormElement::getAutoId());
+		$out = parent::getHtml();
+		$this->attributes = $preserveAttributes;
+		return $out;
+	}
+	public function setChecked($value = true) {
+		$this->checked = $value;
+		return $this;
+	}
+}
+/**
+ * Элемент <input type="radio" />
+ */
+class RadioInput extends Checkbox {
+	public function getHtml() {
+		$this->type = 'radio';
+		return parent::getHtml();
+	}
+}
+/**
+ * Enter description here ...
+ */
+class SelectorOption extends FormElement {
+	private $checked = false;
+	private $label;
+	public function setLabel($label) {
+		$this->label = $label;
+	}
+	public function getLabel() {
+		return $this->label;
+	}
+	public function setChecked($state = true) {
+		$this->checked = $state;
+		return $this;
+	}
+	public function isChecked() {
+		return $this->checked;
+	}
+	public function getHtml() {
+		return sprintf(
+		    '<option id="%s" value="%s" %s %s>%s</option>',
+		    $this->id,
+		    $this->value,
+		    $this->getAttributesString(),
+		    ($this->checked) ? 'selected="selected"' : '',
+		    $this->value
+		);
+	}
+}
+/**
+ * Элемент <select>
+ */
+class Selector extends LabeledInput {
+	public $options = array();
+	public function clearOptions() {
+		$this->options = array();
+		return $this;
+	}
+	public function getOptions() {
+		return $this->options;
+	}
+	public function removeOption($value) {
+		if (array_key_exists($value, $this->options))
+			unset($this->options[$value]);
+	}
+	public function addOption($value, $text = null, $addToStart = false) {
+		if ($addToStart) {
+			$items         = array_reverse($this->options, true);
+			$items[$value] = $text;
+			$this->options = array_reverse($items, true);
+		} else {
+			if ($value instanceof SelectorOption) {
+				$this->options[] = $value;
+			} else {
+				$this->options[$value] = $text;
+			}
+		}
+		return $this;
+	}
+	/**
+	 * @param $array
+	 * @param $autoCopyKeys
+	 * @param $clearOld
+	 * @return Selector
+	 */
+	public function addOptions($array, $autoCopyKeys = false, $clearOld = false) {
+		if (count($array) == 0) return $this;
+		if ($clearOld) $this->clearOptions();
+		if (!isAssoc($array) && $autoCopyKeys) {
+			$array = array_combine($array, $array);
+		}
+		foreach ($array as $value => $option) {
+			if ($option instanceof SelectorOption) $value = $option->getValue();
+			$this->addOption($value, $option);
+		}
+		return $this;
+	}
+	protected $multiple = false;
+	public function setMultiple($value = true) {
+		$this->multiple = $value;
+		return $this;
+	}
+	public function translate($prefix) {
+		if (count($this->options)) {
+			foreach ($this->options as $f => &$v) {
+				$v = s($prefix.$v);
+			}
+		}
+		return $this;
+	}
+	public function getHtml() {
+		$out = '';
+		if (!$this->noExtraHtml) {
+			$out .= '<span class="dfFormElement dfSelector">';
+		}
+		$out          .= parent::getHtml();
+		$checkedValues = (is_array($this->value)) ? $this->value : array($this->value);
+		if (count($checkedValues) > 1 ) $this->setMultiple(true);
+		$out .= sprintf(
+		    '<select %s %s %s %s %s>',
+		    ($this->id) ? 'id="'.$this->id.'"' : '',
+		    ($this->name) ? 'name="'.$this->name.'"' : '',
+		    $this->getAttributesString(),
+		    ($this->multiple) ? 'multiple="multiple"' : '',
+		    ''
+		);
+		if (is_array($this->options)) {
+			foreach ($this->options as $optionValue => $option) {
+				$optionSelected = in_array($optionValue, $checkedValues);
+				if ($option instanceof SelectorOption) {
+					$option->setChecked($optionSelected);
+					$out .= $option->getHtml();
+				} else {
+					$out .= sprintf(
+					    '<option value="%s" %s>%s</option>',
+					    $optionValue,
+					    ($optionSelected) ? 'selected="selected"' : '',
+					    $option
+					);
+				}
+			}
+		}
+		$out .= '</select>';
+		if (!$this->noExtraHtml)
+			$out .= '</span>';
+		return $out;
+	}
+}
+
+/**
+ * Селектор с вольноизменяемым содержимым.
+ *
+ * Возвращает то же, что и <select> пока текстовое значение совпадает со значением из опций.
+ * При вольном значении оно передается в параметре запроса "name + Mutated" , а параметр"name" отсутствует
+ *
+ * @example
+ * (new SelectorMutable('example'))->addOptions([1 => 'apple', 2 => 'lemon']);
+ *
+ * значение поля = apple
+ * $_REQUEST = (
+ *     example => 1,
+ *     exampleMutated => 'apple'
+ * );
+ *
+ * значение поля = lemon
+ * $_REQUEST = (
+ *     example => 2,
+ *     exampleMutated => 'lemon'
+ * );
+ *
+ * значение поля = melon
+ * $_REQUEST = (
+ *     exampleMutated => 'melon'
+ * );
+ *
+ * Перед использованием необходимо выполнить метод initJS раньше, чем на страницу будет выведен JSBridge::getScripts()
+ */
+class SelectorMutable extends Selector {
+	static private $jsInitedAlready = false;
+	static public function initJS() {
+		if (!self::$jsInitedAlready) {
+			JSManager::add('d-engine/js/formElements/selectMutable.js');
+			JSManager::exportCode('SelectorMutable.create($("select.mutable"));');
+			self::$jsInitedAlready = true;
+		}
+	}
+	public function getHtml() {
+		$this->getId();
+		/*
+		 * высоту выпадающего списка задать равной количеству опций
+		 */
+		$size = count($this->options);
+		/*
+		 * если всего одна опция, добавить пустую в начало, иначе выводится не списком,
+		 * а обычным селектом, без возможности выбора (т.к. один)
+		 */
+		if ($size == 1) {
+			$this->addOption('', '', true);
+			$size++;
+		}
+		if ($size > $this->maxHeight) $size = $this->maxHeight;
+		$this->addAttribute("size=\"$size\"");
+		$this->addAttribute("class=\"mutable\"");
+		return parent::getHtml();
+	}
+
+	public $maxHeight = 5;
+}
+
+/**
+ * TODO delete
+ *
+ * Текст с выпадающим списком вариантов.
+ *
+ * Аттрибуты, присваеваемые через addAttribute - аттрибуты текстового поля, все кроме
+ * onchange
+ * который передается селектору.
+ * Количество выделенных опций не может быть больше 1
+ */
+class SelectorText extends Selector {
+	static private $autoId = 0;
+	public $maxHeight      = 3;
+	protected $mode        = 'text';
+	/**
+	 * @param $m
+	 * режим вывода
+	 * text - работать как текстовое поле с выпадающим списком -
+	 * значение = выбранный пункт из списка
+	 * select - значение = ключ выбранного пункта
+	 * @return SelectorText
+	 */
+	public function setMode($m) {
+		$this->mode = $m;
+		return $this;
+	}
+	public function setMaxHeight($v) {
+		$this->maxHeight = $v;
+		return $this;
+	}
+	public function getHtml() {
+		if (count($this->options) == 0) {
+			$this->addAttribute('onchange=""');
+			$t = new TextInput;
+			return $t
+				->setName($this->name)
+				->setLabel($this->label)
+				->addAttribute($this->getAttributesString())
+				->setValue($this->value)
+				->setId($this->id);
+		}
+		if (!$this->id) {
+			self::$autoId++;
+			$this->id = get_class($this).self::$autoId;
+		}
+		$t = new TextInput;
+		$text   = $t
+			->setId($this->id)->setName($this->name)
+			->setValue($this->value);
+		$t = new HiddenInput;
+		$hidden = $t->setName($this->name.'_option')->setId($this->id.'_option');
+		$label  = '';
+		if ($this->label) {
+			$label = "<label>{$this->label}</label>";
+		}
+		if (array_key_exists('onchange', $this->attributes)) {
+			$onChangeHandler = $this->attributes['onchange'].';';
+			unset($this->attributes['onchange']);
+		} else {
+			$onChangeHandler = '';
+		}
+		$text->attributes = $this->attributes;
+		$btn = new Button();
+		$btn->setLabel('V')
+			->addAttribute(sprintf('onclick="$(\'#%s_selector\').toggle()"', $this->id))
+			->addAttribute('class="dropdownbtn"');
+		$size = count($this->options);
+		/*
+		 * если всего одна опция, добавить пустую в начало, иначе выводится не списком,
+		 * а обычным селектом, без возможности выбора (т.к. один)
+		 */
+		if ($size == 1) {
+			$this->addOption('', '', true);
+			$size++;
+		}
+		if ($size > $this->maxHeight) $size = $this->maxHeight;
+		$this->setLabel('')->setName('')
+			->addAttribute("size=\"$size\"")
+			->addAttribute('style="display:none;position:absolute;top:1.5em;left:0"');
+		if ($this->mode == 'text') {
+			$onchange  = '%1$s$(\'#%2$s\').val(this.options[this.selectedIndex].innerHTML);';
+			$onchange .= '$(\'#%2$s_option\').val(this.options[this.selectedIndex].value);';
+			$onchange .= '$(this).hide()';
+			$this->addAttribute(sprintf('onchange="'.$onchange.'"', $onChangeHandler, $this->id));
+		} else {
+			$onchange  = '%1$s$(\'#%2$s\').val(this.options[this.selectedIndex].value);';
+			$onchange .= '$(\'#%2$s_option\').val(this.options[this.selectedIndex].innerHTML);';
+			$onchange .= '$(this).hide()';
+			$this->addAttribute(
+			    sprintf(
+			        'onchange="'.$onchange.'"',
+			        $onChangeHandler,
+			        $this->id
+			    )
+			);
+		}
+		$this->setId($this->id.'_selector');
+		$hidden->noExtraHtml = $text->noExtraHtml = $this->noExtraHtml = true;
+		$selector = parent::getHtml();
+		return sprintf(
+		    '<span class="dfSelectorText">%s%s<span style="position:relative">%s%s</span>%s</span>',
+		    $label,
+		    $hidden,
+		    $text,
+		    $selector,
+		    $btn
+		);
+	}
+}
+/**
+ * Enter description here ...
+ */
+class SelectorEditable extends SelectorText {
+	protected $mode = 'select';
+}
+/**
+ * Элемент строит группу чекбоксов, по логике работы идентично мультиселекту <select>
+ */
+class CheckboxesGroup extends Selector {
+	protected $rowDesign = '<div class="checkbox">%s</div>';
+	public function setDesign($d) {
+		$this->rowDesign = $d;
+		return $this;
+	}
+	public function getHtml() {
+		$out  = $this->getLabelHtml();
+		$out .= sprintf('<div id="%1$s" %2$s>', $this->id, $this->getAttributesString());
+		// на случай неотмечивания ни одного чекбокса
+		$out .= sprintf('<input type="hidden" name="%s" value=""/>', $this->name);
+		if (is_array($this->value)) {
+			if (isAssoc($this->value)) {
+				$checkedValues = array_keys($this->value);
+			} else {
+				$checkedValues = $this->value;
+			}
+		} elseif(isset($this->value)) $checkedValues = array($this->value);
+		else $checkedValues = array();
+		foreach ($this->options as $optionValue => $option) {
+			$optionSelected = in_array($optionValue, $checkedValues);
+			$ch = new Checkbox();
+			$ch->setName($this->name.'[]');
+			if ($option instanceof SelectorOption) {
+				/* @var $option SelectorOption */
+				$ch->setLabel($option->getLabel())
+					->setValue($option->getValue())
+					->setChecked($option->isChecked())
+					->setId($this->name.'_'.$optionValue)
+					->attributes = $option->attributes;
+			} else {
+				$ch->setLabel($option)->setValue($optionValue)->setChecked($optionSelected)->setId($this->name.'_'.$optionValue);
+			}
+			$out .= ($this->rowDesign == null) ? $ch->getHtml() : sprintf($this->rowDesign, $ch->getHtml());
+		}
+		$out .= '</div>';
+		return $out;
+	}
+}
+/**
+ * Элемент строит группу радиокнопок, по логике работы идентично <select>
+ */
+class RadioGroup extends CheckboxesGroup {
+	public function getHtml() {
+		$out = $this->getLabelHtml();
+		if (!array_key_exists('class', $this->attributes)) {
+			$this->attributes['class'] = '';
+		}
+		$this->attributes['class'] .= ' radiogroup';
+		$out .= sprintf('<div id="%1$s_div" %2$s>', $this->id, $this->getAttributesString());
+		$checkedValues = (is_array($this->value)) ? $this->value : array($this->value);
+		foreach ($this->options as $optionValue => $option) {
+			$optionSelected = in_array($optionValue, $checkedValues);
+			$ch = new RadioInput($this->name);
+			if ($option instanceof SelectorOption) {
+				dump('CheckboxesGroup::rich option is not implemented yet');
+			} else {
+				$ch->setLabel($option)->setValue($optionValue)->setChecked($optionSelected)->setId($this->name.'_'.$optionValue);
+			}
+			$out .= ($this->rowDesign == null) ? $ch->getHtml() : sprintf($this->rowDesign, $ch->getHtml());
+		}
+		$out .= '</div>';
+		return $out;
+	}
+}
+/**
+ * Элемент строит группу из трех <select> для выбора дня, месяца и года.
+ * При отправке формы собирается в единственную переменную name
+ */
+class DateInput extends LabeledInput {
+	private $yearFrom = null;
+	private $yearTo   = null;
+	private $disabled = false;
+	private $months;
+	public function setMonthsArray($months) {
+		$this->months = array();
+		for ($i = 1; $i <= 12; $i++) {
+			$this->months[sprintf('%02s', $i)] = $months[$i - 1];
+		}
+		return $this;
+	}
+	public function getMonthsArray() {
+		if ($this->months != null) {
+			$monthData = $this->months;
+		} else {
+			$monthData = array(
+			    '01' => 'jan',
+			    '02' => 'feb',
+			    '03' => 'mar',
+			    '04' => 'apr',
+			    '05' => 'may',
+			    '06' => 'jun',
+			    '07' => 'jul',
+			    '08' => 'aug',
+			    '09' => 'sep',
+			    '10' => 'oct',
+			    '11' => 'nov',
+			    '12' => 'dec'
+			);
+		}
+		return $monthData;
+	}
+	public function disable($v = true) {
+		$this->disabled = $v;
+	}
+	public function setYearsRange($f, $t) {
+		$this->yearFrom = $f;
+		$this->yearTo   = $t;
+		return $this;
+	}
+	public function getJS() {
+		$js = <<<JS
+		$('#{$this->id}').val( $('#{$this->id}_years').val() + '-' +
+		    $('#{$this->id}_months').val() + '-' +
+		    $('#{$this->id}_days').val());
+JS;
+		return $js;
+	}
+	public function getJSreverse() {
+		$js = <<<JS
+		var year = $('#{$this->id}').get(0).value.substr(0,4);
+		for (var i = 0; i < $('#{$this->id}_years').get(0).options.length; i++) {
+			if ($('#{$this->id}_years').get(0).options[i].value == year) {
+				$('#{$this->id}_years').get(0).selectedIndex = i;
+				break;
+			}
+		}
+		
+JS;
+		return $js;
+	}
+	public $format = 'd.M.Y';
+	public function getHtml($returnControls = false) {
+		$preserveAttributes = $this->attributes;
+		if (empty($this->id)) $this->id = $this->name;
+		$this->setType('hidden');
+		if ($this->disabled) $this->addAttribute('disabled="disabled"');
+		$control = sprintf('<script>%s_js = function() {%s}</script>%s', $this->id, $this->getJS(), parent::getHtml());
+		/*
+		 * Months selector
+		 */
+		$monthData = $this->getMonthsArray();
+		if ( class_exists('ObjectsPool') && ObjectsPool::exist('Translator')) {
+			foreach ($monthData as $n => &$month) $month = ObjectsPool::get('Translator')->get($month);
+		}
+		$t = new Selector;
+		$months = $t
+			->setId($this->id.'_months')
+			->addOptions($monthData)
+			->addAttribute("onchange=\"{$this->id}_js()\"")
+			->setValue(substr($this->value, 5, 2));
+		if ($this->disabled) $months->addAttribute('disabled="disabled"');
+		/**
+		 * Days selector
+		 */
+		if (strpos($this->format, 'd') === false) {
+			$days = new HiddenInput();
+			$days->setId($this->id.'_days')->setValue(substr($this->value, 8, 2));
+		} else {
+			$dayData = array();
+			for ($i = 1; $i <= 31; $i++) {
+				$dayData[sprintf('%02s', $i)] = $i;
+			}
+			$t = new Selector;
+			$days = $t
+				->addOptions($dayData)
+				->setId($this->id.'_days')
+				->setValue(substr($this->value, 8, 2))
+				->addAttribute("onchange=\"{$this->id}_js()\"");
+			if ($this->disabled) $days->addAttribute('disabled="disabled"');
+		}
+		/*
+		 * Years selector
+		 */
+		$yearData = array();
+		if ($this->yearFrom == null) $this->yearFrom = date('Y') - 10;
+		if ($this->yearTo == null)   $this->yearTo   = date('Y') + 10;
+		for ($i = $this->yearTo; $i >= $this->yearFrom; $i--) {
+			$yearData[$i] = $i;
+		}
+		$t = new Selector;
+		$years = $t
+			->setId($this->id.'_years')
+			->addOptions($yearData)
+			->addAttribute("onchange=\"{$this->id}_js()\"")
+			->setValue(substr($this->value, 0, 4));
+		if ($this->disabled) $years->addAttribute('disabled="disabled"');
+
+		$control .= $days->getHtml();
+		$control .= $months->getHtml();
+		$control .= $years->getHtml();
+		if ($returnControls) return $control;
+		$css = (DForm::$addTypedCSS !== false) ? sprintf(' class="%sdate" ', DForm::$addTypedCSS) : '';
+		$this->addAttribute('class="dfDateInput"');
+		$out = sprintf('<span id="%s_box" %s>%s</span>', $this->id, $this->getAttributesString().$css, $control);
+		$this->attributes = $preserveAttributes;
+		return $out;
+	}
+}
+/**
+ * Enter description here ...
+ */
+class DateTimeInput extends DateInput {
+	private $time;
+	public function setTime($time = null) {
+		if ($time === null) $time = date('H:i:s');
+		$this->time = $time;
+	}
+	function __construct($obj = null) {
+		parent::__construct($obj);
+		$this->setTime();
+	}
+	public function getJS() {
+		$js = <<<JS
+		$('#{$this->id}').val( $('#{$this->id}_years').val() + '-' +
+		    $('#{$this->id}_months').val() + '-' +
+		    $('#{$this->id}_days').val() + ' ' + '{$this->time}');
+JS;
+		return $js;
+	}
+}
+/**
+ * Элемент вызывает указаную функцию для построения содержимого
+ */
+class CallbackInput extends LabeledInput {
+	private $function = null;
+	public function setCallback($function) {
+		$this->function = $function;
+		return $this;
+	}
+	public function getHtml() {
+		if ($this->function == null) trigger_error('CallbackInpu requires valid callback function', E_USER_ERROR);
+		return parent::getHtml().call_user_func($this->function, $this->value, $this);
+	}
+}
+/**
+ * Элемент выводит значение value, переведенное с помощь функции s() с указанным префиксом (s(prefix.value))
+ */
+class TranslatedInput extends LabeledInput {
+	private $prefix;
+	public function translate($prefix) {
+		return $this->setPrefix($prefix);
+	}
+	public function setPrefix($prefix) {
+		$this->prefix = $prefix;
+		return $this;
+	}
+	public function getHtml() {
+		return s($this->prefix.$this->value);
+	}
+}
+/**
+ * Элемент строит виджет jQueryUI.DatePicker
+ */
+class Calendar extends LabeledInput {
+	private $config = array(
+	    'showOn'          => "'both'",
+	    'altFormat'       => "'dd.mm.yy'",
+	    'dateFormat'      => "'yy-mm-dd'",
+	    'buttonText'      => "'Choose'",
+	    'buttonImageOnly' => 'true',
+	    'showAnim'        => "'fadeIn'",
+	    'showButtonPanel' => 'true',
+	    'duration'        => "'fast'"
+	);
+	/**
+	 * установить опцию конфигурирования виджета jQuery
+	 * @param $property
+	 * @param $value
+	 * текстовое значение должно быть обрамлено кавычками. Например setJQConfig('buttonText', "'Choose'");
+	 * @return Calendar $this
+	 */
+	public function setJQConfig($property, $value) {
+		$this->config[$property] = $value;
+		return $this;
+	}
+	function __construct($name = '') {
+		$monthNames = array();
+		for ($j = 1; $j <= 12; $j++) {
+			$monthNames[] = s('month'.$j);
+		}
+		$monthNames = implode("','", $monthNames);
+		$this->setJQConfig('monthNames', sprintf("['%s']", $monthNames));
+		$this->setJQConfig('monthNamesShort', sprintf("['%s']", $monthNames));
+		$dayNames = array();
+		for ($j = 0; $j < 7; $j++) {
+			$dayNames[] = s('weekday'.$j);
+		}
+		$dayNames = implode("','", $dayNames);
+		$this->setJQConfig('dayNamesMin', sprintf("['%s']", $dayNames));
+		//if (CONFIG::getPackages()->available('versions'))
+		//$this->setJQConfig('firstDay', versions::getCurrent()->code == 'ru' ? 1 : 0 );
+		$this->setJQConfig('closeText', '\''.s('close').'\'');
+		$this->setJQConfig('currentText', '\''.s('today').'\'');
+		parent::__construct($name);
+	}
+	public function getHtml() {
+		$this->getId();
+		$this->setJQConfig('altField', sprintf("'#%s_altfield'", $this->id));
+
+		$config   = implodeAssoc(',', $this->config, ':');
+		$js       = <<<CAL
+$(document).ready(function() { $("#{$this->id}").datepicker({ {$config} }); });
+CAL;
+		JSManager::exportCode($js);
+		$control  = <<<CONTROL
+	<div type="text" id="%1\$s_box" %2\$s>
+		<input style="display:inline" size="12" readonly="readonly" class="hasDatepicker" type="text" id="%1\$s_altfield" value="%5\$s"/>
+		<input type="hidden" name="%3\$s" id="%1\$s" value="%4\$s"/>
+	</div>
+CONTROL;
+
+		$out  = $this->getLabelHtml();
+		$out .= sprintf(
+		    $control,
+		    $this->id,
+		    $this->getAttributesString(),
+		    $this->name,
+		    $this->value,
+			formatDate($this->value, '%d.%m.%Y')
+		);
+		return $out;
+	}
+}
+/**
+ * Базовый элемент <input type=x/>
+ */
+class UsualInput extends FormElement {
+	protected $type = null;
+	public function setType($type) {
+		$this->type = $type;
+	}
+	public function getHtml() {
+		if (DForm::$addTypedCSS !== false) {
+			$css = sprintf(' class="%s%s" ', DForm::$addTypedCSS, $this->type);
+		} else {
+			$css = '';
+		}
+		$out = sprintf('<input type="%s" ', $this->type);
+		if ($this->id) {
+			$out .= sprintf('id="%s" ', $this->id);
+		}
+		if ($this->name) {
+			$out .= sprintf('name="%s" ', $this->name);
+		}
+		if ($this->isValueSet) {
+			$out .= sprintf('value="%s" ', htmlspecialchars($this->value));
+		}
+		if ($attr = $this->getAttributesString()) {
+			$out .= $attr;
+		}
+		if ($css) {
+			$out .= $css;
+		}
+		$out .= ' />';
+		return $out;
+	}
+}
+/**
+ * Элемент ввода с меткой (<label>)
+ */
+class LabeledInput extends UsualInput {
+	protected $labelFirst = true;
+	/**
+	 * не генерировать wrapper в виде <span class="class">
+	 * @var bool
+	 */
+	public $noExtraHtml = false;
+	public $label;
+	public function getLabel() {
+		return $this->label;
+	}
+	public function setLabel($label = '') {
+		$this->label = $label;
+		return $this;
+	}
+	public function getHtml() {
+		if ($this->type == null) {
+			//$this->label = $this->value;
+			return $this->getLabelHtml();
+		} else {
+			$class = get_class($this);
+			$out   = '';
+			if (!$this->noExtraHtml)
+				$out .= sprintf('<span class="dfFormElement df%s">', $class);
+			$labelHTML = $this->getLabelHtml();
+			if ($this->labelFirst) $out  .= $labelHTML;
+			$out .= parent::getHtml();
+			if (!$this->labelFirst) $out .= $labelHTML;
+			if (!$this->noExtraHtml)
+				$out .= '</span>';
+			return $out;
+		}
+	}
+	public function getLabelHtml() {
+		if (empty($this->label)) return '';
+		return sprintf(
+			'<label for="%s" %s>%s</label>',
+			$this->id,
+			$this->getAttributesString(),
+			$this->label
+		);
+	}
+}
+/**
+ * Тип элемента, требующий обработки данных запроса перед началом работы.
+ * Например, если элемент генерирует одни переменные запроса, а необходимо в контроллер выдавать другие:
+ * @example
+ * элемент ввода даты, представлен одной переменной date,
+ * в форме представлен тремя элементами: day, month, year,
+ * однако контроллер обработки формы ожидает единственное значение date,
+ * в таком случае и стоит поручить сборку переменной date из day, month и year в метод process
+ * элемента PreprocessedInput
+ */
+abstract class PreprocessedInput extends LabeledInput {
+	public function getHtml() {
+		if (empty($this->name)) trigger_error('PreProcessedInput should have name', E_USER_ERROR);
+		$add = sprintf('<input type="hidden" name="dengine_preprocess_inputs[%s]" value="%s" />', $this->name, get_class($this));
+		return $add.parent::getHtml();
+	}
+	abstract public function process (&$requestData);
+}
+/**
+ * Класс для работы с изображениями.
+ *
+ * @author dron
+ */
+class DImage {
+	const JPG = 'jpg';
+	const PNG = 'png';
+	static public $DEFAULT_JPG_QUALITY = 70;
+	static public $DEFAULT_PNG_QUALITY = 7;
+	private $path;
+	private $filetype;
+	public $exif;
+	public $raw = null;
+	public $info;
+	private $sourceType = null;
+	/**
+	 * @param $filename
+	 * @param string $errorMsg
+	 *
+	 * @return DImage
+	 */
+	static public function factory($filename, &$errorMsg = '') {
+		if (is_string($filename)) {
+			if (!file_exists($filename)) {
+				$errorMsg = sprintf("File '%s' not found", $filename);
+				return null;
+			}
+			$info = @getimagesize($filename);
+			if ($info === false) {
+				$errorMsg = sprintf("File '%s' is not valid image", $filename);
+				return null;
+			}
+		} elseif (!is_resource($filename)) {
+			$errorMsg = 'DImage requires file path or resource';
+			return null;
+		}
+		$instance = new DImage($filename);
+		return $instance;
+	}
+	function __construct($filename) {
+		if (is_string($filename)) {
+			$this->path = $filename;
+			if (!file_exists($filename)) throw new ExceptionCMS(sprintf("File '%s' not found", $this->path));
+			$this->info = @getimagesize($this->path);
+			if ($this->info === false) throw new ExceptionCMS(sprintf("File '%s' is not valid image", $this->path));
+			$this->filetype = $this->info['mime'];
+			$this->createRawFromFile();
+			$this->exif = @exif_read_data($filename);
+		} elseif (is_resource($filename)) {
+			$this->raw = $filename;
+			$this->info = array(
+				0 => imagesx($this->raw),
+				1 => imagesy($this->raw)
+			);
+		}
+	}
+	private function createRawFromFile() {
+		if (!function_exists('imagecreatefromjpeg'))
+			throw new ExceptionCMS('GD library is not installed or Jpeg support disabled');
+		switch ($this->filetype) {
+			case 'image/gif':
+				$this->sourceType = 'gif';
+				$source = @imagecreatefromgif($this->path);
+				break;
+
+			case 'image/png':
+				$this->sourceType = 'png';
+				$source = @imagecreatefrompng($this->path);
+				break;
+
+			case 'image/bmp':
+				$this->sourceType = 'bmp';
+				$source = @imagecreatefromwbmp($this->path);
+				break;
+
+			case 'image/jpg':
+			case 'image/jpeg':
+				$this->sourceType = 'jpg';
+				$source = @imagecreatefromjpeg($this->path);
+				break;
+
+			default:
+				throw new ExceptionCMS('unsupported extension '.$this->filetype);
+				break;
+		}//end switch
+		if (!$source) throw new ExceptionCMS('No standart JPG file given');
+		$this->raw = $source;
+	}
+	public function canvasSize($width, $height, $bgcolor, $align = 'left') {
+		$canvas = imagecreatetruecolor($width, $height);
+		imagefilledrectangle($canvas, 0, 0, $width, $height, $this->getColor($bgcolor));
+		$rawW = imagesx($this->raw);
+		$rawH = imagesy($this->raw);
+		switch ($align){
+			case 'left':
+				$destX = 0;
+				$destY = 0;
+				break;
+
+			case 'right':
+				$destX = $width - $rawW;
+				$destY = 0;
+				break;
+
+			case 'center':
+				$destX = ($width - $rawW) / 2;
+				$destY = ($height - $rawH) / 2;
+				break;
+
+			default:
+				//no default
+				break;
+		}
+		imagecopy($canvas, $this->raw, $destX, $destY, 0, 0, $rawW, $rawH);
+		imagedestroy($this->raw);
+		$this->raw = $canvas;
+	}
+	public function saveAs($dest, $type = DImage::JPG, $quality = null) {
+		if ($this->raw === null) {
+			if (!copy($this->path, $dest)) throw new ExceptionCMS(sprintf("Cant move file to '%s'", $dest));
+		} else {
+			$this->path = $dest;
+			switch ($type) {
+				case DImage::JPG:
+					if ($quality === null) $quality = DImage::$DEFAULT_JPG_QUALITY;
+					if (!imagejpeg($this->raw, $this->path, $quality)) throw new ExceptionCMS('Cant save JPG');
+					break;
+				case DImage::PNG:
+					imagesavealpha($this->raw, true);
+					if ($quality === null) $quality = DImage::$DEFAULT_PNG_QUALITY;
+					if (!imagepng($this->raw, $this->path, $quality)) throw new ExceptionCMS('Cant save PNG');
+					break;
+			}
+			$info = @getimagesize($this->path);
+			$this->filetype = $info['mime'];
+		}
+		return $this;
+	}
+	public function delete() {
+		if (file_exists($this->path)) unlink($this->path);
+		return $this;
+	}
+	public function getWidth() {
+		return $this->info[0];
+	}
+	public function getHeight() {
+		return $this->info[1];
+	}
+	/**
+	 * @param int $thumbWidth
+	 * Ширина миниатюры, null для автоматического подсчета (пропорционально уменьшив до заданной высоты)
+	 * @param int $thumbHeight
+	 * Высота миниатюры, null для автоматического подсчета (пропорционально уменьшив до заданной ширины)
+	 * @param bool $keepRatio
+	 * уменьшать не нарушая пропорций (по большей стороне)
+	 * @param bool $crop
+	 * уменьшать, полностью вписывая в заданные размеры и обрезая лишнее (по меньшей стороне)
+	 * @param null $offset
+	 * @param null $area
+	 *
+	 * @throws ExceptionCMS
+	 * @return DImage
+	 */
+	public function createThumb ($thumbWidth, $thumbHeight, $keepRatio = true, $crop = false, $offset = null, $area = null) {
+		$imageWidth  = $this->info[0];
+		$imageHeight = $this->info[1];
+		if ($offset == null) {
+			$offset = array(0, 0);
+		}
+		if ($area == null) {
+			$area = array($imageWidth, $imageHeight);
+		}
+
+		if ($thumbHeight == 0) $thumbHeight = $imageHeight;
+		if ($thumbWidth == 0) $thumbWidth   = $imageWidth;
+		$ratioX = $imageWidth / $thumbWidth;
+		$ratioY = $imageHeight / $thumbHeight;
+		if ($keepRatio) {
+			if ($crop) {
+				($ratioX < $ratioY) ? $ratioY = $ratioX : $ratioX = $ratioY;
+			} else {
+				($ratioX > $ratioY) ? $ratioY = $ratioX : $ratioX = $ratioY;
+			}
+		}
+		if (!$crop) {
+			$thumbWidth  = $imageWidth / $ratioX;
+			$thumbHeight = $imageHeight / $ratioY;
+		}
+		if ($thumbWidth > $imageWidth) {
+			$thumbWidth = $imageWidth;
+		}
+		if ($thumbHeight > $imageHeight) {
+			$thumbHeight = $imageHeight;
+		}
+		$dest = imagecreatetruecolor($thumbWidth, $thumbHeight);
+		if (($this->sourceType == 'png') || ($this->sourceType == null)) {
+			imagealphablending($dest, false);
+			$transparentColor = imagecolorallocatealpha($dest, 0, 0, 0, 127);
+			imagefilledrectangle($dest, 0, 0, $thumbWidth, $thumbHeight, $transparentColor);
+			imagealphablending($dest, true);
+		}
+		if (($ratioX <= 1) && ($ratioY <= 1)) {
+			if (!imagecopy($dest, $this->raw, 0, 0, 0, 0, $imageWidth, $imageHeight))
+				throw new ExceptionCMS('No standart JPG file given');
+		} else {
+			if (!imagecopyresampled(
+			    $dest,
+			    $this->raw,
+			    0, 0, $offset[0], $offset[1],
+				$thumbWidth, $thumbHeight,
+			    $area[0], $area[1]
+			)) throw new ExceptionCMS('No standart JPG file given');
+		}
+		/*
+		 * повернуть результат, если есть в EXIF исходника
+		 */
+		if(!empty($this->exif['Orientation'])) {
+			switch($this->exif['Orientation']) {
+				case 8:
+					$dest = imagerotate($dest, 90, 0);
+					break;
+				case 3:
+					$dest = imagerotate($dest, 180, 0);
+					break;
+				case 6:
+					$dest = imagerotate($dest, -90, 0);
+					break;
+			}
+		}
+		return new DImage($dest);
+	}
+	public function getColor($hex) {
+		if (!is_string($hex)) return $hex;
+		switch (strlen($hex)){
+			case 8:
+				// RRGGBBAA
+				$r = hexdec(substr($hex, 0, 2));
+				$g = hexdec(substr($hex, 2, 2));
+				$b = hexdec(substr($hex, 4, 2));
+				$a = hexdec(substr($hex, 6, 2));
+				break;
+
+			case 4:
+				// RGBA
+				$r = substr($hex, 0, 1);
+				$r = hexdec($r.$r);
+				$g = substr($hex, 1, 1);
+				$g = hexdec($g.$g);
+				$b = substr($hex, 2, 1);
+				$b = hexdec($b.$b);
+				$a = substr($hex, 3, 1);
+				$a = hexdec($a.$a);
+				break;
+
+			case 3:
+				// RGB
+				$r = substr($hex, 0, 1);
+				$r = hexdec($r.$r);
+				$g = substr($hex, 1, 1);
+				$g = hexdec($g.$g);
+				$b = substr($hex, 2, 1);
+				$b = hexdec($b.$b);
+				$a = 0;
+				break;
+
+			case 6:
+				// RRGGBB
+				$r = hexdec(substr($hex, 0, 2));
+				$g = hexdec(substr($hex, 2, 2));
+				$b = hexdec(substr($hex, 4, 2));
+				$a = 0;
+				break;
+
+			default:
+				throw new Exception('Invalid color presentation (should be RRGGBB(AA) or RGB(A))');
+				break;
+		}//end switch
+		return imagecolorallocatealpha($this->raw, $r, $g, $b, $a);
+	}
+	public function box($x1,$y1,$x2,$y2,$color) {
+		$t = imagefilledrectangle($this->raw, $x1, $y1, $x2, $y2, $this->getColor($color));
+		if ($t === false) throw new ExceptionCMS('Box failed');
+		return $this;
+	}
+	public function rectangle($x1,$y1,$x2,$y2,$color) {
+		$t = imagerectangle($this->raw, $x1, $y1, $x2, $y2, $this->getColor($color));
+		if ($t === false) throw new ExceptionCMS('Rectangle failed');
+		return $this;
+	}
+	public function text($text, $x, $y, $color, $size = 1) {
+		imagestring($this->raw, $size, $x, $y, $text, $this->getColor($color));
+		return $this;
+	}
+	function __destruct() {
+		imagedestroy($this->raw);
+	}
+	function getDFile() {
+		return new DFile(array(
+			'name' => basename($this->path),
+			'type' => $this->filetype,
+			'tmpName' => $this->path,
+			'error' => 0
+		));
+	}
+	public function getSourceType() {
+		return $this->sourceType;
+	}
+}
+
+class DModelAutosave extends DModelValidated {
+	private $deferredCommit = false;
+	public function commit() {
+		$this->deferredCommit = true;
+	}
+	public function __destruct() {
+		if ($this->deferredCommit) {
+			if ($this->getKeyValue()) {
+				$this->save();
+			} else {
+				$this->create();
+			}
+		}
+	}
+}
+//namespace DEngine;
+if (!class_exists('DModel', false)) require_once 'DModel.php';
+/**
+ * Класс модели, имеющий способность к валидации данных
+ *
+ * @author dron.
+ */
+class DModelValidated extends DModel {
+	protected $validated = false;
+	public final function __set($field, $value) {
+		$res = parent::__set($field, $value);
+		$this->validated = false; // ??? после установки новых значений отменить признак валидности данных
+		return $res;
+	}
+	function setRawData($data) {
+		$res = parent::setRawData($data);
+		$this->validated = false;
+		return $res;
+	}
+	protected $validatingRules = array();
+	/**
+	 * @param string $property
+	 * @param string|array $rule
+	 * @param string $message
+	 * сообщение об ошибке
+	 * @param bool $stopRule
+	 * если да, то ошибка на этом правиле исключает дальнейшие проверки по этому полю
+	 * @param string $ruleQueue
+	 * метка правила, по которой затем можно определить необходимость проверки данного правила.
+	 * Это определяется значением метода модели validationRuleAllowance, в качестве аргумента принимающего
+	 * $ruleQueue и возвращающий true/false.
+	 * @return static
+	 *
+	 * @example
+	 * class test extends DBObject{
+	 *     public $id;
+	 *     public $message;
+	 * }
+	 * $msg = new test();
+	 * $msg->message = "h ";
+	 * $msg->id = "51";
+	 *
+	 * // стоп-правило, если нет значения, дальнейшие проверки поля не проводятся
+	 * $msg->addRule('message', 'ne', 'message empty!', true);
+	 * $msg->addRule('message', '/^.{3,}$/', 'should be more length');
+	 *
+	 * // два последовательных правила со своими сообщениями
+	 * $msg->addRule('message', '/^[^ ]+$/', 'should not consists spaces');
+	 * $msg->addRule('id', 'n%d', 'twittername should be a number', true);
+	 *
+	 * // цепочка - два правила с одним сообщением (т.е. второе сообщение = null),
+	 * // вызывают одну ошибку, пока не будут удовлетворять оба.
+	 * // Если это стоп-правило, то при наличии ошибки, дальнейшие правила в цепочке не проверяются
+	 * $msg->addRule('id', array('/^4/', 'n> 40'), 'id should be greater then 40 and started with 4');
+	 *
+	 * // правило ИЛИ, ошибка не сработает, если выполняется хотя бы одно условие
+	 * // из массива
+	 * $msg->addOrRule('id', array('/^43$/', '/^44$/'), 'id should be equal either to 43 or 44 ');
+	 */
+	public function addRule($property, $rule, $message, $stopRule = false, $ruleQueue = null) {
+		if (is_array($rule)) {
+			$rules = $rule;
+		} else {
+			$rules = array($rule);
+		}
+		foreach ($rules as $rule) {
+			$this->validatingRules[] = new DataValidationRuleDescriptor($property, $rule, $message, $stopRule, $ruleQueue);
+		}
+		$this->validated = false;
+		return $this;
+	}
+	public function addOrRule($property, $rulesArray, $message, $stopRule = false, $ruleQueue = null) {
+		$this->validatingRules[] = new DataValidationRuleDescriptor($property, $rulesArray, $message, $stopRule, $ruleQueue);
+		$this->validated = false;
+		return $this;
+	}
+	/**
+	 * Определить, активно ли правило проверки.
+	 *
+	 * Метод должнен быть переопределен в конкретном классе модели.
+	 *
+	 * @param string $ruleQueue
+	 * метка правила
+	 * @return bool
+	 */
+	protected function validationRuleAllowance($ruleQueue) {
+		return true;
+	}
+	private $requiredFields = array();
+	/**
+	 * Выполнить проверку значений объекта.
+	 * проверяем по преобразованным через setter значениям!
+	 *
+	 * @return DModelValidated
+	 * @throws ExceptionDataValidation
+	 */
+	public function validate() {
+		$this->createRulesAccordingToProperties();
+		if ($this->validated) return $this;
+		$errors = array();
+		foreach ($this->validatingRules as $item) {
+			/* @var $item DataValidationRuleDescriptor */
+			/*
+			 * если свойство не существует/выключено пропустить
+			 */
+			if (!$this->isPropertyExist($item->property)) {
+				continue;
+			}
+			/*
+			 * если правило нельзя применять из-за ключа серии, пропустить
+			 */
+			if (($item->queue != null) && ($this->validationRuleAllowance($item->queue) === false)) {
+				continue;
+			}
+			if (!$this->__isset($item->property) && !in_array($item->property, $this->requiredFields)) continue;
+			$value = $this->get($item->property, self::CONVERSIONS_BYPASS);
+			/*
+			 * SQLVar не проверяем
+			 */
+			if ($value instanceof SQLvar) continue;
+			/*
+			 * пройтись по всем проверкам правила
+			 */
+			$item->passed = false;
+			foreach ($item->getRules() as $rule) {
+				if ($rule instanceof DataValidationRuleInterface) {
+					$ruleChecker = $rule;
+				} else {
+					$ruleChecker = new DataValidationRule($rule);
+				}
+				$pass = $ruleChecker->check($value, $this);
+				if ($pass === true) {
+					$item->passed = true;
+					break;
+				}
+			}
+			/*
+			 * если ошибка, добавить сообщение в массив ошибок проверки
+			 */
+			if (!$item->passed) {
+				if (!array_key_exists($item->property, $errors)) {
+					$errors[$item->property] = array();
+				}
+				$errors[$item->property][] = $item->message;
+				if ($item->stopRule) {
+					break;
+				}
+			}
+		}//end foreach
+		if (count($errors) > 0) {
+			throw new ExceptionDataValidation($errors);
+		}
+		$this->validated = true;
+		return $this;
+	}
+	private $createRulesAccordingToPropertiesCalled = false;
+	/**
+	 * создать правила валидации на основе типов полей модели
+	 * @return null
+	 */
+	protected function createRulesAccordingToProperties() {
+		if ($this->createRulesAccordingToPropertiesCalled) return; // уже вызывали
+		foreach ($this->properties as $field) {
+			$f = $field->name;
+			switch ($field->type) {
+				case 'int':
+					$this->addOrRule(
+					    $f,
+					    array('e', 'n%d'),
+					    sprintf(s('modelvalidate_notint'), $f),
+					    true
+					);
+					break;
+
+				case 'float':
+				case 'double':
+				case 'decimal':
+					$this->addOrRule(
+					    $f,
+					    array('e', 'n'),
+					    sprintf(s('modelvalidate_notnumber'), $f),
+					    true
+					);
+					break;
+
+				case 'enum':
+					$setValuesPossible   = $field->parameters;
+					foreach ($setValuesPossible as &$v) $v = "/^{$v}$/";
+					$setValuesPossible[] = 'e';
+					$this->addOrRule(
+					    $f,
+					    $setValuesPossible,
+					    sprintf(s('modelvalidate_notinset'), $f),
+					    true
+					);
+					break;
+
+				case 'date':
+					$this->addOrRule(
+					    $f,
+					    array('e', 'dat'),
+					    sprintf(s('modelvalidate_notdate'), $f),
+					    true
+					);
+					break;
+
+				case 'datetime':
+					$this->addOrRule(
+					    $f,
+					    array('e', '/^\d{4}-(0\d|1[0-2])-[0-3]\d( [012]\d:[0-6]\d(:[0-6]\d)?)?$/'),
+					    sprintf(s('modelvalidate_nottime'), $f),
+					    true
+					);
+					break;
+
+				case 'string':
+				case 'varchar':
+					$maxLen = $field->parameters;
+					if ($maxLen != null) {
+						$this->addOrRule(
+						    $f,
+						    array('e', "s<=$maxLen"),
+						    sprintf(s('modelvalidate_toolong'), $f, $maxLen),
+						    true
+						);
+					}
+					break;
+
+				case 'pattern':
+					$this->addRule(
+					    $f,
+					    $field->parameters,
+					    sprintf(s('modelvalidate_invalid'), $f),
+					    true
+					);
+					break;
+
+				case 'object':
+					$this->addOrRule(
+						$f,
+						array('e', 'cls'.$field->parameters),
+					    sprintf(s('modelvalidate_not_instanceof'), $f, $field->parameters),
+					    true
+					);
+					break;
+				default:
+					//noop
+					break;
+			}//end switch
+			foreach ($field->typeOptions as $typeOption) {
+				switch ($typeOption) {
+					case 'unsigned':
+						$this->addOrRule(
+						    $f,
+						    array('e', 'n>=0'),
+						    sprintf(s('modelvalidate_negative'), $f)
+						);
+						break;
+					case 'required':
+						$this->requiredFields[] = $f;
+						$this->addRule(
+						    $f,
+						    'ne',
+						    sprintf(s('modelvalidate_required'), $f)
+						);
+						break;
+					case 'readonly':
+						break;
+					default:
+						trigger_error("Unknown type option '$typeOption' specified", E_USER_ERROR);
+						// no op
+						break;
+				}
+			}
+		}//end foreach
+		$this->createRulesAccordingToPropertiesCalled = true;
+	}
+	function beforeCreate() {
+		$this->validate();
+	}
+	function beforeSave() {
+		$this->validate();
+	}
+}
+class ExceptionDataValidationMessage {
+	public $message;
+	function __construct($message) {
+		$this->message = $message;
+	}
+	function getMessagesFor($name) {
+		if (array_key_exists($name, $this->message)) {
+			return $this->message[$name];
+		} else {
+			return null;
+		}
+	}
+	function __toString() {
+		return json_encode($this->message);
+	}
+}
+class ExceptionDataValidation extends Exception {
+	function __construct($array) {
+		if (is_array($array)) {
+			foreach ($array as &$errors) {
+				if (!is_array($errors)) {
+					$errors = array($errors);
+				}
+			}
+		}
+		$this->message = is_array($array) ? json_encode($array) : $array;
+	}
+}
+interface DataValidationRuleInterface {
+	function check($value, DModel $contextModel = null);
+}
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class DataValidationRule implements DataValidationRuleInterface {
+	/**
+	 * правила проверки
+	 * @var string[]|DataValidationRuleInterface[]
+	 */
+	public $rule;
+	/**
+	 * Сообщение об ошибке
+	 * @var string
+	 */
+	public $message;
+	function __construct($rule) {
+		$this->rule     = $rule;
+	}
+	/**
+	 * Проверка напрямую без модели.
+	 * @static
+	 *
+	 * @param mixed $value
+	 * значение
+	 * @param string $rule
+	 * правило
+	 * @param string $message
+	 * сообщение об ошибке
+	 *
+	 * @throws ExceptionDataValidation
+	 */
+	static function checkDirect($value, $rule, $message = 'Invalid value') {
+		if (isAssoc($value)) {
+			$key = array_keys($value);
+			$varName = reset($key);
+			$value = reset($value);
+		} else {
+			$varName = null;
+		}
+		$t = new DataValidationRule($rule);
+		$pass = $t->check($value);
+		if (!$pass) {
+			throw new ExceptionDataValidation(($varName === null) ? $message : array($varName => array($message)));
+		}
+	}
+	/**
+	 * Проверяет значение
+	 * @param mixed $value
+	 * @param DModel $contextModel
+	 * проверяемая модель
+	 *
+	 * @throws ExceptionDataValidation
+	 * @return bool
+	 * true - без ошибок
+	 * false - ошибка
+	 */
+	public function check($value, DModel $contextModel = null) {
+		$macros      = substr($this->rule, 0, 3);
+		$macrosParam = substr($this->rule, 3);
+		switch($macros) {
+			case 'ne':
+				// should be not empty
+				$isError = empty($value) && ($value !== 0) && ($value !== '0') && ($value !== 0.0);
+				break;
+
+			case 'n':
+				// should be a number
+				$isError = !is_numeric(parseFloat($value));
+				break;
+
+			case 'n%d':
+				// should be a decimal number
+				$isError = !is_numeric(parseFloat($value));
+				if (!$isError)
+					$isError = strpos($value, '.') !== false;
+				break;
+
+			case 'n< ':
+				// should be less then
+				$isError = !is_numeric(parseFloat($value));
+				if (!$isError)
+					$isError = parseFloat($value) >= parseFloat($macrosParam);
+				break;
+
+			case 'n<=':
+				// should be less or equal then
+				$isError = !is_numeric(parseFloat($value));
+				if (!$isError)
+					$isError = parseFloat($value) > parseFloat($macrosParam);
+				break;
+
+			case 'n> ':
+				// should be greater then
+				$isError = !is_numeric(parseFloat($value));
+				if (!$isError)
+					$isError = parseFloat($value) <= parseFloat($macrosParam);
+				break;
+
+			case 'n>=':
+				// should be greater or equal then
+				$isError = !is_numeric(parseFloat($value));
+				if (!$isError)
+					$isError = parseFloat($value) < parseFloat($macrosParam);
+				break;
+
+			case 'n= ':
+				// should be equal to
+				$isError = parseFloat($value) != parseFloat($macrosParam);
+				break;
+
+			case 'e':
+				// should be empty
+				$isError = !empty($value);
+				break;
+
+			case 's< ':
+				// should be shorter then
+				$isError = mb_strlen($value) >= $macrosParam;
+				break;
+
+			case 's<=':
+				// should be not longer then
+				$isError = mb_strlen($value) > $macrosParam;
+				break;
+
+			case 's> ':
+				// should be longer then
+				$isError = mb_strlen($value) <= $macrosParam;
+				break;
+
+			case 's>=':
+				// should be not shorter then
+				$isError = mb_strlen($value) < $macrosParam;
+				break;
+
+			case 's= ':
+				// should be long exaclty as
+				$isError = mb_strlen($value) != $macrosParam;
+				break;
+
+			case '===':
+				// should be equal to specified value
+				$isError = ($value !== $macrosParam);
+				break;
+
+			case '!==':
+				// should not be equal to specified value
+				$isError = ($value === $macrosParam);
+				break;
+
+			case 'dat':
+				// should be in sql date format
+				$isError = !preg_match('/^\d{4}-(0\d|1[0-2])-[0-3]\d$/', $value);
+				if (!$isError) $isError = ($value == '0000-00-00');
+				break;
+
+			case 'fn ':
+				// define callback
+				$params   = explode(',', $macrosParam);
+				$funcName = array_shift($params);
+				array_unshift($params, $value);
+				if (strpos($funcName, '::')) {
+					$funcName = explode('::', $funcName);
+				}
+				array_push($params, $contextModel);
+				$isError = (call_user_func_array($funcName, $params) == false);
+				break;
+
+			case '@':
+				// should be email
+				$isError = !preg_match('/^[\w-]+(?:[\.\w]+)*\w@\w(?:(?:\.\w)*[\w\-]+)*\.\w{2,3}$/', $value);
+				break;
+
+			case 'cls':
+				// should be instance of class
+				$valueIsInstanceOfClass = ($value instanceof $macrosParam);
+				//$valueIsNullOfClass     = ( ($value instanceof NULLobject) && ($value->getClassName() == $macrosParam));
+				$valueIsNullOfClass     = ($value instanceof NULLobject);
+				$isError = !$valueIsInstanceOfClass && !$valueIsNullOfClass;
+				break;
+
+			case 'a[]':
+				/*
+				 * если не массив, то ошибка
+				 */
+				if (!is_array($value)) return false;
+				/*
+				 * если пустой параметр и массив, то тест пройден
+				 */
+				if (empty($macrosParam)) return true;
+				/*
+				 * пройтись по элементам массива
+				 */
+				$validator = new DataValidationRule($macrosParam);
+				foreach ($value as $v) {
+					$passed = $validator->check($v, $contextModel);
+					if (!$passed) return false;
+				}
+				return true;
+				break;
+
+			default:
+				if (!is_scalar($value) && !is_null($value)) {
+					$this->message = 'is not plain value!';
+					$isError       = true;
+				} else {
+					if ($this->rule[0] == '/') {
+						$isError = !preg_match($this->rule, $value);
+					}
+					if (($this->rule[0] == '!') && ($this->rule[1] == '/')) {
+						$isError = preg_match(substr($this->rule, 1), $value);
+					}
+				}
+				break;
+		}//end switch
+		return !$isError;
+	}
+}
+
+/**
+ * Описатель правила для addRule
+ *
+ * @property string $property
+ * @property string|DataValidationRuleInterface $rule
+ * @property string $message
+ * @property boolean $stopRule
+ * @property string $queue
+ */
+class DataValidationRuleDescriptor {
+	public $property;
+	public $rule;
+	public $message;
+	public $stopRule;
+	public $queue;
+
+	public $passed;
+	function __construct($property, $rulesArray, $message, $stopRule, $ruleQueue) {
+		$this->property = $property;
+		$this->rule     = $rulesArray;
+		$this->message  = $message;
+		$this->stopRule = $stopRule;
+		$this->queue    = $ruleQueue;
+	}
+	public function getRules() {
+		return is_array($this->rule) ? $this->rule : array($this->rule);
+	}
+}
+abstract class DModelProxy {
+	/**
+	 * @var DModel
+	 */
+	public $model;
+	function __construct(){
+	}
+	/**
+	 * CRUD
+	 */
+	function create() {
+		trigger_error('Create method is not implemented in '.get_class($this));
+	}
+	/**
+	 * Метод чтения данных для модели.
+	 * Должен возвращать массив массивов!
+	 * @example
+	 * Array
+	 * (
+	 *     [0] => Array
+	 *            (
+	 *                [property] => "value"
+	 *            )
+	 * )
+	 * @abstract
+	 * @param null $params
+	 * @return mixed
+	 */
+	abstract function read($params = null);
+	abstract function update();
+	/**
+	 * @param mixed $params
+	 * опциональный параметр, передаваемый аргументом из вызова метода DModel->delete.
+	 * Например указание дополнительных условий при удалении.
+	 */
+	abstract function delete($params = null);
+	/**
+	 * Снабдить Proxy информацией о том, какие страницы ожидаются в выборке
+	 */
+	protected $pager;
+	function setPager(PagerHelper $pager) {
+		$this->pager = $pager;
+		return $this;
+	}
+	/**
+	 * Получить объъект пагинатора
+	 * @return mixed
+	 */
+	function getPager() {
+		return $this->pager;
+	}
+}
+abstract class DModelProxyReadOnly extends DModelProxy {
+	final function delete($params = null) {
+		trigger_error(sprintf('Proxy %s of model %s is read-only and can not delete', get_class($this), get_class($this->model)), E_USER_ERROR);
+	}
+	final function update() {
+		trigger_error(sprintf('Proxy %s of model %s is read-only and can not update', get_class($this), get_class($this->model)), E_USER_ERROR);
+	}
+}
+/**
+ * Заполняет модель данными из массива.
+ *
+ * @author dron
+ */
+class DModelProxyArray extends DModelProxy {
+	protected $data;
+	function __construct(& $dataArray) {
+		parent::__construct();
+		if (!is_array($dataArray)) trigger_error('DModelProxyHTTPRequest constructor expects an array as argument', E_USER_ERROR);
+		$this->data = & $dataArray;
+	}
+	function update() {
+		throw new Exception('Array proxy cant update');
+	}
+	function delete($params = null) {
+		throw new Exception('Array proxy cant delete');
+	}
+	/*
+	 * create is implemented in update, proxy decides
+	function create() {
+		throw new Exception('Array proxy cant create');
+	}
+	*/
+	function read($params = null) {
+		if ($this->model instanceof DModelsCollection) {
+			return array($this->data);
+		}
+		return $this->data;
+	}
+}
+/**
+ * Заполняет модель даными из $_REQUEST.
+ *
+ * @author dron
+ */
+class DModelProxyHTTPRequest extends DModelProxyArray {
+	function __construct() {
+		parent::__construct($_REQUEST);
+	}
+}
+/**
+ * Предоставляет возможность совместить несколько прокси-серверов.
+ * Возвращает единственную запись (то есть не для коллекции).
+ */
+class DModelProxyPool extends DModelProxy {
+	/**
+	 * @var DModelProxy[] array
+	 */
+	private $pool = array();
+	function addProxy(DModelProxy $proxy) {
+		$this->pool[] = $proxy;
+		return $this;
+	}
+	function addProxies($proxies) {
+		foreach($proxies as $proxy) $this->addProxy($proxy);
+		return $this;
+	}
+	function __construct($proxiesArray = null) {
+		if (is_array($proxiesArray)) {
+			$this->addProxies($proxiesArray);
+		}
+	}
+	function read($params = null) {
+		$data = array();
+		foreach ($this->pool as $proxy) {
+			$proxy->model = $this->model;
+			$data[] = $proxy->read($params);
+			$proxy->model = null;
+		}
+		/**
+		 * merge down data read
+		 */
+		$result = array();
+		foreach ($data as $row) {
+			if (!is_array($row)) continue;
+			$result = $this->merge($result, $row);
+		}
+		return $result;
+	}
+	function merge($array1, $array2) {
+		return array_merge($array1, $array2);
+	}
+	function delete($params = null) {
+		trigger_error('Method not supported', E_USER_ERROR);
+	}
+	function update($params = null) {
+		trigger_error('Method not supported', E_USER_ERROR);
+	}
+
+}
+/**
+ * Прокси для выбора из связанных (joined) таблиц.
+ * @author dron
+ *
+ */
+class DModelProxyDatabaseJoins extends DModelProxyDatabase {
+	protected $joinedTables = array();
+	function addJoinedTable($table, $onStatement, $joinType = 'left') {
+		$join = (object)array(
+			'table'       => $table,
+			'onStatement' => $onStatement,
+			'type'        => $joinType
+		);
+		$this->joinedTables[] = $join;
+		return $this;
+	}
+	function doSelect($sql, $fields) {
+		$query  = sprintf('select %1$s from %2$s%3$s as %3$s', $fields, CONFIG::$DB->prefix, $this->tableName);
+		foreach ($this->joinedTables as $join) {
+			$query .= sprintf(
+				' %1$s join %4$s%2$s as %2$s ON (%3$s) ',
+				$join->type,
+				$join->table,
+				$join->onStatement,
+				CONFIG::$DB->prefix
+			);
+		}
+		$query .= " where $sql";
+		$this->lastSQLquery = $query;
+		$result = ObjectsPool::get('DataBase')->query($query, DB_SELECT_OBJS | DBFetchModes::$ONE_FIELD_ITEM_KEEP);
+		return $result;
+	}
+	/**
+	 * Установить связь полей с таблицами, чтобы был работоспособный update и insert.
+	 * Обязательные условия:
+	 * - у всех задействованных таблиц значение ключа для обновления будет одинаковым (то есть они связаны по ключу)
+	 * - первая ячейка массива - главная таблица, при insert значение ключа будет взято из этой таблицы
+	 *
+	 * @param array $map
+	 * ассоциативный массив,
+	 * ключ - имя таблицы[.имя ключа], если имя ключа не указано, будет задействовано имя ключа модели
+	 * значение - список полей для этой таблицы или '*' означающий "все оставшиеся от остальных таблиц поля"
+	 * ЛИБО ассоциативный массив с ключами - имя свойства объекта модели, значение - имя поля в таблице БД
+	 *
+	 * @return DModelProxyDatabaseJoins
+	 */
+	function setFieldsWrite($map) {
+		$asterixUsed = false;
+		$this->fieldsToWrite = array();
+		foreach ($map as $table => $fields) {
+			if (isAssoc($fields)) {
+				$this->fieldsToWrite[$table] = $fields;
+			} elseif (is_array($fields)) {
+				$this->fieldsToWrite[$table] = array_combine($fields, $fields);
+			} elseif (is_string($fields)) {
+				if ($fields == '*') {
+					if ($asterixUsed) {
+						trigger_error('$map can contain one asterix (*) only!', E_USER_ERROR);
+					}
+					$asterixUsed = true;
+					$this->fieldsToWrite[$table] = '*';
+				} else {
+					$this->fieldsToWrite[$table] = explode(',', preg_replace('/\s*,\s*/', ',', $fields));
+				}
+			} else {
+				trigger_error('$map should be either string or array', E_USER_ERROR);
+			}
+		}
+		return $this;
+	}
+	function update() {
+		if ($this->fieldsToWrite == null) {
+			trigger_error('DModelProxyDatabaseJoins can not update without fields map set (use setFieldsWrite at proxy config)', E_USER_ERROR);
+		}
+		return parent::update();
+	}
+}
+/**
+ * Прокси для базы данных, выполняющий заданный SQL запрос.
+ * Шаблон запроса задается в конструкторе, часть запроса,
+ * задаваемая через аргумент метода load модели будет подставлена в плейсхолдер %s шаблона.
+ * 
+ * @example
+ * $proxy = new DModelProxyDatabaseCustom('select * from mytable where %s');
+ *
+ */
+class DModelProxyDatabaseCustom extends DModelProxyDatabaseJoins {
+	protected $query;
+	function __construct($queryTpl) {
+		$this->query = $queryTpl;
+		$regexToFindMainTable = '/select(?:.+?)from\W*(\w+)\W*\s+(?:as\s+(.+?)\s+)?/i';
+		if (!preg_match($regexToFindMainTable, $queryTpl, $match)) {
+			trigger_error("Unable to get primary table name in the query '$queryTpl'", E_USER_ERROR);
+		}
+		$this->tableName = isset($match[2]) ? $match[2] : $match[1];
+	}
+	function doSelect($sql, $fieldsToSelect) {
+		//if (empty($fieldsToSelect)) trigger_error('No fields to select', E_USER_ERROR);
+		$this->lastSQLquery = sprintf($this->query, $sql);
+		return ObjectsPool::get('DataBase')->query(
+			$this->lastSQLquery,
+			DBFetchModes::$ITEM_IS_ASC | DBFetchModes::$INDEX_ARRAY | DBFetchModes::$ONE_ROW_KEEP | DBFetchModes::$ONE_FIELD_ITEM_KEEP
+		);
+	}
+}
+/**
+ * Обеспечивает построение формы фильтра.
+ 
+ * (когда пользователь вводит какие-либо параметры для фильтрации списка записей например).
+ * По сути является связующим звеном между Model и DForm.
+ * Для хранения данных используется DModelDynamic
+ * Для отображения формы (если требуется) - DForm
+ * Для формирования SQL запроса - ассоциативный массив [имя переменной] => 'строка для sprintf'
+ * @example
+ * $this->filter = new FilterForm();
+ * $this->filter->addField(
+ *     new DModelProperty('id', 'int'),
+ *     'HiddenInput',
+ *     "%1\$s = %2\$s"
+ * );
+ * $this->filter->addField(
+ *     new DModelProperty('type', 'enum', implode(',', array('mine', 'apps') + ApplicationsModel::factory()->getProperty('type')->parameters), 'apps'),
+ *     'Selector',
+ *     "FIND_IN_SET('%2\$s', %1\$s) > 0"
+ * );
+ * $this->filter->fill($_GET);
+ * var_dump($this->filter->getSQL(false));
+ *
+ * @author Andrei V.Nakhabov
+ * @copyright 11.2007, 01.2012
+ */
+class ModelToSQL {
+	protected $patterns = array();
+	protected $ignoreEmptyValues = true;
+	/**
+	 * @var DModel
+	 */
+	protected $model;
+	function getModel() {
+		return $this->model;
+	}
+	function __construct(DModel $model, $fillDefaultPatterns = true, $ignoreEmptyValues = true) {
+		$this->model    = $model;
+		$this->ignoreEmptyValues = $ignoreEmptyValues;
+		if ($fillDefaultPatterns) {
+			$properties     = (array_keys($this->model->getProperties()));
+			$values         = array_fill(0, count($properties), '%s = "%s"');
+			$this->patterns = array_combine($properties, $values);
+		}
+	}
+	function setPatterns($array) {
+		foreach ($array as $name => $pattern) {
+			$this->setPatternFor($name, $pattern);
+		}
+		return $this;
+	}
+	function setPatternFor($name, $pattern) {
+		if ($pattern === null) {
+			if (array_key_exists($name, $this->patterns)) {
+				unset($this->patterns[$name]);
+			}
+		} else {
+			$this->patterns[$name] = $pattern;
+		}
+		return $this;
+	}
+	/**
+	 * @return ModelToSQLResult
+	 */
+	function compile() {
+		$result = new ModelToSQLResult();
+		$affectedProperties = $this->model->getFieldsModified();
+		foreach ($this->model->getProperties() as $property) {
+			$hasDefault = $property->default !== null;
+			if (!$hasDefault && !in_array($property->name, $affectedProperties)) {
+				continue;
+			}
+			if (array_key_exists($property->name, $this->patterns)) {
+				$value = $this->model->{$property->name};
+				if (is_object($value) && method_exists($value, '__toString')) {
+					$value = (string) $value;
+				}
+				if (!is_scalar($value)) {
+					continue;
+				}
+				/*
+				 * пропустить пустые значения, если установлена опция
+				 */
+				if ($this->ignoreEmptyValues && empty($value)) {
+					continue;
+				}
+				/*
+				 * формируем SQL строку
+				 */
+				if (is_scalar($value)) {
+					$result->where[$property->name] = sprintf($this->patterns[$property->name], $property->name, $value);
+				}
+			}
+		}
+		return $result;
+	}
+	/**
+	 * @param bool $flat
+	 * @param bool $isResultBeingAppend
+	 * @return ModelToSQLResult|string
+	 */
+	function getSQL($flat = true, $isResultBeingAppend = false) {
+		$result = $this->compile();
+		if (!$flat) return $result;
+		return $result->render($isResultBeingAppend);
+	}
+}
+class ModelToSQLResult {
+	public $where  = array();
+	public $group  = array();
+	public $having = array();
+	public $order  = array();
+	public $limit = '';
+	function render($isResultBeingAppend = false) {
+		$sql = '';
+		/*
+		 * WHERE
+		 */
+		if (count($this->where) > 0) {
+			$sql .= implode(' AND ', $this->where);
+		}
+		/*
+		 * GROUP BY
+		 */
+		if (count($this->group) > 0) {
+			$sql .= ' GROUP BY '.implode(', ', $this->group);
+		}
+		/*
+		 * HAVING
+		 */
+		if (count($this->having) > 0) {
+			$sql .= ' HAVING '.implode(' AND ', $this->having);
+		}
+		/*
+		 * ORDER BY
+		 */
+		if (count($this->order) > 0) {
+			$sql .= ' ORDER BY '.implode(', ', $this->order);
+		}
+		/*
+		 * LIMIT
+		 */
+		if ($this->limit != null) {
+			$sql .= ' LIMIT '.$this->limit;
+		}
+		if (empty($sql)) {
+			return ($isResultBeingAppend) ? '' : 'true';
+		} else {
+			return (($isResultBeingAppend) ? ' AND ' : '').$sql;
+		}
+	}
+}
+/**
+ * @property string $pagename;
+ * имя страницы
+ * @property string $layout;
+ * имя файла глобального шаблона, в который подставляется контент от отображения
+ * @property string $url
+ * Адрес запроса (относительно корня сайта), без переменных
+ * @property string $controller;
+ * имя класса контроллера
+ * @property string $method
+ * имя метода контроллера
+ */
+class Page {
+	static protected $pagename;
+	static public $urlPrefix;
+	static public $url;
+	static public $controller;
+	static public $method;
+	static private $attrs = array();
+	static private $registeredAttrs = array();
+	static function setName($name) {
+		self::$pagename = $name;
+	}
+	static function getName() {
+		return self::$pagename;
+	}
+	public static function setUrlPrefix($urlPrefix) {
+		self::$urlPrefix = $urlPrefix;
+	}
+	public static function getUrlPrefix() {
+		return self::$urlPrefix;
+	}
+	public static function getUrl() {
+		$out = '';
+		if (!empty(self::$urlPrefix)) {
+			$out .= self::$urlPrefix;
+			if (!empty(self::$url)) {
+				$out .= '/';
+			}
+		}
+		$out .= self::$url;
+		return $out;
+	}
+	public static function registerAttributes($attrs) {
+		self::$registeredAttrs = explode(',', $attrs);
+	}
+	public static function attr($name, $value = null) {
+		if (!in_array($name, self::$registeredAttrs)) {
+			throw new Exception("Attribute $name is not registered!");
+		}
+		if ($value === null) {
+			/*
+			 * GET mode
+			 */
+			if (!array_key_exists($name, self::$attrs)) return null;
+			return self::$attrs[$name];
+		} else {
+			/*
+			 * SET mode
+			 */
+			self::$attrs[$name] = $value;
+		}
+	}
+	public static function isAttrSet($name) {
+		return (self::attr($name) !== null);
+	}
+}
+
+/**
+ * Система распределения доступа.
+ *
+ * Для работы с авторизацией и правами предназначен объект-синглтон RDS
+ *
+ * Для авторизации используется модель, описывающая пользователя.
+ * Требуется передать экземпляр объекта этой модели в конструктор.
+ * Если в модели имеется ненулевой ключ, то авторизация успешна.
+ * Таким образом, все авторизационные действия производятся в прокси-объекте модели
+ * (установка значения ключа в зависимости от авторизации)
+ *
+ * У любого класса-контроллера конструктор помещает ссылку на этот объект в свойство RDS.
+ * Права доступа построены на иерархическом принципе, уровни отделяются друг от друга точкой.
+ * Например “level1”, “level1.sublevel1”, “level1.sublevel1.thirdsub1”.
+ * Запрещено все, что не разрешено. Разрешение или запрет верхнего уровня действует
+ * на все вложенные, если только вложенные права не заданы в явном виде.
+ *
+ * Номенклатура прав в ядре следующая:
+ * "access.class.method" -  доступ к контроллеру class к методу method
+ *
+ * @author DroN
+ * @copyright 04.2006
+ */
+class RDS implements RDS_Interface {
+	/**
+	 * флаг присутствия юзера в системе
+	 *
+	 * @var bool
+	 */
+	public $isLogged = false;
+	public $userId;
+	/**
+	 * IP адрес пользователя
+	 *
+	 * @var XXX.XXX.XXX.XXX
+	 */
+	public $ip;
+	/**
+	 * @var UserSettings
+	 */
+	public $config;
+	/**
+	 * Модель данных авторизованного пользователя
+	 * @var UserDefaultModel
+	 */
+	public $userInfo;
+	/**
+	 * список привелегий залогиненного пользователя 1 - allow, 2 - deny, 5 - allow by group, 6 - deny by group
+	 *
+	 * @var unknown_type
+	 */
+	private $privileges = array();
+	public function clear() {
+		$this->privileges = array();
+	}
+	/**
+	 * проверить, установлена ли данная привилегия
+	 * @param string $name
+	 * проверяемая привилегия
+	 *
+	 * @throws ExceptionRDS
+	 * @throws Exception
+	 */
+	public function check($name) {
+		if (empty($name)) return;
+		if (!is_array($this->privileges)) return;
+		try {
+			if (array_key_exists($name, $this->privileges)) {
+				// точное вхождение привилегии
+				$finalAccess = $this->privileges[$name] % 2;
+			} else {
+				// проверить на вышеиерархические вхождения (у юзера есть view.user а требуется view.user.guest => вернуть true)
+				$finalAccess = 0;
+				foreach ($this->privileges as $one => $access) {
+					$access = $access % 2;
+					if (empty($one)) continue;
+					if (strpos($name, $one, 0) === 0) {
+						// допускать только полное вхождение слов, т.е. проверка access.ins при имеющимся access.insert выдаст false
+						if ($name[strlen($one)] != '.') continue;
+						$finalAccess = $access;
+						break;
+					}
+				}
+			}
+			if (!$finalAccess) throw new Exception($name);
+		} catch (Exception $e) {
+			throw new ExceptionRDS('Insufficient privileges '.$e->getMessage());
+		}//end try
+	}
+	/**
+	 * check без exception, возвращает true/false.
+	 *
+	 * @param string $name
+	 * Проверяемая привилегия
+	 * @return bool
+	 */
+	public function is($name) {
+		try {
+			$this->check($name);
+			return true;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+	/**
+	 * Добавить привилегию
+	 *
+	 * @param string $name
+	 * имя привилегии
+	 * @param int $access
+	 * уровень доступа
+	 * 1 - allow, 2 - deny, 5 - allow by group, 6 - deny by group
+	 */
+	public function add($name, $access = 1) {
+		$this->privileges[$name] = $access;
+		if ($this->autosort) $this->sortList();
+	}
+	private $autosort = false;
+	public function sortList() {
+		arsort($this->privileges);
+		$this->autosort = true;
+	}
+	/**
+	 * Заполнение моделью пользователя.
+	 *
+	 * Главное действие, вся авторизация основана на наличии в предоставленной модели
+	 * ненулевого ключевого свойства, т.е. если ключ > 0 - то авторизация успешна
+	 * @param DModel $userModel
+	 *
+	 * @return RDS
+	 */
+	function init(DModel $userModel) {
+		$this->userInfo = $userModel;
+		$this->isLogged = ($this->userInfo->getKeyValue() != null);
+		if ($this->isLogged) {
+			$this->userId = $this->userInfo->getKeyValue();
+		}
+		$this->ip = getIP();
+		return $this;
+	}
+}
+/**
+ * Маршрутизатор запросов в обработчики.
+ */
+class Router extends DController {
+	static public $GET = 'get';
+	static public $POST = 'post';
+	static public $PUT = 'put';
+	static public $DELETE = 'delete';
+	static protected $predefinedUrlKeys = array('controller', 'action');
+	private $map;
+	/**
+	 * return global instance
+	 * for convinience
+	 *
+	 * @static
+	 */
+	static function get() {
+		static $instance;
+		if (!$instance instanceof Router) {
+			$instance = new Router();
+		}
+		return $instance;
+	}
+	static function processUrl($url, $method = null) {
+		$router = Router::get();
+		return $router->process($router->getRoute($method, $url));
+	}
+	public function process($route) {
+		/*
+		 * выполнить затребованный метод с подстановкой параметров из запроса в качестве аргументов
+		 */
+		if ($route->class && $route->method) {
+			$controllerObject = DI::create($route->class);
+			/*
+			 * если есть параметры, передать
+			 */
+			if (isset($route->params) && is_array($route->params)) {
+				foreach ($route->params as $k => $v) {
+					$controllerObject->$k = $v;
+				}
+			}
+			$result = DI::invoke($controllerObject, $route->method, $_REQUEST);
+		} else {
+			$result = null;
+		}
+		/*
+		 * Если указан template, то отрендерить с полученными данными
+		 */
+		if ($route->template) {
+			$view = View::factory(VC_DTPL, $route->template);
+			$view->assign($result);
+			$result = $view->get();
+		}
+		return $result;
+	}
+	/**
+	 * Connect url to controller
+	 *
+	 * @param string $httpMethod
+	 * get or post
+	 * @param $urlRegex
+	 * @param $controller
+	 * @param null $templateFile
+	 * @param null $param
+	 *
+	 * @throws Exception
+	 * @internal param string $controllerClass
+	 * @internal param string $controllerMethod
+	 * @return \Router
+	 * @internal param string $url url part after CONFIG::$PATH_URL (it is what going to index.php as path var).* url part
+	 * after CONFIG::$PATH_URL (it is what going to index.php as path var).
+	 * as regex
+	 */
+	public function add($httpMethod, $urlRegex, $controller = null, $templateFile = null, $param = null) {
+		if (!in_array($httpMethod, array(self::$GET, self::$POST, self::$PUT, self::$DELETE))) {
+			throw new Exception('Invalid HTTP method specified in router');
+		}
+		foreach (self::$predefinedUrlKeys as $d) {
+			if (strpos($urlRegex, "<{$d}>") !== false) {
+				$urlRegex = htmlentities($urlRegex);
+				$d        = htmlentities("<{$d}>");
+				trigger_error("The route url '$urlRegex' can not consists kernel-reserved $d", E_USER_ERROR);
+			}
+		}
+		if ($controller == null) {
+			$from     = array(':controller', ':action');
+			$to       = array('(?<controller>.+)', '(?<action>.+)');
+			$urlRegex = str_replace($from, $to, $urlRegex, $matched);
+			$controllerClass = $controllerMethod = null;
+		} else {
+			list($controllerClass, $controllerMethod) = explode('/', $controller);
+		}
+		$this->map[] = array($httpMethod, $urlRegex, $controllerClass, $controllerMethod, $templateFile, $param);
+		return $this;
+	}
+	public function connect($httpMethod, $urlRegex, $controller = null, $templateFile = null, $param = null) {
+		return $this->add($httpMethod, $urlRegex, $controller, $templateFile, $param);
+	}
+	public function getRoute($method = null, $url = null) {
+		if ($method === null) {
+			$method = $_SERVER['REQUEST_METHOD'];
+		}
+		if ($url === null) {
+			$url = isset($_REQUEST[CONFIG::$ACTION_VAR_NAME]) ? $_REQUEST[CONFIG::$ACTION_VAR_NAME] : '';
+		}
+
+		if (count($this->map) == 0) {
+			throw new Exception('No any routes defined');
+		}
+		$method = strtolower($method);
+		$found  = false;
+		foreach ($this->map as $entry) {
+			if ($entry[0] != $method) continue;
+			if (preg_match('/'.str_replace('/', '\/', $entry[1]).'/m', $url, $matches)) {
+				/*
+				 * проверить доступ
+				 */
+				$result = new stdClass();
+				if (array_key_exists('controller', $matches)) {
+					$result->class = ucfirst($matches['controller']);
+				} else {
+					$result->class = $entry[2];
+				}
+				if (array_key_exists('action', $matches)) {
+					$result->method = $matches['action'];
+				} else {
+					$result->method = $entry[3];
+				}
+				$result->template = $entry[4];
+				/*
+				 * выделить из запроса все параметры (которые определены как (?<x>) в урле)
+				 */
+				foreach ($matches as $key => $value) {
+					if (is_string($key) && !in_array($key, self::$predefinedUrlKeys)) {
+						self::addVarToRequest($key, $value);
+					}
+				}
+				/*
+				 * если есть параметр
+				 */
+				if (($param = $entry[5]) !== null) {
+					$result->params = $param;
+				}
+				return $result;
+			}//end if
+		}//end foreach
+		if (!$found) {
+			throw new Exception404('There are no controller defined that able to handle request');
+		}
+		return null;
+	}
+	private static function addVarToRequest($key, $value) {
+		$_REQUEST[$key] = $value;
+	}
+}
+
+spl_autoload_register(array('CMS', 'autoloader'));
+/**
+ * Ключевые интерфейсы
+ */
+interface RDS_Interface {}
+interface DataBase_Interface {}
+interface Translator_Interface {}
+interface View_Interface {}
+interface Controller_Interface {}
+interface Model_Interface {}
+
+/**
+ * Функции ядра.
+ *
+ * @author DroN
+ * @copyright 04.2006
+ */
+class CMS {
+	static public function autoloader($name) {
+		if (!defined('KERNEL_SETTED_UP')) return;
+		if (!self::$autoLoad) return;
+		if (CONFIG::getPackages()->available($name)) {
+			CONFIG::getPackages()->load($name);
+			return;
+		} else {
+			$packageError = sprintf('Package <strong>%s</strong> is not registered<br/>', $name);
+		}
+		$lookAt = CONFIG::$INCPATH;
+			/*array(
+		    CONFIG::$PATH_ABS.'/controllers',
+		    CONFIG::$PATH_KERNEL_ABS.'/controllers',
+		    CONFIG::$PATH_KERNEL_ABS.'/CMS',
+		    CONFIG::$PATH_ABS.'/controllers/'.$name,
+		    CONFIG::$PATH_KERNEL_ABS.'/controllers/'.$name,
+		    CONFIG::$PATH_ABS.'/models'
+		);*/
+		$found = false;
+		foreach ($lookAt as $loc) {
+			$path = $loc.'/'.$name.'.php';
+			if (file_exists($path)) {
+				include($path);
+				$found = true;
+				break;
+			}
+		}
+		if (!$found) {
+			$errorMsg = '<strong>Fatal error:</strong> cant load file with class <strong>%s</strong> description';
+			trigger_error($packageError.sprintf($errorMsg, $name), E_USER_ERROR);
+		}
+	}
+	/**
+	 * Позволить автозагрузку классов
+	 *
+	 * @var bool
+	 */
+	static public $autoLoad = true;
+	private static $autoLoadBackup;
+	/**
+	 * Сохранить текущее состояние autoload
+	 *
+	 */
+	static public function backupAutoloadStatus() {
+		self::$autoLoadBackup = self::$autoLoad;
+	}
+	/**
+	 * Сохранить текущее состояние autoload и установить новое
+	 *
+	 * @param bool $f
+	 */
+	static public function backupAutoloadStatusAndSet($f) {
+		self::backupAutoloadStatus();
+		self::$autoLoad = $f;
+	}
+	/**
+	 * Восстановить сохраненное состояние
+	 *
+	 */
+	static public function restoreAutoloadStatus() {
+		self::$autoLoad = self::$autoLoadBackup;
+	}
+}
+/**
+ * Стандартный объект для описания результатов выполнения действия.
+ */
+class HandlingResult {
+	public $status;
+	public $response;
+	function __construct($msg = '') {
+		if (!empty($msg)) $this->setStatus($msg);
+	}
+	/**
+	 * установить статусное сообщение
+	 *
+	 * @param string $msg
+	 * @param string $param
+	 * @return HandlingResult
+	 */
+	public function setStatus($msg = null, $param = '') {
+		if ($msg == null) {
+			$this->status = null;
+			return $this;
+		}
+		//$timeArray = getdate();
+		$this->status = $msg;
+		return $this;
+	}
+	/**
+	 * получить статусное сообщение
+	 *
+	 * @return string
+	 */
+	public function getStatus() {
+		return $this->status;
+	}
+	/**
+	 * @param $msg
+	 * @return HandlingResult
+	 */
+	public function setResponse($msg) {
+		$this->response = $msg;
+		return $this;
+	}
+	public function getResponse() {
+		return $this->response;
+	}
+}
+/**
+ * Объект-заглушка.
+ */
+class NULLobject {
+	private $class;
+	function __construct($class = '') {
+		$this->class = $class;
+	}
+	function getClassName(){
+		return $this->class;
+	}
+	function __set($name, $val) {
+		Debug::message('NULLobject', "set '$name' for class '$this->class'", 'OTHER');
+	}
+	function __get($name) {
+		Debug::message('NULLobject', "get '$name' for class '$this->class'", 'OTHER');
+		return $this;
+	}
+	function __call($name, $params) {
+		Debug::message('NULLobject', "call '$name' for class '$this->class'", 'OTHER');
+		return $this; // для корректной работы при вызове цепочек
+	}
+	function __toString() {
+		return '';
+	}
+}
+/**
+ * Диспетчер событий.
+
+ * @author dron
+ */
+class Events {
+	static private $listeners = array();
+	/**
+	 * Посылка события.
+	 *
+	 * @param string $event
+	 * @param mixed $mutableParam
+	 * параметр события.
+	 * Передается по ссылке, то есть изменение параметра в обработчике влечет
+	 * за собой изменение параметра в месте запуска события.
+	 * @param mixed $p2
+	 * @param mixed $p3
+	 * @return boolean
+	 * true - если есть слушатели события
+	 */
+	static function raise($event, &$mutableParam = null, $p2=null, $p3=null) {
+		if (array_key_exists($event, self::$listeners)) {
+			//if ($enterPoint != 'init') Debug::message('call', $enterPoint, 'CALLBACK', true);
+			$listeners = self::$listeners[$event];
+			if (count($listeners) > 0) {
+				foreach ($listeners as $listener) {
+					if (is_string($listener) && (strpos($listener, '/') !== false)) {
+						$listener = explode('/', $listener);
+					}
+					$callResult = call_user_func($listener, $mutableParam, $p2, $p3);
+					if ($callResult != null) $mutableParam = $callResult;
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+	static public function addListener($event, $listener) {
+		if (!array_key_exists($event, self::$listeners)) {
+			self::$listeners[$event] = array();
+		}
+		self::$listeners[$event][] = $listener;
+	}
+	static public function removeListener($event, $listener) {
+		if (array_key_exists($event, self::$listeners)) {
+			self::$listeners[$event] = array();
+			$index = array_search($listener, self::$listeners[$event]);
+			if ($index !== false) unset(self::$listeners[$event][$index]);
+		}
+	}
+}
+interface Injectable {
+	function injectDependences();
+}
+/**
+ * Enter description here ...
+ */
+class ExceptionCMS extends Exception {
+}
+/**
+ * Enter description here ...
+ */
+class ExceptionDB extends ExceptionCMS {
+}
+/**
+ * Enter description here ...
+ */
+class ExceptionRDS extends ExceptionCMS {
+}
+/**
+ * Enter description here ...
+ */
+class ExceptionUser extends ExceptionCMS {
+}
+/**
+ * Enter description here ...
+ */
+class Exception404 extends ExceptionCMS {
+	function __construct($msg = '404 page not found') {
+		parent::__construct($msg);
+	}
+}
+
+if (CONFIG::$DEBUG) {
+	Debug::parseConfig();
+	if (Debug::isSectionEnabled('PHP'))
+		set_error_handler('debugPhpErrorHandler', E_ALL);
+}
+function debugPhpErrorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
+	if (error_reporting() === 0) return;
+	if (is_array($errcontext) && array_key_exists('trace', $errcontext)) $trace = $errcontext['trace'];
+	else $trace = false;
+	Debug::message('', "$errstr in $errfile at $errline", 'PHP', $trace);
+}
+/**
+ * Получить html стека
+ *
+ * @param array $trace
+ * стек
+ * @param int $level
+ * глубина
+ * @return string
+ * HTML
+ */
+function getTraceReport($trace = null, $level = 5, $tpl = null) {
+	if ($tpl === null)
+		$tpl = '<span class="file">%s</span> at line <span class="line">%s</span>';
+	if ($trace === null) $trace = getTrace();
+	for ($traceReport = array(), $i = 0; $i < $level; $i++) {
+		if (!isset($trace[$i])) break;
+		$traceReport[] = sprintf($tpl, @basename($trace[$i]['file']), @$trace[$i]['line']);
+	}
+	return $traceReport;
+}
+/**
+ * Получить стек
+ *
+ * @return array
+ */
+function getTrace() {
+	try {
+		throw new Exception();
+	} catch (Exception $e) {
+		$trace = $e->getTrace();
+		return $trace;
+	}
+}
+
+/**
+ * Вывести переменную
+ * @internal param \any $var переменная* переменная
+ * @internal param string $label заголовок* заголовок
+ */
+function dump() {
+	$vars = func_get_args();
+	if (@$_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
+		header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden', true, 403);
+		$res   = array();
+		$error = '';
+		foreach ($vars as $var) {
+			$error .= print_r($var, true);
+		}
+		$res['error'] = $error;
+		echo json_encode($res);
+		exit();
+	}
+	$color = '349C1C';
+	$trace = getTrace();
+	//var_dump($trace);
+	$caller = $trace[1];
+	$label = $caller['file'].':'.$caller['line'];
+	$out = '<div style="border:1px solid #'.$color.';">';
+	$out .= '<div style="padding:2px;font-weight:bold;background-color:#'.$color.'; color:#fff">';
+	$out .= '%s';
+	$out .= '</div><table><tr>%s</tr></table></div>';
+	foreach($vars as &$var) {
+		if (is_string($var)) $var = htmlentities($var);
+		// добавить тип
+		$addType = '';
+		if (is_string($var)) {
+			if (empty($var)) {
+				$addType = 'empty string';
+			} else {
+				$addType = 'string';
+			}
+		}
+		elseif (is_object($var)) $addType = get_class($var);
+		elseif (is_float($var)) $addType = 'float';
+		elseif (is_bool($var)) $addType = 'bool';
+		elseif (is_int($var)) $addType = 'int';
+		
+		if ($var === null) $addType = 'null';
+		
+		if (!empty($addType)) {
+			$addType = ' <i>('.$addType.')</i>';
+		}
+		
+		
+		if (is_bool($var)) $var = $var ? '<i>true</i>' : '<i>false</i>';
+		$var = '<td valign="top" style="border-right:1px solid #'.$color.'"><pre style="margin:0;padding:5px">'.print_r($var, true).$addType.'</pre></td>';
+	}
+	echo sprintf($out, $label, implode('',$vars));
+}
+/**
+ * Класс для отладки.
+ */
+class Debug {
+	/**
+	 * Шаблон для форматирования сообщения
+	 *
+	 * @var string
+	 */
+	static public $lineTpl;
+	/**
+	 * Массив сообщений
+	 *
+	 * @var DebugMessage[]
+	 */
+	static private $msg = array();
+	/**
+	 * Сквозной инкремент сообщений
+	 *
+	 * @var int
+	 */
+	static public $debugline = 0;
+	/**
+	 * Установиь шаблон для сообщения
+	 *
+	 */
+	static public function setLineTpl($tpl = null) {
+		if ($tpl == null)
+		$tpl = <<<TPL
+	<div  style='border-top:1px dotted #444;'>%1\$s: <b>%2\$s</b> <div style="color:#666">%4\$s</div></div>
+TPL;
+
+		self::$lineTpl = $tpl;
+	}
+	/**
+	 * Добавить сообщений
+	 *
+	 * @param string $title
+	 * заголовок
+	 * @param string $message
+	 * текст
+	 * @param string $level
+	 * раздел
+	 * @param bool $trace
+	 * признак трассировки
+	 */
+	static public function message($title, $message, $level = '', $trace = true) {
+		if (!CONFIG::$DEBUG) return;
+		if (!self::isSectionEnabled($level)) return;
+		if (ObjectsPool::exist('jsmanager')) {
+			ObjectsPool::get('jsmanager')->register('cookie.js', 'd-engine/js/');
+		}
+		self::$debugline++;
+		$traceReport = null;
+		if ($trace === true) {
+			try {
+				throw new Exception();
+			} catch (Exception $e) {
+				$trace       = $e->getTrace();
+				$traceReport = getTraceReport($trace, CONFIG::$DEBUG_TRACELEVEL);
+				$traceReport = implode('<br>', $traceReport);
+			}
+		} elseif($trace !== false) {
+			$traceReport = getTraceReport($trace, CONFIG::$DEBUG_TRACELEVEL);
+			$traceReport = implode('<br>', $traceReport);
+		}
+		self::$msg[] = new DebugMessage($title, $message, $level, $trace, $traceReport);
+		if (CONFIG::$DEBUG_TO_FILE) {
+			$logMessage = sprintf("%s %s\t%s %s\n", date('Y-m-d/H:i'), $level, $title, $message);
+			if (self::$debugline == 1)
+				file_put_contents(CONFIG::$DEBUG_TO_FILE, "\tSTART\n", FILE_APPEND);
+			file_put_contents(CONFIG::$DEBUG_TO_FILE, $logMessage, FILE_APPEND);
+		}
+	}
+	/**
+	 * Добавить аварийное сообщение
+	 *
+	 * @param string $message
+	 */
+	static public function warning($message) {
+		if (!CONFIG::$DEBUG_WARNINGS) return;
+		self::$msg[] = "<b>Warning</b>: $message<br>";//.chr(13);
+	}
+	/**
+	 * Подготовить отладочную панель и вывести
+	 *
+	 */
+	static public function printInfo() {
+		if (!CONFIG::$DEBUG) return;
+		if (CONFIG::$DEBUG_TO_FILE !== false) return;
+		if (@$_SERVER['REQUEST_METHOD'] == 'POST') return;
+		self::setLineTpl();
+		$out = '';
+		$sortedByLevels = array();
+		foreach (self::$msg as $msg) $sortedByLevels[$msg->level][] = $msg;
+		foreach ($sortedByLevels as $level => $msgs) {
+			$out  .= '<div onclick="jQuery(\'#debuggroup_'.$level.'\').toggle(); ';
+			$out  .= 'if ( Element.visible(\'debuggroup_'.$level.'\') ) Cookie.set(\'debuggroup_'.$level.'\', 1); ';
+			$out  .= 'else Cookie.erase(\'debuggroup_'.$level.'\')" ';
+			$out  .= 'style="cursor:pointer;background-color:#349C1C;border:1px solid #349C1C;color:#fff">';
+			$out  .= $level;
+			$out  .= '</div>';
+			$style = (isset($_COOKIE["debuggroup_$level"])) ? '' : "style='display:none1'";
+			$out  .= "<div id='debuggroup_$level' $style>";
+			foreach ($msgs as $msg)
+				$out .= $msg->get(self::$lineTpl);
+			$out  .= '</div>';
+		}
+		self::messageBox($out, 'Debug panel for '.CONFIG::$PATH_URL);
+	}
+	/**
+	 * Вывести отладочную панель
+	 *
+	 * @param string $message
+	 * тело
+	 * @param string $title
+	 * заголовок
+	 */
+	static public function messageBox($message, $title) {
+		$visible    = (isset($_COOKIE['debugpanelhide'])) ? 'display:none' : '';
+		$top        = (isset($_COOKIE['debugpaneltop'])) ? $_COOKIE['debugpaneltop'] : '0px';
+		$left       = (isset($_COOKIE['debugpanelleft'])) ? $_COOKIE['debugpanelleft'] : '0px';
+		$windowName = CONFIG::$PATH_URL;
+		$html       = <<<HTML
+		<script>
+		jQuery(function() { setTimeout("createDebugPopup();", 400); });
+		var createDebugPopup = function() {
+			var myWinShow = window.open("Debug console",
+				"debugconsole_$windowName",
+				"width=500,heigth=400,scrollbars=yes,status=yes,toolbar=no,menubar=no,resizable=yes"
+			);
+			myWinShow.document.open();
+			myWinShow.document.writeln( jQuery('#debugpanel').html() );
+			jQuery('#debugpanel').remove();
+			myWinShow.document.close();
+			myWinShow.blur();
+		}
+		</script>
+		<div id="debugpanel" style="display:none;width:100%;position:absolute;top:$top;left:$left;
+			background-color:#fff; border:1px solid #888; font-size:10px;z-index:10000">
+		<div id="debugtitle" style="cursor:pointer;text-align:center;padding:2px;
+			color:#ff8; background-color:#666">$title</div>
+		<div id="debugbody" style="$visible;padding:2px;font-family:Console;font-size:12px;">$message</div></div>
+HTML;
+		echo $html;
+	}
+	static public $executionTime = 0;
+	/**
+	 * Старт счетчика выполнения
+	 *
+	 */
+	static public function timerStart() {
+		self::$executionTime = - microtime(true);
+	}
+	/**
+	 * Останов счетчика выполнения
+	 *
+	 * @return float
+	 * Время выполнения
+	 */
+	static public function timerStop() {
+		return (self::$executionTime += microtime(true));
+	}
+	private static $sectionsAllowed    = false;
+	private static $sectionsDisallowed = false;
+	static public function parseConfig() {
+		if (self::$sectionsAllowed !== false) return;
+		self::$sectionsAllowed    = array();
+		self::$sectionsDisallowed = array();
+		if (CONFIG::$DEBUG_SECTIONS == null) {
+			self::$sectionsAllowed = null;
+			return;
+		}
+		$sections = explode(',', strtoupper(CONFIG::$DEBUG_SECTIONS));
+		foreach ($sections as $section) {
+			if (strpos($section, '!') === 0) {
+				self::$sectionsDisallowed[] = substr($section, 1);
+			} else {
+				self::$sectionsAllowed[] = $section;
+			}
+		}
+		if (count(self::$sectionsAllowed) == 0) self::$sectionsAllowed = null;
+	}
+	static public function isSectionEnabled($section) {
+		if (self::$sectionsAllowed === null) {
+			$allowed = !in_array($section, self::$sectionsDisallowed);
+		} else {
+			$allowed = in_array($section, self::$sectionsAllowed);
+		}
+		return $allowed;
+	}
+}
+/**
+ * Отладочное сообщение.
+ */
+class DebugMessage {
+	/**
+	 * Текст сообщение
+	 *
+	 * @var string
+	 */
+	private $message;
+	/**
+	 * Заголовок
+	 *
+	 * @var string
+	 */
+	private $title;
+	/**
+	 * Тематический раздел сообщения
+	 *
+	 * @var string
+	 */
+	public $level;
+	/**
+	 * Признак трассировки
+	 *
+	 * @var boolean
+	 */
+	private $trace;
+	/**
+	 * Стек трассировки
+	 *
+	 * @var boolean
+	 */
+	private $traceReport;
+	/**
+	 * Относительное время порождения сообщения
+	 *
+	 * @var int
+	 */
+	public $time;
+	function __construct($title, $message, $level = '', $trace = true, $traceReport = null) {
+		$this->title       = $title;
+		$this->message     = $message;
+		$this->level       = $level;
+		$this->trace       = $trace;
+		$this->traceReport = $traceReport;
+		$this->time        = DEBUG::$debugline;
+	}
+	/**
+	 * Получить отформатированную строку сообщения
+	 *
+	 * @param string $tpl
+	 * Шаблон
+	 * @return string
+	 * HTML
+	 */
+	public function get($tpl) {
+		return sprintf($tpl, $this->title, $this->message, $this->level, $this->traceReport);
+	}
+}
+
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class IncludeManager {
+	static protected $i;
+	static public function add($file, $priority = 10) {
+		if (strpos($file, ':') !== false) {
+			list($protocol, $file2) = explode(':', $file);
+			switch ($protocol) {
+				case 'http':
+					break;
+				case 'view':
+					$file = CONFIG::$PATH_THEME.'/'.$file2;
+					break;
+				case 'kernel':
+					$file = CONFIG::$KERNEL_FOLDER.'/'.$file2;
+					break;
+				default:
+					break;
+			}
+		}
+		if (!file_exists($file)) {
+			trigger_error("File $file not found", E_USER_ERROR);
+			return;
+		}
+		if (!array_key_exists($priority, static::$registry)) {
+			static::$registry[$priority] = array();
+		}
+		static::$registry[$priority][] = $file;
+	}
+	static public function setCompileGroups($groups) {
+		static::$compileGroups = $groups;
+	}
+	static protected function getPlainRegistry() {
+		ksort(static::$registry);
+		$files = (object)array('plain' => array());
+		array_walk_recursive(static::$registry, function($v, $k, &$t) {
+			$t->plain[] = $v;
+		}, $files);
+		return $files->plain;
+	}
+	static public function compileFile($extension = '') {
+		if (static::$compileGroups != null) {
+			ksort(static::$registry);
+			$files = static::$registry;
+			foreach (static::$compileGroups as $i => $compileGroup) {
+				dump($compileGroup, $files);
+				$group = array();
+				if (!array_key_exists($i, $group)) $group[$i] = array();
+				foreach ($compileGroup as $p) {
+					$group[$i] = array_merge($group[$i], $files[$p]);
+				}
+				dump($group);
+			}
+		} else {
+			$files = array(self::getPlainRegistry());
+		}
+		$compiledFileNames = array();
+		foreach ($files as $bucket) {
+			$compiledFileName = md5(implode('', $bucket));
+			$compiledFileName .= $extension;
+			$compiledFileName = static::$compileToFolder.'/'.$compiledFileName;
+			$destination = CONFIG::absPath($compiledFileName);
+			if (CONFIG::$DEVELOPING || !file_exists($destination)) {
+				$content = '';
+				foreach ($bucket as $file) {
+					if (!file_exists($file)) continue;
+					$filecontent = php_strip_whitespace($file);
+					$filecontent = str_replace(array("\r", "\t"), ' ', $filecontent);
+					$content    .= static::prepareText($filecontent)."\n";
+				}
+				file_put_contents($destination, $content);
+				if (CONFIG::$DEVELOPING) {
+					@file_put_contents($destination.'.debug', implode("\n", $bucket));
+				}
+			}
+			$compiledFileNames[] = $compiledFileName;
+		}
+		return $compiledFileNames;
+	}
+	static protected function prepareText($text) {
+		return $text;
+	}
+}
+/**
+ * Класс для управления подключаемыми JS скриптами
+ * и "передачи" данных из PHP в JS.
+ *
+ * @author Dron
+ * @package includemanager
+ */
+class JSManager extends IncludeManager {
+	static protected $registry     = array();
+	static $compileGroups = null;
+	static public $compileToFolder = null;
+	static public function getHtml() {
+		/*
+		 * подключить JS-файлы
+		 */
+		$compile = (self::$compileToFolder != null);
+		if ($compile) {
+			$files = self::compileFile('.js');
+
+		} else {
+			$files = self::getPlainRegistry();
+		}
+		$out = '';
+		foreach ($files as $file) {
+			$out .= sprintf('<SCRIPT language="JavaScript" src="%s"></SCRIPT>', CONFIG::urlPath($file));
+		}
+		return $out;
+	}
+	private static $vars = array();
+	private static $code = array();
+	/**
+	 * Генерирует код для создания в JS указанных переменных с указанными значениями.
+	 * Имена переменных могут содержать точки, в этом случае будут созданы JS-объекты
+	 *
+	 * @example
+	 * JSManager::exportVar('foo', 'bar');
+	 *
+	 * JSManager::exportVar('SomeNamespace.someObject', (new MyModel)->load());
+	 * // при этом не надо заботиться о наличии в Javascript объекта SomeNamespace,
+	 * // при отсутствии он будет создан автоматически, а при наличии будет дополнен экспортируемыми свойствами.
+	 *
+	 * JSManager::exportVar('arrayFromPHP', [4,5,6,7]);
+	 * JSManager::exportVar('Data.hashFromPHPwithListOfData', (new MyCollection)->load());
+	 *
+	 * @static
+	 * @param $name
+	 * @param mixed|DModel|DModelsCollection $value
+	 */
+	static function exportVar($name, $value) {
+		if ($value instanceof DModel) {
+			$value = $value->getAsStdObject();
+		}
+		if ($value instanceof DModelsCollection) {
+			$value = $value->getAsStdObjects();
+		}
+		self::$vars[$name] = $value;
+	}
+	/**
+	 * @static
+	 *
+	 * @param $jsCode
+	 */
+	static function exportCode($jsCode) {
+		self::$code[] = $jsCode;
+	}
+	static private function renderExported() {
+		$out = '';
+		foreach (self::$vars as $varName => $value) {
+			if (is_string($value)) {
+				$value = '"'.$value.'"';
+			}
+			if (!is_scalar($value)) {
+				if (!function_exists('JSONserialize'))
+					require_once 'funcs/jsonSerializer.php';
+				$value = JSONserialize($value);
+			}
+			$out .= sprintf("createNamespace(\"%1\$s\");\n%1\$s = %2\$s;\n", $varName, $value);
+		}
+		foreach (self::$code as $code) {
+			$out .= sprintf("%s;\n", $code);
+		}
+		return $out;
+	}
+	static protected function prepareText($text) {
+		return $text;
+		require_once (CONFIG::$PATH_KERNEL_ABS.'/JSMin.php');
+		return JSMin::minify($text);
+	}
+}
+/**
+ * Класс для управления подключаемыми CSS файлами.
+ *
+ * @author Dron
+ * @package includemanager
+ */
+class CSSManager extends IncludeManager {
+	static protected $registry     = array();
+	static public $compileToFolder = null;
+	static $compileGroups = null;
+	static public function getHtml() {
+		$compile = (self::$compileToFolder != null);
+		if ($compile) {
+			$files = self::compileFile('.css');
+
+		} else {
+			$files = self::getPlainRegistry();
+		}
+		$out = '';
+		foreach ($files as $file) {
+			$out .= sprintf('<LINK href="%s" type="text/css" rel="stylesheet" />', $file);
+		}
+		return $out;
+	}
+	static protected function prepareText($text) {
+		$in   = array(
+			'/\burl\([\'"]?(?!http)(\.{0,2})\/?(.+?)[\'"]?\)/',
+		    '/\bborder-radius:(.+?);/',
+		    '/\bborder-(.+?)-(.+?)-radius:(.+?);/',
+			'/\banimation(.*?):(.+?);/',
+			'/\btransition-(.+?):(.+?);/',
+			'/\btransform(.*?):(.+?);/',
+		    '/\bbox-sizing:(.+?);/',
+		    '/(.+?)::input-placeholder/m'
+		);
+		$slashCount = substr_count(static::$compileToFolder, '/') + 1;
+		/*
+		 * вставить ../ столько раз, сколько папка компиляции относительно сайта вложена
+		 */
+		$parentPath = str_repeat('../', $slashCount);
+		$out  = array(
+			'url(\''.$parentPath.CONFIG::$PATH_THEME.'/\2\')',
+		    'border-radius:\1;-moz-border-radius:\1;-o-border-radius:\1;',
+		    'border-\1-\2-radius:\3;-moz-border-radius-\1\2:\3;-o-border-\1-\2-radius:\3;',
+			'animation\1:\2;-webkit-animation\1:\2;-moz-animation\1:\2;-o-animation\1:\2;',
+			'transition-\1:\2;-webkit-transition-\1:\2;-moz-transition-\1:\2;-o-transition-\1:\2;',
+			'transform\1:\2;-webkit-transform\1:\2;-moz-transform\1:\2;-o-transform\1:\2;',
+		    'box-sizing:\1;-moz-box-sizing:\1;',
+			'\1::-webkit-input-placeholder, \1::-moz-placeholder '
+		);
+		$text = preg_replace($in, $out, $text);
+
+		/* Minify CSS */
+		/* remove comments */
+		$text = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $text);
+		/* remove tabs, spaces, newlines, etc. */
+		$text = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $text);
+
+		return $text;
+	}
+}
+
+/**
+ * Встроенные обработчики событий,
+ * выполняемые всегда
+ */
+class KernelListeners {
+	/**
+	 * Декодирует сообщения об ошибках и статусе
+	 * @static
+	 */
+	static function beforeRouter() {
+		ObjectsPool::get('RDS')->add('access.KernelListeners.processHandlingResult');
+		Router::get()->connect(Router::$GET, 'processHandlingResult', 'KernelListeners/processHandlingResult');
+		if (isset($_REQUEST['error'])) {
+			if (empty($_REQUEST['error'])) {
+				unset($_REQUEST['error']);
+			} else {
+				$_REQUEST['error'] = base64_decode($_REQUEST['error']);
+			}
+		}
+		if (isset($_REQUEST['status'])) {
+			if (empty($_REQUEST['status'])) {
+				unset($_REQUEST['status']);
+			} else {
+				$_REQUEST['status'] = base64_decode($_REQUEST['status']);
+			}
+		}
+	}
+	/**
+	 * Преред вызовом контроллера преобразует загруженные файлы в стандартный вид
+	 * @static
+	 */
+	static function beforeController() {
+		$pagename = Page::getName();
+		if (empty($pagename)) {
+			if (ObjectsPool::exist('Translator')) {
+				$pagename = s('pagename_'.Page::$controller);
+			} else {
+				$pagename = Page::$controller;
+			}
+			Page::setName($pagename);
+		}
+		CRUDtemplates::init();
+		/*
+		 * для put/delete/patch распарсить payload
+		 */
+		$contentType = isset($_SERVER["CONTENT_TYPE"]) ? $_SERVER["CONTENT_TYPE"] : '';
+		if ((strpos($contentType, 'application/json') === 0) && in_array(strtolower($_SERVER['REQUEST_METHOD']), array(Router::$POST, Router::$PUT, Router::$DELETE))) {
+			$payload = file_get_contents('php://input');
+			$payload = (array)json_decode($payload);
+			if (is_array($payload)) {
+				$_REQUEST = array_merge($_REQUEST, $payload);
+			}
+		}
+		/*
+		 * если данные - комбинированные, распарсить
+		 */
+		if (isset($_REQUEST['debug']) || isset($_REQUEST['emulateHTTP']) || @$_SERVER["HTTP_DENGINE_MULTIPART_JSON"]) {
+			$payload = $_REQUEST['payload'];
+			$payload = (array)json_decode($payload);
+			if (is_array($payload)) {
+				$_REQUEST = array_merge($_REQUEST, $payload);
+			}
+		}
+		switch ($_SERVER['REQUEST_METHOD']) {
+			case 'POST':
+				/*
+				 * преобразовать загруженные файлы в обычный вид
+				 */
+				TransformFILES::run();
+				TransformFILES::handleExternalUrlUploads();
+				//TransformFILES::handleProgressUploaderSession();
+				break;
+		}
+	}
+}
+/**
+ * Реестр объектов.
+ *
+ * Предназначен для хранения и доступа к объектам, как то База данных, Словарь,
+ * Список прав доступа, Описатель текущей страницы и другие, которые востребованы
+ * из разных частей системы.
+ *
+ * @copyright 04.2006
+ * @author DroN
+ */
+class ObjectsPool {
+	static private $pool;
+	/**
+	 * Добавить объект в реестр
+	 *
+	 * @param string $name
+	 * @param DController $object
+	 */
+	static public function put($name, $object) {
+		if (isset(self::$pool[$name])) trigger_error("ObjectPool: object '$name' already exist in the pool", E_USER_NOTICE);
+		self::$pool[$name] = $object;
+	}
+	/**
+	 * Получить объект из реестра
+	 * @param string $name
+	 *
+	 * @throws Exception
+	 * @return DController
+	 */
+	static public function get($name) {
+		if (!isset(self::$pool[$name])) {
+		//	return new NULLobject($name);
+			throw new Exception("There is no $name object in the ObjectsPool");
+		}
+		return self::$pool[$name];
+	}
+	static public function gets($namereg) {
+		$result = array();
+		foreach (self::$pool as $name => $object) {
+			if (preg_match("/$namereg/", $name, $sub)) {
+				$result[(count($sub) > 1) ? $sub[1] : $name] = $object;
+			}
+		}
+		if (count($result) == 0) return false;
+		return $result;
+	}
+	/**
+	 * Проверить наличие объекта в реестре
+	 *
+	 * @param string $name
+	 * @return boolean
+	 */
+	static public function exist($name) {
+		return isset(self::$pool[$name]);
+	}
+	/**
+	 * Удалить объект из реестра
+	 *
+	 * @param string $name
+	 */
+	static public function remove($name) {
+		if (isset(self::$pool[$name])) unset(self::$pool[$name]);
+	}
+}
+
+if (!class_exists('CacheSlotSelfRefreshed')) {
+	require_once('CMS/Cache.php');
+}
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class PagerHelper extends CacheSlotSelfRefreshed {
+	function getTTL() {
+		return 0;
+	}
+	function getData () {
+		return '';
+	}
+	protected $cacheKey;
+	function getKey () {
+		if ($this->cacheKey) throw new Exception("Cache key in pager is not set");
+		return $this->cacheKey;
+	}
+	public $capacity;
+	public $pageNum;
+	public $isNextPage = false;
+	public $isPrevPage = false;
+	public $isNeeded   = false;
+	public $ownerClassName = null;
+	function __construct($capacity = 10, $pageNum = null, $requestParamName = null) {
+		$this->capacity = $capacity;
+		if ($pageNum !== null)
+			$this->pageNum = $pageNum;
+		else
+			$this->pageNum = $this->getPageNum($requestParamName);
+	}
+	public function analyzeQuery($query, $fetchMode = DB_SELECT_ONE) {
+		$this->cacheKey = $this->ownerClassName.'.'.md5($query);
+		// генерируем limit конструкцию для выборки n+1 элемента
+		$limitPos = strpos($query, 'LIMIT');
+		if ($limitPos !== false) {
+			$query = substr($query, 0, $limitPos);
+		}
+		$limit  = sprintf(' LIMIT %s,%s ', ($this->pageNum - 1) * $this->capacity, $this->capacity + 1);
+		$query .= $limit;
+		$queryForCount    = "select COUNT(*) from ($query) as subtable";
+		$data = dbQuery($queryForCount, DB_SELECT_ONE);
+		if ($data > $this->capacity) {
+			$this->isNextPage = true;
+		}
+		$this->isPrevPage = ($this->pageNum > 1);
+		$this->isNeeded   = ($this->pageNum > 1) || ($this->isNextPage);
+		return $data;
+	}
+	public function getPageNum($param = null) {
+		if ($param === null)
+			$param  = @$_REQUEST['page'];
+		$pageNum = (is_numeric($param)) ? $param : 1;
+		if ($pageNum < 1)
+			$pageNum = 1;
+		return $pageNum;
+	}
+	public function getLimit() {
+		return sprintf(' LIMIT %s,%s ', ($this->pageNum - 1) * $this->capacity, $this->capacity);
+	}
+}
+/**
+ * Pager с полным списком страниц.
+ *
+ * @author dron
+ */
+class PagerHelperFull extends PagerHelper {
+	public $pagesCount;
+	public $itemsCount;
+	public function analyzeQuery($query, $fetchMode = DB_SELECT_ONE) {
+		$this->cacheKey = $this->ownerClassName.'.'.md5($query);
+		$limitPos = strpos($query, 'LIMIT');
+		if ($limitPos !== false) {
+			$query = substr($query, 0, $limitPos);
+		}
+
+		$queryForCount    = "select COUNT(*) from ($query) as subtable";
+		$this->itemsCount = ObjectsPool::get('DataBase')->query($queryForCount, DB_SELECT_ONE);
+		$this->pagesCount = ceil($this->itemsCount / $this->capacity);
+		$this->isNextPage = ($this->pageNum < $this->pagesCount);
+		$this->isPrevPage = ($this->pageNum > 1);
+		$this->isNeeded   = ($this->pageNum > 1) || ($this->isNextPage);
+		return $this;
+	}
+}
+
+/**
+ * Предназначен для работы с таблицей настроек.
+ *
+ * @example
+ * $settingsValue = Registry::get('name');
+ * Registry::set('name', value);
+ */
+class Registry {
+	static private $cache = array();
+	static public $table  = 'registry';
+	static public function get($name) {
+		if (!array_key_exists($name, self::$cache)) {
+			$db = ObjectsPool::get('DataBase');
+			$value              = $db->select(self::$table, 'value', "name = '%s'", $db->escape($name), DB_SELECT_ONE);
+			self::$cache[$name] = $value;
+		} else {
+			$value = self::$cache[$name];
+		}
+		return $value;
+	}
+	static public function set($name, $value, $tag = null) {
+		self::$cache[$name] = $value;
+
+		$data = array('name' => $name, 'value' => $value);
+		if ($tag !== null) $data['tag'] = $tag;
+		$t = "name = '$name'";
+		ObjectsPool::get('DataBase')->insertOrUpdate(self::$table, $data, $t);
+	}
+}
+
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class StatusMessages {
+	private $msg;
+	function __construct($type) {
+		if (isset($_GET[$type]))
+			$this->msg = $_GET[$type];
+	}
+	public function is() {
+		return !empty($this->msg);
+	}
+	public function get() {
+		return $this->msg;
+	}
+	/**
+	 * возвращает объект с сообщением об ошибке
+	 *
+	 * @return statusmessages
+	 */
+	static public function getError() {
+		return new statusmessages('error');
+	}
+	/**
+	 * возвращает объект со статусным сообщением
+	 *
+	 * @return statusmessages
+	 */
+	static public function getStatus() {
+		return new statusmessages('status');
+	}
+}
+
+/**
+ * Словарь.
+ *
+ * @package translator
+ * @author DroN
+ * @copyright 04.2006
+ */
+class Translator {
+	/**
+	 * словарь
+	 *
+	 * @var array
+	 */
+	private $dict = array();
+	/**
+	 * Кэш уже загруженных файлов
+	 *
+	 * @var string[]
+	 */
+	private $loadedFrom = array();
+	/**
+	 * загрузить все файлы директории
+	 *
+	 * @param string $dirname
+	 * путь к директории
+	 * @return bool
+	 * результат операции
+	 */
+	public function loadDir($dirname) {
+		if (!is_dir($dirname)) {
+			Debug::message('not a dir', $dirname, 'LANG', false);
+			return false;
+		}
+		$d = @dir($dirname);
+		if ($d === false) {
+			Debug::message('cant open dir', $dirname, 'LANG', false);
+			return false;
+		}
+		while (false !== ($entry = $d->read())) {
+			if ($entry == '.') continue;
+			if ($entry == '..') continue;
+			$this->load($entry, $dirname);
+		}
+		$d->close();
+		return true;
+	}
+	/**
+	 * загрузить файл
+	 * @param string $filename
+	 * путь к файлу
+	 * @param bool $noerror
+	 *
+	 * @return bool
+	 */
+	public function load($filename, $noerror = false) {
+		if (!is_file($filename)) {
+			if ($noerror) return false;
+			trigger_error("Lang file $filename is not found", E_USER_ERROR);
+		}
+		if (in_array($filename, $this->loadedFrom)) {
+			return false;
+		}
+		$dict = parse_ini_file($filename);
+		Debug::message('loaded', $filename, 'LANG', false);
+		$this->loadedFrom[] = $filename;
+		if (is_array($dict))
+			$this->dict = array_merge($this->dict, $dict);
+		return true;
+	}
+	/**
+	 * получить соответствие из словаря
+	 *
+	 * @param string $str
+	 * входное слово
+	 * @return string
+	 * выходное слово
+	 */
+	public function get($str) {
+		if (!isset($this->dict[$str])) {
+			if (CONFIG::$DEVELOPING) {
+				$dir = CONFIG::$PATH_ABS.'/lang/'.versions::getCurrent()->code.'.ini';
+				$out = "\n{$str}\t= \"\"";
+			//	file_put_contents($dir, $out, FILE_APPEND);
+			}
+			return $str;
+		}
+		$msg = $this->dict[$str];
+		if (func_num_args() > 1) {
+			$params = func_get_args();
+			array_shift($params);
+			if (count($params) > 0) {
+				if (is_array($params)) {
+					$msg = vsprintf($msg, $params);
+				} else {
+					$msg = vsprintf($msg, $params[0]);
+				}
+			}
+		}
+		return $msg;
+	}
+	/**
+	 * заменить слово в словаре
+	 *
+	 * @param string $str
+	 * слово в словаре
+	 * @param string $translate
+	 * новое значение
+	 */
+	public function set($str, $translate) {
+		$this->dict[$str] = $translate;
+	}
+	public function clear() {
+		$this->dict = array();
+	}
+}
+
+/**
+ * Карточка версии.
+ */
+class Version {
+	public $name;
+	public $code;
+	public $default;
+	public $id;
+	function __construct() {
+		$this->default = false;
+	}
+}
+/**
+ * Предназначен для организации показа разных версий сайта.
+ *
+ * Например в разных языках.
+ */
+class Versions {
+	static private $topId       = 0;
+	static public $versions     = array();
+	static private $currentCode = null;
+	/**
+	 * отслеживание единственной версии "по умолчанию"
+	 *
+	 * @var bool
+	 */
+	static private $defaultDefine = false;
+	/**
+	 * добавить версию
+	 *
+	 * @param string $name
+	 * имя версии
+	 * @param string $code
+	 * аббревиатура
+	 * @param bool $isdef
+	 * является ли версией по умолчанию
+	 */
+	static public function add($name, $code, $isdef = false, $id = null) {
+		self::$topId ++;
+		if ($id == null) $id = self::$topId;
+
+		$t          = new Version();
+		$t->name    = $name;
+		$t->code    = $code;
+		$t->id      = $id;
+		$t->default = (self::$defaultDefine) ? false : $isdef;
+
+		self::$defaultDefine      = self::$defaultDefine || $isdef;
+		self::$versions[$t->code] = $t;
+	}
+	/**
+	 * получить версию по умолчанию
+	 *
+	 * @return version
+	 */
+	static public function getDefault() {
+		foreach (self::$versions as $code => $t) {
+			/* @var $t Version */
+			if ($t->default) return $t;
+		}
+		return new NULLobject('version');
+	}
+	/**
+	 * Получить текущую активную версию
+	 *
+	 * @return version
+	 */
+	static public function getCurrent() {
+		if (self::$currentCode == null) return self::getDefault();// return new NULLobject('version');
+		if (!array_key_exists(self::$currentCode, self::$versions)) return new NULLobject('version');
+		return self::$versions[self::$currentCode];
+	}
+	/**
+	 * установить активную версию
+	 *
+	 * @param string/int $codeOrId
+	 * code или id устанавливаемой версии
+	 */
+	static public function setCurrent($codeOrId) {
+		if (is_numeric($codeOrId)) {
+			/* @var $t Version */
+			foreach (self::$versions as $code => $t) if ($t->id == $codeOrId) $codeOrId = $t->code;
+		}
+		self::$currentCode = $codeOrId;
+	}
+	/**
+	 * загрузить список из базы
+	 *
+	 */
+	static public function getFromDB() {
+		$versions = db_select('versions', '*', '1', DB_SELECT_OBJS);
+		foreach ($versions as $id => $item) {
+			self::add($item->name, $item->code, ($item->def == '1'), $item->id);
+		}
+	}
+	/**
+	 * добавить версию в базу
+	 *
+	 * @param string $name
+	 * @param string $code
+	 * @param bool $isdef
+	 */
+	static public function addToDB($name, $code, $isdef = false) {
+		$isdef = ($isdef) ? '1' : '0';
+		db_insert('versions', array('name' => $name, 'code' => $code, 'def' => $isdef));
+	}
+	static public function get($codeOrID = null) {
+		if ($codeOrID === null) return self::$versions;
+		if (is_numeric($codeOrID)) {
+			foreach (self::$versions as $version) {
+				if ($version->id == $codeOrID) return $version;
+			}
+		} else {
+			if (!isset(self::$versions[$codeOrID])) trigger_error("There are no version '$codeOrID' exists", E_USER_WARNING);
+			else return self::$versions[$codeOrID];
+		}
+	}
+	static public function clear() {
+		self::$versions      = array();
+		self::$currentCode   = null;
+		self::$topId         = 0;
+		self::$defaultDefine = false;
+	}
+}
+
+define('VC_SMARTY', 'ViewSmarty');
+define('VC_DTPL', 'ViewDtpl');
+define('VC_SIMPLE', 'ViewSimple');
+define('VC_XSL', 'ViewXSLT');
+define('VC_DIRECT', 'ViewNot');
+define('VC_NO', 'ViewNot');
+/**
+ * Класс представлений (шаблонизаторов).
+ *
+ * @author DroN
+ * @copyright 05.04.2006
+ * @package views
+ */
+abstract class View {
+	const DTPL   = 'ViewDtpl';
+	const SIMPLE = 'ViewSimple';
+	const XSL    = 'ViewXSLT';
+	const NO     = 'ViewNot';
+	/**
+	 * Имя файла шаблона
+	 *
+	 * @var unknown_type
+	 */
+	public $tplName;
+	/**
+	 * Данные, полученные от контроллера
+	 *
+	 * @var any
+	 */
+	protected $data;
+	/**
+	 * ссылка на породивший объект
+	 *
+	 * @var class
+	 */
+	public $owner;
+	/**
+	 * Присвоение данных
+	 *
+	 * @param unknown_type $data
+	 */
+	public function assign($data) {
+		$this->data = $data;
+		return $this;
+	}
+	function __construct($tplName = '') {
+		$this->tplName = $tplName;
+	}
+	/**
+	 * Получить объект контроллера.
+	 *
+	 * @param string $type
+	 * @param string $tpl
+	 * @return View
+	 */
+	static public function factory($type, $tpl, $owner = null) {
+		if (!class_exists($type, false))
+		require_once(dirname(__FILE__).'/'.$type.'.php');
+		$obj          = new $type();
+		$obj->tplName = $tpl;
+		if (class_exists('Debug'))
+			Debug::message('View created', sprintf('%s (%s)', $type, $tpl), 'VIEWS', false);
+		return $obj;
+	}
+	/**
+	 * Получение результата
+	 *
+	 * @return string
+	 */
+	abstract public function get();
+}
+
+/**
+ * LICENCE
+ *
+ * Copyright (c) 2009, Andrei V.Nakhabov
+ * All rights reserved.
+ *
+ * 	Redistribution and use in source and binary forms, with or without modification,
+ * 	are permitted provided that the following conditions are met:
+ * 	    * Redistributions of source code must retain the above copyright notice,
+ * 	      this list of conditions and the following disclaimer.
+ * 	    * Redistributions in binary form must reproduce the above copyright notice,
+ *        this list of conditions and the following disclaimer in the documentation
+ *        and/or other materials provided with the distribution.
+ *      * Neither the name of author may be used to endorse or promote products derived from this
+ *        software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+/**
+ *	DTPL - simple 'template' engine.
+ *
+ *	You must specify tplName - php file with view-logic script.
+ *	It will be included and executed with capture content into ob_buffer
+ */
+class ViewDtpl extends View {
+	public function get() {
+		ob_start();
+		$RDS  = ObjectsPool::get('RDS');
+		$data = $this->data;
+		if (!include($this->tplName)) {
+			trigger_error(sprintf('<b>DTPL error:</b> Cannot read template file %s', $this->tplName), E_USER_ERROR);
+		}
+		$content = ob_get_contents();
+		ob_end_clean();
+		if (substr($content, 0, 3) == chr(239).chr(187).chr(191)) $content = substr($content, 3);
+		return $content;
+	}
+}
+
+/**
+ * LICENCE.
+ *
+ * Copyright (c) 2009, Andrei V.Nakhabov
+ * All rights reserved.
+ *
+ * 	Redistribution and use in source and binary forms, with or without modification,
+ * 	are permitted provided that the following conditions are met:
+ * 	    * Redistributions of source code must retain the above copyright notice,
+ * 	      this list of conditions and the following disclaimer.
+ * 	    * Redistributions in binary form must reproduce the above copyright notice,
+ *        this list of conditions and the following disclaimer in the documentation
+ *        and/or other materials provided with the distribution.
+ *      * Neither the name of author may be used to endorse or promote products derived from this
+ *        software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * + поддержка строк, объектов и массивов (циклов)
+ * Пример шаблона:
+ *  <h1>Добрый день, {name}!</h1>
+ * {object.property}
+ * <p>Уведомляем вас, что в вашем профиле Finobox.ru автоматически были созданы бюджеты на {month}:</p>
+ * <!-- BEGIN budgets -->
+ * row begin: {budgets.id} {budgets.name} end of {name}<hr/>
+ * <!-- END budgets -->
+ *
+ * name - ожидаем строку во входном массиве под ключем 'name' (data['name'])
+ * object - ожидаем в data['object'] объекта, у которого берем свойство property и выводим
+ * секция budgets - если data['budgets'] - массив массивов, то секция будет
+ * повторена для каждого элемента массива рекурсивно
+ * 	- секция становится шаблоном, а элемент массива - входящими данными для рекурсивного шаблонизатора.
+ * 	При этом названия ключей массива дополняются префиксом, равным имени свойства. В данном случае - "budget."
+ */
+class ViewSimple extends View {
+	public function viewSimpleCallback($m) {
+		$equation = $m[1]; // это имя переменной в this->data
+
+		if (($spacePos = strpos($equation, ' ')) === false) {
+			if (isset($this->data[$equation])) {
+				/*
+				 * если this->data[equation] - массив, то организовать циклический рендер
+				 */
+				if (is_array($this->data[$equation])) {
+					$out = '';
+					foreach ($this->data[$equation] as $v) {
+						$dataToSubrender = array(); // добавить к свойствам префикс и именем переменной - varname.property
+						foreach($v as $subF => $subV) $dataToSubrender[$equation.'.'.$subF] = $subV;
+						$renderedRow = View::factory(VC_SIMPLE, $m[2])->assign($dataToSubrender)->get();
+						$out .= $renderedRow;
+					}
+					$m[2] = $out;
+				}
+				if ($this->data[$equation]) return $m[2];
+			}
+		} else {
+			$result   = '';
+			$equation = preg_replace('/(?:^|\s)\.(.+?)\b/', '$this->data[\'\1\']', $equation);
+			eval( sprintf('if (%s) $result = $m[2];', $equation) );
+			return $result;
+		}//end if
+	}
+	public function get() {
+		$content      = $this->tplName;
+		$placeholders = array();
+		$placedata    = array();
+		if ($this->data) {
+			foreach ($this->data as $f => $v) {
+				if ($f === 0) continue;
+				/*
+				 * у класса дать возможность заменять плейсхолдеры вида {class.property}
+				 */
+				if (is_object($v) ) {
+					foreach ($v as $vf => $vv) {
+						$placeholders[] = sprintf('{%s.%s}', $f, $vf);
+						$placedata[]    = $vv;
+					}
+				} elseif(is_array($v)) {
+					$placeholders[] = '{'.$f.'}';
+					// надо взять контент между BEGIN $f и END $f и повторить его по количеству ячеек массива
+					$placedata[] = 'CYCLES HERE';
+				} else {
+					$placeholders[] = '{'.$f.'}';
+					$placedata[]    = $v;
+				}
+			}
+		}//end if
+		//dump($placedata, 'placedata');
+		$content = str_replace($placeholders, $placedata, $content);
+		/*
+		 * удалить блоки с нетронутым контентом
+		 */
+		$content = preg_replace_callback(
+		    '/\<!\-\- BEGIN (.+?) \-\->(.+?)\<!\-\- END \1 \-\->/s',
+		    array($this, 'viewSimpleCallback'),
+		    $content
+		);
+		return $content;
+	}
+}
+
+class AuthController extends DController {
+	/**
+	 * @var UserAuthDefaultModel
+	 */
+	static protected $userModelName = null;
+	static function setModelName($model) {
+		self::$userModelName = $model;
+	}
+	/**
+	 * @var UserDefaultModel
+	 */
+	protected $userModel;
+	function __construct() {
+		if (self::$userModelName == null)
+			self::$userModelName = 'UserDefaultModel';
+		$this->userModel = new self::$userModelName();
+	}
+	function login($login, $password) {
+		DataValidationRule::checkDirect(array('login' => $login), 'ne', s('error_emptylogin'));
+		DataValidationRule::checkDirect(array('password' => $password), 'ne', s('error_emptypassword'));
+		$this->userModel->login       = $login;
+		$this->userModel->password    = $password;
+		if (CONFIG::$USE_COOKIE_FOR_AUTH && isset($_REQUEST['remembering']) && $this->userModel->isPropertyExist('remembering')) {
+			$this->userModel->remembering = $_REQUEST['remembering'];
+		}
+		$this->userModel->create();
+		$handlingResult = new HandlingResult;
+		Events::raise('onLogin', $handlingResult, $this->userModel->getAsStdObject());
+		return $handlingResult;
+	}
+	/**
+	 * деавторизация.
+	 * Чтобы переопределить результат действия (HandlingResult),
+	 * надо повесить обработчик на onLogout
+	 */
+	function logout() {
+		$userInfo = $this->userModel->getAsStdObject();
+		$this->userModel->delete();
+		$handlingResult = new HandlingResult;
+		Events::raise('onLogout', $handlingResult, $userInfo);
+		return $handlingResult;
+	}
+}
+/**
+ * Обработка подтверждающих ключей.
+ *
+ * @author Andrei V.Nakhabov
+ * @copyright 12.2007
+ */
+class DefferedActions extends DController {
+	function __construct(DataBase $db) {
+		parent::__construct();
+		$this->db = $db;
+	}
+
+	public function activate($key) {
+		$keyParams = self::checkKey($key);
+		if ($keyParams == null) {
+			throw new Exception(s('keynotfound'));
+		}
+		@list($class, $method) = explode('/', $keyParams->action);
+		if (empty($method)) {
+			$res = call_user_func($method, $keyParams->params);
+		} else {
+			$res = (new $class)->invoke($method, $keyParams->params);
+		}
+//		if ($res !== false)
+//			self::removeKey($exist->id);
+
+		if ($res instanceof HandlingResult) {
+			/* @var $res handlingResult */
+			if ($message = $res->getStatus()) {
+				return $message;
+			}
+			if ($response = $res->getResponse()) {
+				return $response;
+			}
+			return 'Ok';
+		} else {
+			return $res;
+		}
+	}
+	final static public function checkKey($key) {
+		if (strlen($key) != 32) accessDenied();
+		$exist = ObjectsPool::get('DataBase')->select('defferedactions', '*', sprintf("keystring = '%s'", ObjectsPool::get('DataBase')->escape($key)), DB_SELECT_OBJ);
+		if ($exist == null) return null;
+		if ($exist->params)
+			$exist->params = unserialize($exist->params);
+		else
+			$exist->params = null;
+		return $exist;
+	}
+	final static public function removeKey($keyId) {
+		ObjectsPool::get('DataBase')->delete('defferedactions', "id = {$keyId}");
+	}
+	static private function generateKey() {
+		$val   = time().mt_rand(111, 999).'secretword';
+		$key   = md5($val);
+		$tries = 5;
+		while (1) {
+			$exist = ObjectsPool::get('DataBase')->select('defferedactions', 'id', "keystring = '{$key}'", DB_SELECT_ONE);
+			if ($exist == null) break;
+			$tries--;
+			if ($tries == 0) throw new ExceptionCMS('System error: cant generate unique key');
+		}
+		return $key;
+	}
+	static public function insert($action, $params) {
+		$params = serialize($params);
+		$key    = self::generateKey();
+		$data   = array(
+		    'keystring' => $key,
+		    'date'      => new SQLvar('NOW()'),
+		    'params'    => $params,
+		    'action'    => $action
+		);
+		ObjectsPool::get('DataBase')->insert('defferedactions', $data);
+		return $key;
+	}
+}
+
+class MailTplManager extends CRUD {
+	protected function createModelInstance() {
+		if (CONFIG::getPackages()->available('Versions')) {
+			$defaultVersion = Versions::getDefault()->id;
+		} else {
+			$defaultVersion = 0;
+		}
+		$model = new DModelDynamic(
+			array(
+				new DModelProperty('id', 'int'),
+				new DModelProperty('lang_id', 'int', '', $defaultVersion),
+				new DModelProperty('code', 'string required'),
+				new DModelProperty('descr', 'text'),
+				new DModelProperty('macros', 'string'),
+				new DModelProperty('fromaddress', 'string'),
+				new DModelProperty('subject', 'string'),
+				new DModelProperty('message', 'text')
+			)
+		);
+		$model->setProxy(new DModelProxyDatabase('mailtemplates'));
+		return $model;
+	}
+	public function lists() {
+		$this->customize->fields = 'id,subject,descr';
+		return parent::lists();
+	}
+	private $shortMode = false;
+	public function showShort($id = null) {
+//		$this->shortMode = true;
+		$this->customize->fields = 'id,code,subject,message,fromaddress';
+		return $this->show($id);
+	}
+	public function show($id = null) {
+		//$expr = " AND (lang_id ={$curLang} OR lang_id = {$defLang}) ORDER BY IF(lang_id={$defLang},1,0) LIMIT 0,1";
+		$common = dbSelect('mailtemplates', 'code,message', "code IN ('HEADER', 'FOOTER')", DB_SELECT_ASC);
+		foreach ($common as &$body) {
+			$body = str_replace(array("\r", "\n", '"'), array('', '', '\"'), $body);
+		}
+		JSManager::exportVar('Mails.header', $common['HEADER']);
+		JSManager::exportVar('Mails.footer', $common['FOOTER']);
+		$code = <<<JS
+Mails.preview = function ()
+{
+	var winopt="width=500,heigth=400,scrollbars=yes,status=yes,toolbar=no,menubar=no,resizable=yes";
+	myWinShow = window.open("","mywin",winopt);
+	myWinShow.document.open();
+	var html = $('textarea[name=message]').val() ;
+	html = html.replace(/{header}/, Mails.header);
+	html = html.replace(/{footer}/, Mails.footer);
+	myWinShow.document.writeln( html);
+	myWinShow.document.close();
+}
+JS;
+		JSManager::exportCode($code);
+		return parent::show($id);
+	}
+	public function getShowModelToFormMap(DModel $model) {
+		$map = parent::getShowModelToFormMap($model);
+		if ($this->shortMode) {
+			$map['code'] = 'HiddenInput';
+		}
+		return $map;
+	}
+
+	public function getShowForm(DModel $model) {
+		$form = parent::getShowForm($model);
+		if (!in_array($model->code, array('HEADER', 'FOOTER'))) {
+			$t = new Button;
+			$t->setLabel('Preview')->addAttribute('onclick="Mails.preview()"');
+			$form->buttonsBox->add($t);
+			$t = new Submit;
+			$t->setLabel('Save and send')->setName('action')->setValue('MailTplManager/send');
+			$form->buttonsBox->add($t);
+		}
+		return $form;
+	}
+	function send(){
+		$this->edit();
+		Mailer::push(new MailLetter(array(), $_POST['code']), CONFIG::$TEST_EMAIL, MAIL_INSTANT);
+		return new HandlingResult('Message has been sent to '.CONFIG::$TEST_EMAIL);
+	}
+
+}
+define('MAIL_PENDING', 'pending');
+define('MAIL_INSTANT', 'instant');
+define('MAIL_BROADCAST', 'broadcast');
+/**
+ * Рассыльщик почты.
+ *
+ * @author Andrei V.Nakhabov
+ * @copyright 09.2007
+ */
+class MailLetter {
+	public $subject;
+	public $template;
+	private $data;
+	private $parsedTemplate;
+	public $dispatchDate;
+	public $fromAddress;
+	public $templateMissed = false;
+	function __construct($data, $subjectORcode, $template = null) {
+		$data = (array)$data;
+		if ($template === null) {
+			$defLang = Versions::getDefault();
+			$curLang = Versions::getCurrent();
+			$where   = "code = '$subjectORcode'";
+			if (!$defLang instanceof NULLobject) {
+				$where .= "AND (lang_id ={$curLang->id} OR lang_id = {$defLang->id})";
+				$where .= "ORDER BY IF(lang_id={$defLang->id},1,0) LIMIT 0,1";
+			}
+			$tpl = ObjectsPool::get('DataBase')->select('mailtemplates', 'subject, fromaddress, message', $where, DB_SELECT_OBJ);
+			if ($tpl == null) {
+				// template missed
+				$this->templateMissed = true;
+				$this->subject        = $subjectORcode;
+			} else {
+				$this->subject     = $tpl->subject;
+				$this->fromAddress = $tpl->fromaddress;
+				$this->template    = html_entity_decode($tpl->message);
+			}
+		} else {
+			$this->subject  = $subjectORcode;
+			$this->template = $template;
+		}
+		$data['url']        = CONFIG::$PATH_URL;
+		$this->data         = $this->detectAttachments($data);
+		$this->dispatchDate = isset($data['dispatchdate']) ? $data['dispatchdate'] : new SQLvar('NOW()');
+	}
+	private $attachments = null;
+	private function detectAttachments($data) {
+		$out = array();
+		foreach ($data as $f => $v) {
+			if ($v instanceof MailAttachment) {
+				if (!is_array($this->attachments))
+					$this->attachments = array();
+				if (is_string($f)) {
+					/*
+					 * если задан ключ , то использовать его как имя вложенного файла
+					 */
+					$v->setFilename($f);
+				}
+				$this->attachments[] = $v;
+			} else {
+				$out[$f] = $v;
+			}
+		}
+		return $out;
+	}
+	public function getAttachments() {
+		return ($this->attachments == null) ? array() : $this->attachments;
+	}
+	public function isAttachments() {
+		return $this->attachments !== null;
+	}
+	private function getMessage() {
+		if ($this->templateMissed)
+			return serialize($this->data);
+		$view = View::factory(VC_SIMPLE, $this->template, $this);
+		$view->assign($this->data);
+		$body = $view->get();
+		Events::raise('compileMailerBody', $body);
+		return $body;
+	}
+	private function getSubject() {
+		if ($this->templateMissed)
+			return $this->subject;
+		$view = View::factory(VC_SIMPLE, $this->subject, $this);
+		$view->assign($this->data);
+		return $view->get();
+	}
+	private function getFrom() {
+		$view = View::factory(VC_SIMPLE, $this->fromAddress, $this);
+		$view->assign($this->data);
+		return $view->get();
+	}
+
+	public $subjectCompiled;
+	public $fromAddressCompiled;
+	public $bodyCompiled;
+	private $isCompiled = false;
+	public function render() {
+		if ($this->isCompiled)
+			return;
+		$this->subjectCompiled     = $this->getSubject();
+		$this->fromAddressCompiled = $this->getFrom();
+		$this->bodyCompiled        = $this->getMessage();
+		$this->isCompiled          = true;
+	}
+}
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class Mailer {
+	static public function push(MailLetter $letter, $listOfEmails, $status = MAIL_PENDING) {
+		if (!is_array($listOfEmails))
+			$listOfEmails = array($listOfEmails);
+
+		$listOfEmails = implode(',', $listOfEmails);
+		$letter->render();
+		if ($letter->templateMissed) {
+			/**
+			 * mail's template missed, dump the data with proper status
+			 */
+			$data = array(
+				'date'    => $letter->dispatchDate,
+				'subject' => $letter->subjectCompiled,
+				'email'   => $listOfEmails,
+				'body'    => $letter->bodyCompiled,
+				'status'  => 'tplmissed'
+			);
+		} else {
+			/**
+			 * mail is ready to send
+			 */
+			$mailHeaders = "MIME-Version: 1.0 \n";
+			$boundary    = 'DEngine-Mail-3347-998834234';
+			if ($letter->isAttachments()) {
+				/*
+				 * attach the files
+				 */
+				$mailHeaders .= "Content-type: multipart/mixed; boundary=$boundary \n";
+
+				$body  = '--'.$boundary."\n";
+				$body .= "Content-Transfer-Encoding: base64\n";
+				$body .= "Content-Type: text/html; charset=utf-8 \n\n";
+				$body .= base64_encode($letter->bodyCompiled);
+				$body .= "\n\n";
+
+				foreach ($letter->getAttachments() as $attachedFile) {
+					$body    .= '--'.$boundary."\n";
+					$filename = $attachedFile->getFilename();
+					$mimetype = 'application/octet-stream';
+					$body    .= "Content-Type: $mimetype;\n";
+					$body    .= "Content-Transfer-Encoding: base64\n";
+					$body    .= "Content-Disposition: attachment; filename=\"{$filename}\"\n\n";
+					$body    .= $attachedFile->getBody();
+					$body    .= "\n\n--".$boundary."\n";
+				}
+
+				$letter->bodyCompiled = $body;
+			} else {
+				/*
+				 * content is html text, no attachs
+				 */
+				$mailHeaders .= "Content-type: text/html; charset=utf-8 \n";
+				$mailHeaders .= "Content-Transfer-Encoding: 8bit\n";
+			}//end if
+			$mailHeaders .= "From: {$letter->fromAddressCompiled}\n";
+			$mailHeaders .= "Return-Path: {$letter->fromAddressCompiled} \n";
+			$mailHeaders .= "X-Priority: 3 \n";
+			$mailHeaders .= "X-Mailer: DEngine Mailer \n";
+			$mailHeaders .= "X-Unique-ID: 52f408a2_988b02f4_b5e6f4ba_af0ae \n";
+
+			$data = array(
+				'date'    => $letter->dispatchDate,
+				'email'   => $listOfEmails,
+				'subject' => $letter->subjectCompiled,
+				'body'    => $letter->bodyCompiled,
+				'headers' => $mailHeaders,
+				'status'  => $status
+			);
+			if (($status == MAIL_INSTANT) || CONFIG::$DEVELOPING) {
+				$result = self::sendmail($listOfEmails, $letter->subjectCompiled, $letter->bodyCompiled, $mailHeaders);
+				if ($result === - 1)
+					$data['status'] = 'failed';
+				elseif ($result) {
+					$data['status'] = 'sent';
+				} else {
+					$data['status'] = MAIL_PENDING;
+				}
+			}
+		}//end if
+		ObjectsPool::get('DataBase')->insert('mailqueue', $data);
+		$mailId = ObjectsPool::get('DataBase')->lastId();
+		return $mailId;
+	}
+	static public function send($status = MAIL_PENDING, $ids = null) {
+		ObjectsPool::get('DataBase')->useCache = false;
+
+		$usingCacheStatus = ObjectsPool::get('DataBase')->useCache;
+		$sentIDs          = array();
+		$mailerTime       = time();
+		if ($ids === null) {
+			$expr = 'AND date <= NOW() ORDER BY date LIMIT 0,1';
+		} else {
+			$expr = "AND id IN ($ids)";
+		}
+		while (1) {
+			$lockQuery  = 'LOCK TABLES %1$smailqueue WRITE,';
+			$lockQuery .= '%1$smailqueue as mailqueue WRITE';
+			$lockQuery  = sprintf($lockQuery, CONFIG::getDBCfg()->prefix);
+			ObjectsPool::get('DataBase')->query($lockQuery);
+			$locked = true;
+			$msgs   = ObjectsPool::get('DataBase')->select('mailqueue', '*', "status = '$status' $expr", DB_SELECT_OBJS);
+			$count  = 0;
+			if ($msgs) {
+				foreach ($msgs as $id => $msgObject) {
+					if (in_array($id, $sentIDs))
+						continue;
+					ObjectsPool::get('DataBase')->update('mailqueue', array('status' => 'processed'), "id = $id");
+					if ($locked) {
+						$locked = false;
+						ObjectsPool::get('DataBase')->query('UNLOCK TABLES');
+					}
+					if ($status == MAIL_BROADCAST) {
+						$emails = ObjectsPool::get('DataBase')->select('members', 'email', "subscribed = 'Yes' order by user_id", DB_SELECT_COL);
+					} else {
+						$emails = explode(',', $msgObject->email);
+					}
+
+					$result         = true;
+					$sentMailsCount = 0;
+					foreach ($emails as $email) {
+						if ($status == MAIL_BROADCAST) {
+							ObjectsPool::get('DataBase')->insert(
+							    'broadcastsents',
+							    array(
+									'email' => $email,
+									'rem'   => "Mailer: $mailerTime message:{$msgObject->id}"
+								)
+							);
+						}
+						$curResult = self::sendmail($email, $msgObject->subject, $msgObject->body, $msgObject->headers);
+						$sentMailsCount++;
+						$result = $result && $curResult;
+						if ($status != MAIL_INSTANT)
+							sleep(1);
+					}
+					ObjectsPool::get('DataBase')->update(
+					    'mailqueue',
+					    array(
+							'status'    => ($result) ? 'sent' : 'failed',
+							'sentmails' => new SQLvar("sentmails + $sentMailsCount")
+						),
+					    "id = $id"
+					);
+					$sentIDs[] = $id;
+					$count++;
+				}//end foreach
+			}//end if
+			if ($count == 0) {
+				if ($locked)
+					ObjectsPool::get('DataBase')->query('UNLOCK TABLES');
+				break;
+			}
+		}//end while
+		ObjectsPool::get('DataBase')->useCache = $usingCacheStatus;
+	}
+	static private function sendmail($emails, $subject, $body, $headers) {
+		if (!is_array($emails))
+			$emails = array($emails);
+
+		$result = true;
+		foreach ($emails as $email) {
+			$email = trim($email);
+			if (!preg_match('/^[\w-]+(?:[\.\w]+)*@\w(?:(?:\.\w)*[\w\-]+)*\.\w{2,3}$/', $email)) {
+				return -1;
+			} else {
+				$subject = '=?utf-8?B?'.base64_encode($subject).'?=';
+				//file_put_contents(CONFIG::absPath('test.eml'), $headers."\n".$body);exit();
+				$curResult = mail($email, $subject, $body, $headers);
+			}
+			$result = $result && $curResult;
+		}
+		return $result;
+	}
+}
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class MailAttachment {
+	private $body;
+	private $filename;
+	function __construct($filepath = null) {
+		if ($filepath !== null)
+			$this->setFile($filepath);
+	}
+	public function setBody($body, $toBeEncoded = true) {
+		$this->body = ($toBeEncoded) ? base64_encode($body) : $body;
+	}
+	public function setFile($filepath) {
+		$this->setBody(file_get_contents($filepath));
+		$this->filename = basename($filepath);
+	}
+	public function getBody() {
+		return $this->body;
+	}
+	public function setFilename($name) {
+		$this->filename = $name;
+	}
+	public function getFilename() {
+		return $this->filename;
+	}
+}
+
+CONFIG::getPackages()->load('DForm');
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class TinyMCE extends TextArea {
+	public $config;
+	function __construct($name = '') {
+		parent::__construct($name);
+		$this->config = (object)(
+		    array(
+				'script_url'                      => CONFIG::$PATH_KERNEL_URL.'/js/tiny_mce_jq/tiny_mce.js',
+				'mode'                            => 'exact',
+				'elements'                        => '%1$s',
+				'theme'                           => 'simple',
+				'theme_advanced_toolbar_location' => 'top'
+			)
+		);
+		$js = "function (inst){\$('#%1\$s').val( inst.getBody().innerHTML);}";
+//		$this->config->onchange_callback = new jsonstring($js);
+		Events::raise('setupTinyMCE', $this);
+	}
+	public function getHtml() {
+//		JSManager::add('kernel:js/tinymce/jquery.tinymce.min.js', 10);
+//		JSManager::add('kernel:js/tinymce/tinymce.min.js', 10);
+		JSManager::add('kernel:js/tiny_mce_jq/jquery.tinymce.js');
+		$this->addAttribute('style="width:100%"');
+		$out = parent::getHtml();
+		$id  = ($this->id) ? $this->id : $this->name;
+		JSManager::exportCode(
+		    sprintf(
+		        "$('textarea[name=%s]').tinymce(%s);",
+		        $id,
+		        sprintf(json_encode($this->config), $id)
+		    )
+		);
+		return $out;
+	}
+	public function setJQConfig($property, $value) {
+		$this->config->$property = $value;
+		return $this;
+	}
+}
+
+/**
+ * Класс пользовательских настроек.
+ */
+class UserSettings extends DModelAutosave {
+	static public $DB_TABLE_NAME = 'rds_users';
+	static public $DB_PROPERTY_NAME = 'config';
+	public $userId;
+	function __construct($userId = 0) {
+		/*
+		 * инициализация настроек, задаем панели по умолчанию
+		 */
+		$this->userId = $userId;
+		parent::__construct();
+	}
+	public function beforeSave() {
+		if ($this->userId > 0) {
+			dbUpdate(self::$DB_TABLE_NAME, array(self::$DB_PROPERTY_NAME => serialize($this->getAsStdObject())), "id = $this->userId");
+		}
+	}
+}
+
+/**
+ * @return unknown
+ * @param unknown $names
+ * @desc из GET или POST достает переменные с именами в заданном массиве
+ */
+function getPOSTvars($names) {
+	if (func_num_args() > 1) {
+		$names = func_get_args();
+	}
+	$requestArray = null;
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+		$requestArray = &$_POST;
+	} else {
+		$requestArray = &$_GET;
+	}
+	if (!is_array($names)) {
+		$result = @$requestArray[$names];
+		if (!is_array($result)) $result = $result;
+		return $result;
+	}
+	$result = array();
+	foreach ($names as $inputname) {
+		$result[] = @$requestArray[$inputname];
+	}
+	return $result;
+}
+/**
+ * Получить значение переменной из POST, с проверкой фильтрами. В случае несоответствия фильтру кидает exception
+ *
+ * @param unknown_type $varname
+ * @param unknown_type $filters
+ */
+function getPOSTfiltered($varname, $filters, $errorMsg = false, $raiseException = true) {
+	/*
+	 *  описание фильтров
+	 *  n - число
+	 *  e - не пустое
+	 *  a - массив
+	 */
+	try {
+		$value = getPOSTvars($varname);
+		if ($filters[0] == 'l') {
+			if (!preg_match('/^[\w-]+(?:[\.\w]+)*@\w(?:(?:\.\w)*[\w\-]+)*\.\w{2,3}$/', $value))
+				throw new Exception(($errorMsg) ? $errorMsg : 'Wrong email: '.$varname);
+		}
+		if ($filters[0] == 'e') {
+			if (empty($value))
+				throw new Exception(($errorMsg) ? $errorMsg : s('empty_field').$varname);
+		}
+		if ($filters[0] == 'n') {
+			if (!is_numeric($value))
+				throw new Exception(($errorMsg) ? $errorMsg : s('not_numeric').$varname);
+		}
+		if ($filters[0] == 'a') {
+			if (!is_array($value))
+				throw new Exception(($errorMsg) ? $errorMsg : s('not_array').$varname);
+		}
+		if ($filters[0] == 'r') {
+			if (!preg_match(substr($filters, 1), $value))
+				throw new Exception(($errorMsg) ? $errorMsg : 'Invalid value '.$varname);
+		}
+		if ($filters[0] == 'R') {
+			if (!preg_match(substr($filters, 1), $value, $patterns))
+				throw new Exception(($errorMsg) ? $errorMsg : 'Invalid value '.$varname);
+			return $patterns;
+		}
+		return $value;
+	} catch (Exception $e) {
+		if (!$raiseException) return false;
+		throw $e;
+	}//end try
+}
+function getParamValue($paramSignature) {
+	$array = @$GLOBALS['params'];
+	if (is_array($array)) {
+		foreach ($array as $param) {
+			if (preg_match($paramSignature, $param, $subpatterns)) {
+				if (is_array($subpatterns)) {
+					if (isset($subpatterns[1])) {
+						return $subpatterns[1];
+					} else {
+						return $subpatterns[0];
+					}
+				} else {
+					return $param;
+				}
+			}
+		}
+	}
+	return null;
+}
+
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class DFile {
+	public $name;
+	public $type;
+	public $tmpName;
+	public $error;
+	public $size;
+	/**
+	 * @static
+	 * @param $dfile
+	 * @param null $errorMsg
+	 * @return DFile|null
+	 * @throws Exception
+	 */
+	public static function checkUploaded($dfile, $errorMsg = null) {
+		if ($errorMsg == null) $errorMsg = 'Upload failed';
+		if (!$dfile instanceof DFile) {
+			throw new Exception($errorMsg);
+		}
+		switch ($dfile->error) {
+			case 0:
+				return $dfile;
+			case 4:
+				return null;
+			default:
+				throw new Exception($errorMsg);
+			break;
+		}
+	}
+	function __construct($data = null) {
+		if ($data != null)
+		foreach ($data as $f => $v) {
+			if ($f == 'tmp_name') $f = 'tmpName';
+			$this->$f = $v;
+		}
+	}
+	public function checkType($needed, $errorMsg = 'Invalid filetype') {
+		if (!is_array($needed)) $needed = array($needed);
+		$matched = false;
+		foreach ($needed as $type) {
+			if ( ($p = strpos($type, '*')) !== false) {
+				$type    = substr($type, 0, $p);
+				$matched = (strpos($this->type, $type) === 0);
+			} else {
+				$matched = ($this->type == $type);
+			}
+			if ($matched) break;
+		}
+		if (!$matched) throw new Exception($errorMsg);
+		return $this;
+	}
+	public function moveTo($dest) {
+		if (is_dir($dest)) $dest .= '/'.$this->name;
+		rename($this->tmpName, $dest);
+		$this->tmpName = $dest;
+		return $this;
+	}
+	public function delete() {
+		if (is_file($this->tmpName)) {
+			unset($this->tmpName);
+		}
+	}
+}
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class TransformFILES {
+	/**
+	 * преобразовать структуру FILES в случае массива,
+	 * например
+	 * <input type="file" name="input[index1]" />
+	 * <input type="file" name="input[index2]" />
+	 * дает следующий _FILES:
+	 * Array (
+	 *    [input] => Array (
+	 *        [name] => Array(
+	 *            [index1] => ...
+	 *            [index2] => ...
+	 *        )
+	 *        [type] => Array (
+	 *            [index1] => ...
+	 *            [index2] => ...
+	 *        )
+	 *        ...
+	 *    )
+	 * )
+	 * Преобразуем в:
+	 * Array (
+	 *    [input] => Array (
+	 *        [index1] => DFile (
+	 *            [name] => ...
+	 *            [type] => ...
+	 *            ...
+	 *        )
+	 *        [index2] => DFile (
+	 *            [name] => ...
+	 *            [type] => ...
+	 *            ...
+	 *        )
+	 *    )
+	 * )
+	 */
+	static public function run() {
+		if (!isset($_FILES)) return;
+		$new = array();
+		foreach ($_FILES as $inputname => $var) {
+			if (!is_array($var['name'])) {
+				$new[$inputname] = new DFile($var);
+			} else {
+				$new[$inputname] = self::recur($var);
+			}
+		}
+		$_FILES = $new;
+	}
+	static private function recur($var) {
+		$res = array();
+		foreach ($var['name'] as $i => $v) {
+			$subvar             = array();
+			$subvar['name']     = $var['name'][$i];
+			$subvar['tmp_name'] = $var['tmp_name'][$i];
+			$subvar['size']     = $var['size'][$i];
+			$subvar['error']    = $var['error'][$i];
+			$subvar['type']     = $var['type'][$i];
+			if (is_array($v)) {
+				$res[$i] = self::recur($subvar);
+			} else {
+				$res[$i] = new DFile($subvar);
+			}
+		}
+		return $res;
+	}
+	/**
+	 * Загружает файлы по указанным ссылкам,
+	 * необходимо для реализации драг-н-дропа с вкладок браузера и т.д., когда тащится текст ссылки, а не файл
+	 */
+	static public function handleExternalUrlUploads() {
+		if (!array_key_exists('_fileUploadedExternally', $_REQUEST) ) return;
+		if (!is_array($_FILES))
+			$_FILES = array();
+		foreach ($_REQUEST['_fileUploadedExternally'] as $item) {
+			list($name, $url) = $item;
+//			$url = "http://icdn.lenta.ru/images/0000/0300/000003002077/pic_1369149485.jpg";
+			$file = file_get_contents(($url));
+			$entry = array();
+			if (!$file) {
+				$entry['name']     = '';
+				$entry['tmp_name'] = '';
+				$entry['type']  = '';
+				$entry['size']  = 0;
+				$entry['error'] = 4;
+				continue;
+			} else {
+				$filePath = tempnam(sys_get_temp_dir(), 'extUloads');
+				file_put_contents($filePath, $file);
+				$entry['name']     = $filePath;
+				$entry['tmp_name'] = $filePath;
+				$entry['type']  = mime_content_type($filePath);
+				$entry['size']  = filesize($filePath);
+				$entry['error'] = 0;
+			}
+			/*
+			 * добавить переменную в FILES
+			 */
+			$v = new DFile($entry);
+			if (($p = strpos($name, '[')) !== false) {
+//				if (!preg_match('/^[a-zA-Z\d\[\[\-_\'\"]+$/', $name)) trigger_error('Invalid variable', E_USER_ERROR);
+				$nameArray   = substr($name, 0, $p);
+				$nameIndexes = substr($name, $p);
+				// to do find a better solution
+				eval('$_FILES["'.$nameArray.'"]'.$nameIndexes.'=$v;');
+			} else {
+				$_FILES[$name] = $v;
+			}
+		}
+	}
+	/**
+	 * На основании переменной _uploadedfiles создать записи в массиве $_FILES,
+	 * чтобы сэмулировать обычную загрузку файла
+	 * Структура FILES будет соответствовать внутреннему стандарту движка! (как после TransformFILES::run)
+	 */
+	static public function handleProgressUploaderSession() {
+		if (!array_key_exists('_uploadedfiles', $_REQUEST) ) return;
+		if (!is_array($_FILES))
+			$_FILES = array();
+		$GLOBALS['_FILES_OLD'] = $_FILES;
+
+		$_FILES = self::handleProgressUploaderSessionRecur($_REQUEST['_uploadedfiles']);
+		unset($_REQUEST['_uploadedfiles']);
+	}
+	static private function handleProgressUploaderSessionRecur($files) {
+		$res = array();
+		foreach ($files as $name => $key) {
+			/*
+			 * если значением является строка с запятыми, то это мультизагрузка (FileDropZone), сделать массив
+			 */
+			if (is_string($key) && (strpos($key, ',') !== false)) {
+				$files[$name] = explode(',', $key);
+			}
+			$key = $files[$name];
+			if (is_array($key)) {
+				$res[$name] = self::handleProgressUploaderSessionRecur($key);
+			} else {
+				$entry = array();
+				if (!preg_match('/^[a-z\d]{16}$/', $key)) {
+					$entry['size']  = 0;
+					$entry['error'] = 4;
+					$entry['name']  = $entry['tmp_name'] = $entry['type'] = '';
+				} else {
+					$path              = CONFIG::$PATH_UPLOADFILES.'/'.$key;
+					$namepath          = CONFIG::$PATH_UPLOADFILES.'/'.$key.'.name';
+					$entry['name']     = file_exists($namepath) ? file_get_contents($namepath) : $name;
+					$entry['tmp_name'] = $path;
+					if (file_exists($path)) {
+						$entry['type']  = mime_content_type($path);
+						$entry['size']  = filesize($path);
+						$entry['error'] = 0;
+					} else {
+						$entry['size']  = 0;
+						$errorpath      = CONFIG::$PATH_UPLOADFILES.'/'.$key.'.error';
+						$entry['error'] = file_exists($errorpath) ? file_get_contents($errorpath) : 4;
+						$entry['type']  = '';
+					}
+				}
+				$res[$name] = new DFile($entry);
+			}//end if
+		}//end foreach
+		return $res;
+	}
+}
+/**
+ * @desc Является ли массив ассоциативным
+ */
+function isAssoc($var) {
+	return is_array($var) && array_keys($var) !== range(0, count($var) - 1);
+}
+
+/**
+ * Слить в строку ассоциативный массив, соединяя ключ и значение
+ * @param string $glue
+ * Соединитель пар ключ-значение
+ * @param array $arr
+ * Массив
+ * @param string $keyValueGlue
+ * @param string $vescape
+ * символ экранирования значения
+ *
+ * @internal param string $k_v_glue Соединитель ключа и значения* Соединитель ключа и значения
+ * @return mixed
+ */
+function implodeAssoc($glue, $arr, $keyValueGlue = '', $vescape = '') {
+	$tmp = array();
+	foreach ($arr as $k => $v) {
+		$tmp[] = $k.$keyValueGlue.$vescape.$v.$vescape;
+	}
+	if ($glue != null) $tmp = implode($glue, $tmp);
+	return $tmp;
+}
+function getIDs($name = 'id') {
+	$ids = getPOSTfiltered($name, 'a', 'Empty selection');
+	$ids = implode(',', array_keys($ids));
+	return $ids;
+}
+/**
+ * Enter description here ...
+ *
+ * @author dron
+ */
+class Formatter {
+	/**
+	 * опция сохранения всех разрядов
+	 * @example
+	 * 102
+	 * 1 сотня
+	 * 0 десятков
+	 * 2 единицы
+	 */
+	static public $KEEP_ALL = 1;
+	/**
+	 * опция сохранения только ненулевых разрядов
+	 * @example
+	 * 102
+	 * 1 сотня
+	 * 2 единицы
+	 */
+	static public $KEEP_NONZERO = 2;
+	/**
+	 * опция сохранения только старшего разряда
+	 * @example
+	 * 102
+	 * 1 сотня
+	 */
+	static public $KEEP_LEAD = 3;
+	/**
+	 * опция сохранения двух старших разрядов
+	 * @example
+	 * 102
+	 * 1 сотня
+	 * 0 десятков
+	 */
+	static public $KEEP_LEAD2 = 4;
+	/**
+	 * делит величину на разряды
+	 * @param int $str
+	 * исходная вличина
+	 * @param int $keeping
+	 * опция сохранения разрядов
+	 * @param array $postfixes
+	 * единицы измерения или ассоциативный массив единица->вес разряда
+	 * @param mixed $div
+	 * множитель,
+	 * либо контанта, если все разряды равновесны
+	 * либо массив,
+	 * либо null, если веса разрядов указаны как значения массива $postfixes
+	 * @param int $precise
+	 * точность округления для опции KEEP_LEAD
+	 * @throws Exception
+	 * @example
+	 * Formatter::make(1028237, Formatter::$KEEP_ALL, array('b','Kb','Mb'), $div = 1000);
+	 * // 1 Mb 28 Kb 237 b
+	 * Formatter::make(
+	 *     763434,
+	 *     Formatter::$KEEP_ALL, array('сек.' => 60, 'мин.' => 60, 'ч.' => 24, 'д.' => 31, 'мес.' => 12)
+	 * );
+	 * // 8 д. 20 ч. 3 мин. 54 сек.
+	 */
+	static public function make($str, $keeping, $postfixes, $div = null, $precise = 0) {
+		$outstr = array();
+		if ($div === null) {
+			if (!is_assoc($postfixes)) {
+				throw new Exception('Formatter requires postfixes to be assoc array due to div is null');
+			} else {
+				$div       = array_values($postfixes);
+				$postfixes = array_keys($postfixes);
+			}
+		}
+		/*
+		 * сколько всего разрядов
+		 */
+		$digits = count($postfixes);
+		/*
+		 * разбиваем на разряды
+		 */
+		$digit   = 0;
+		$lastDiv = is_array($div) ? reset($div) : $div;
+		while (1) {
+			$digit++;
+			$outstr[$digit - 1] = $str;
+			if ($digit == $digits) break;
+			$divi = is_array($div) ? array_shift($div) : $div;
+			if ($divi === null) $divi = $lastDiv;
+
+			$outstr[$digit - 1] = $str % $divi;
+			$str                = (int)($str / $divi);
+			if ($str == 0) break;
+		}
+		/*
+		 * если отбрасываем разряды, округлить
+		 */
+		if ( ($precise > 0) && ($keeping == self::$KEEP_LEAD)) {
+			for ($i = 0; $i < count($outstr) - 1; $i++) {
+				$outstr[$i + 1] += round($outstr[$i] / $div, $precise);
+			}
+		}
+		/*
+		 * цепляем измерительные единицы
+		 */
+		$res = array();
+		for ($i = 0; $i < count($outstr); $i++) {
+			if (($keeping == self::$KEEP_NONZERO) && ($outstr[$i] == 0)) continue;
+			$res[] = $outstr[$i].' '.$postfixes[$i].' ';
+		}
+		$res = array_reverse($res);
+		/*
+		 * собираем
+		 */
+		if (($keeping == self::$KEEP_LEAD2) && (count($res) < 2) ) {
+			$keeping = self::$KEEP_LEAD;
+		}
+		if ($keeping == self::$KEEP_LEAD)
+			$res = array_shift($res);
+		elseif ($keeping == self::$KEEP_LEAD2)
+			$res = array_shift($res).' '.array_shift($res);
+		else
+			$res = implode(' ', $res);
+		return $res;
+	}
+}
+function formatbytes($val, $keepHigherOnly = 1, $precise = 0) {
+	$postfixes = array('b', 'Kb', 'Mb', 'Gb', 'Tb');
+	$div       = 1024;
+	return Formatter::make(
+					$val,
+					($keepHigherOnly) ? Formatter::$KEEP_LEAD : Formatter::$KEEP_ALL,
+					$postfixes,
+					$div,
+					$precise
+	);
+}
+function rdsSort($a, $b) {
+	if ($a == $b)  return 0;
+	// загоняем общий вариант (правило "") в конец массива, остальное сортируем по возрастанию
+	if ($a === '') return 1;
+	if ($b === '') return -1;
+	return ($a < $b) ? (-1) : 1;
+}
+
+function s($str) {
+	$str = str_replace(array('[', ']'), '', $str);
+	if (!ObjectsPool::exist('Translator')) {
+		return $str;
+	}
+	$translator = ObjectsPool::get('Translator');
+	if ($translator instanceof Translator) {
+		$args = func_get_args();
+		if (count($args) > 1) {
+			array_shift($args);
+			$str = vsprintf($translator->get($str), $args);
+		} else
+			$str = $translator->get($str);
+	}
+	return $str;
+}
+function confirm($msg) {
+	return "if (!confirm('$msg')) return false;";
+}
+function buildHrefToSelf($mainURL = null, $except = null, $separate = false) {
+	if (!is_array($except)) $except = array($except);
+	if ($mainURL === null) $mainURL = CONFIG::$PATH_URL;
+	$parts = array();
+	foreach ($_GET as $f => $v) {
+		if ($f == 'action') continue;
+		if (in_array($f, $except)) continue;
+		if (!is_array($v)) {
+			$v       = urlencode($v);
+			$parts[] = $f.'='.$v;
+		} else {
+			foreach ($v as $vk => $vv) {
+				$parts[] = sprintf('%s[%s]=%s', $f, $vk, $vv);
+			}
+		}
+	}
+	if (!$separate) {
+		$res = $mainURL;
+		if (!empty($_GET['action'])) $res .= '/'.$_GET['action'];
+		$getpart = implode('&', $parts);
+		$res .= '?';
+		if (!empty($getpart))
+			$res .= $getpart;
+	} else {
+		$res       = (object)array(
+			'base' => CONFIG::$PATH_URL,
+			'action' => @$_GET['action'],
+			'gets' => implode('&', $parts)
+		);
+	}
+	return $res;
+}
+function datestr($format, $str) {
+	return date($format, strtotime($str));
+}
+/**
+ * Проверяет свойство объекта на равенство данному значению,
+ * проверяя, существовует ли объект, существует ли нужное свойство
+ *
+ * @param stdObject $object
+ * @param string $propertyName
+ * @param string $testValue
+ * @return bool
+ */
+function testPropertyEquation($object, $propertyName, $testValue) {
+	if (!is_object($object)) return false;
+	if (!isset($object->$propertyName)) return false;
+	return ($object->$propertyName == $testValue);
+}
+/**
+ * @param $tpl
+ * @param $data
+ * @param $straight
+ * убрать переносы строки в результате
+ * @return string
+ */
+function renderTemplate($tpl, $data = null, $straight = false) {
+	if ($pos = strpos($tpl, 'abs:') !== false) {
+		$tpl = substr($tpl, 4);
+	} else {
+		$tpl = CONFIG::$PATH_THEME.'/'.$tpl;
+	}
+	$vc = View::factory(VC_DTPL, $tpl);
+	$vc->assign($data);
+	$result = $vc->get();
+	if ($straight)
+		$result = str_replace(array("\n", "\r"), '', $result);
+	return $result;
+}
+function getTemplateFile($tpl) {
+	if ($pos = strpos($tpl, 'abs:') !== false) {
+		$tpl = substr($tpl, 4);
+	} else {
+		$tpl = CONFIG::$PATH_THEME.'/'.$tpl;
+	}
+	if (!file_exists($tpl)) {
+		$msg = "File $tpl not found";
+		trigger_error($msg);
+		return null;
+	}
+	return file_get_contents($tpl);
+}
+function kernelShutdown() {
+	/*
+	 * properly destruction order
+	 */
+	Events::raise('onFinish');
+//	dump('shutting down RDS');
+	ObjectsPool::remove('RDS');
+//	dump('shutting down DB');
+	ObjectsPool::remove('DB');
+	exit();
+}
+/**
+ * Создать фильтр
+ *
+ * @return filter
+ */
+function createFilter() {
+	$filter = new FilterForm();
+	$filter->form->addAttribute('method="GET"');
+	$filter->form->addAttribute('class="filter"');
+	$page = ObjectsPool::get('Page');
+	if (!$page instanceof NULLobject ) {
+		$filter->form->addAttribute(sprintf('action="%s"', ObjectsPool::get('Page')->href->path));
+	}
+	$t = new DivInput;
+	$t
+		->setId('title')
+		->setValue(s('filtertitle'))
+		->addAttribute('class="title"');
+	$filter->form->add($t);
+	return $filter;
+}
+function formatDate($date, $format = '%d %b.%Y') {
+	return strftime($format, strtotime($date));
+}
+/**
+ * форма замены значения переменной action перед отсылкой формы. полезно для нескольких submit кнопок
+ *
+ * @param string $action
+ * @return string
+ */
+function setFormAction($action) {
+	$js  = 'var actionbackup=this.form.action;';
+	$js .= 'this.form.action=\'%s\';';
+	$js .= 'this.form.onsubmit();';
+	$js .= 'this.form.action=actionbackup';
+	return sprintf($js, $action);
+}
+function getIP() {
+	$remoteAddr = '';
+	// Get some server/environment variables values
+	if (empty($remoteAddr)) {
+		if (!empty($_SERVER) && isset($_SERVER['REMOTE_ADDR'])) {
+			$remoteAddr = $_SERVER['REMOTE_ADDR'];
+		} else if (!empty($_ENV) && isset($_ENV['REMOTE_ADDR'])) {
+			$remoteAddr = $_ENV['REMOTE_ADDR'];
+		} else if (!empty($HTTP_SERVER_VARS) && isset($HTTP_SERVER_VARS['REMOTE_ADDR'])) {
+			$remoteAddr = $HTTP_SERVER_VARS['REMOTE_ADDR'];
+		} else if (!empty($HTTP_ENV_VARS) && isset($HTTP_ENV_VARS['REMOTE_ADDR'])) {
+			$remoteAddr = $HTTP_ENV_VARS['REMOTE_ADDR'];
+		} else if (@getenv('REMOTE_ADDR')) {
+			$remoteAddr = getenv('REMOTE_ADDR');
+		}
+	}//end if
+	if (empty($httpXForwardedFor)) {
+		if (!empty($_SERVER) && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			$httpXForwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		} else if (!empty($_ENV) && isset($_ENV['HTTP_X_FORWARDED_FOR'])) {
+			$httpXForwardedFor = $_ENV['HTTP_X_FORWARDED_FOR'];
+		} else if (!empty($HTTP_SERVER_VARS) && isset($HTTP_SERVER_VARS['HTTP_X_FORWARDED_FOR'])) {
+			$httpXForwardedFor = $HTTP_SERVER_VARS['HTTP_X_FORWARDED_FOR'];
+		} else if (!empty($HTTP_ENV_VARS) && isset($HTTP_ENV_VARS['HTTP_X_FORWARDED_FOR'])) {
+			$httpXForwardedFor = $HTTP_ENV_VARS['HTTP_X_FORWARDED_FOR'];
+		} else if (@getenv('HTTP_X_FORWARDED_FOR')) {
+			$httpXForwardedFor = getenv('HTTP_X_FORWARDED_FOR');
+		}
+	}//end if
+	if (empty($httpXForwarded)) {
+		if (!empty($_SERVER) && isset($_SERVER['HTTP_X_FORWARDED'])) {
+			$httpXForwarded = $_SERVER['HTTP_X_FORWARDED'];
+		} else if (!empty($_ENV) && isset($_ENV['HTTP_X_FORWARDED'])) {
+			$httpXForwarded = $_ENV['HTTP_X_FORWARDED'];
+		} else if (!empty($HTTP_SERVER_VARS) && isset($HTTP_SERVER_VARS['HTTP_X_FORWARDED'])) {
+			$httpXForwarded = $HTTP_SERVER_VARS['HTTP_X_FORWARDED'];
+		} else if (!empty($HTTP_ENV_VARS) && isset($HTTP_ENV_VARS['HTTP_X_FORWARDED'])) {
+			$httpXForwarded = $HTTP_ENV_VARS['HTTP_X_FORWARDED'];
+		} else if (@getenv('HTTP_X_FORWARDED')) {
+			$httpXForwarded = getenv('HTTP_X_FORWARDED');
+		}
+	}//end if
+	if (empty($httpForwardedFor)) {
+		if (!empty($_SERVER) && isset($_SERVER['HTTP_FORWARDED_FOR'])) {
+			$httpForwardedFor = $_SERVER['HTTP_FORWARDED_FOR'];
+		} else if (!empty($_ENV) && isset($_ENV['HTTP_FORWARDED_FOR'])) {
+			$httpForwardedFor = $_ENV['HTTP_FORWARDED_FOR'];
+		} else if (!empty($HTTP_SERVER_VARS) && isset($HTTP_SERVER_VARS['HTTP_FORWARDED_FOR'])) {
+			$httpForwardedFor = $HTTP_SERVER_VARS['HTTP_FORWARDED_FOR'];
+		} else if (!empty($HTTP_ENV_VARS) && isset($HTTP_ENV_VARS['HTTP_FORWARDED_FOR'])) {
+			$httpForwardedFor = $HTTP_ENV_VARS['HTTP_FORWARDED_FOR'];
+		} else if (@getenv('HTTP_FORWARDED_FOR')) {
+			$httpForwardedFor = getenv('HTTP_FORWARDED_FOR');
+		}
+	}//end if
+	if (empty($httpForwarded)) {
+		if (!empty($_SERVER) && isset($_SERVER['HTTP_FORWARDED'])) {
+			$httpForwarded = $_SERVER['HTTP_FORWARDED'];
+		} else if (!empty($_ENV) && isset($_ENV['HTTP_FORWARDED'])) {
+			$httpForwarded = $_ENV['HTTP_FORWARDED'];
+		} else if (!empty($HTTP_SERVER_VARS) && isset($HTTP_SERVER_VARS['HTTP_FORWARDED'])) {
+			$httpForwarded = $HTTP_SERVER_VARS['HTTP_FORWARDED'];
+		} else if (!empty($HTTP_ENV_VARS) && isset($HTTP_ENV_VARS['HTTP_FORWARDED'])) {
+			$httpForwarded = $HTTP_ENV_VARS['HTTP_FORWARDED'];
+		} else if (@getenv('HTTP_FORWARDED')) {
+			$httpForwarded = getenv('HTTP_FORWARDED');
+		}
+	}//end if
+	if (empty($httpVia)) {
+		if (!empty($_SERVER) && isset($_SERVER['HTTP_VIA'])) {
+			$httpVia = $_SERVER['HTTP_VIA'];
+		} else if (!empty($_ENV) && isset($_ENV['HTTP_VIA'])) {
+			$httpVia = $_ENV['HTTP_VIA'];
+		} else if (!empty($HTTP_SERVER_VARS) && isset($HTTP_SERVER_VARS['HTTP_VIA'])) {
+			$httpVia = $HTTP_SERVER_VARS['HTTP_VIA'];
+		} else if (!empty($HTTP_ENV_VARS) && isset($HTTP_ENV_VARS['HTTP_VIA'])) {
+			$httpVia = $HTTP_ENV_VARS['HTTP_VIA'];
+		} else if (@getenv('HTTP_VIA')) {
+			$httpVia = getenv('HTTP_VIA');
+		}
+	}//end if
+	if (empty($httpXComingFrom)) {
+		if (!empty($_SERVER) && isset($_SERVER['HTTP_X_COMING_FROM'])) {
+			$httpXComingFrom = $_SERVER['HTTP_X_COMING_FROM'];
+		} else if (!empty($_ENV) && isset($_ENV['HTTP_X_COMING_FROM'])) {
+			$httpXComingFrom = $_ENV['HTTP_X_COMING_FROM'];
+		} else if (!empty($HTTP_SERVER_VARS) && isset($HTTP_SERVER_VARS['HTTP_X_COMING_FROM'])) {
+			$httpXComingFrom = $HTTP_SERVER_VARS['HTTP_X_COMING_FROM'];
+		} else if (!empty($HTTP_ENV_VARS) && isset($HTTP_ENV_VARS['HTTP_X_COMING_FROM'])) {
+			$httpXComingFrom = $HTTP_ENV_VARS['HTTP_X_COMING_FROM'];
+		} else if (@getenv('HTTP_X_COMING_FROM')) {
+			$httpXComingFrom = getenv('HTTP_X_COMING_FROM');
+		}
+	}//end if
+	if (empty($httpComingFrom)) {
+		if (!empty($_SERVER) && isset($_SERVER['HTTP_COMING_FROM'])) {
+			$httpComingFrom = $_SERVER['HTTP_COMING_FROM'];
+		} else if (!empty($_ENV) && isset($_ENV['HTTP_COMING_FROM'])) {
+			$httpComingFrom = $_ENV['HTTP_COMING_FROM'];
+		} else if (!empty($httpComingFrom) && isset($HTTP_SERVER_VARS['HTTP_COMING_FROM'])) {
+			$httpComingFrom = $HTTP_SERVER_VARS['HTTP_COMING_FROM'];
+		} else if (!empty($HTTP_ENV_VARS) && isset($HTTP_ENV_VARS['HTTP_COMING_FROM'])) {
+			$httpComingFrom = $HTTP_ENV_VARS['HTTP_COMING_FROM'];
+		} else if (@getenv('HTTP_COMING_FROM')) {
+			$httpComingFrom = getenv('HTTP_COMING_FROM');
+		}
+	}//end if
+
+	// Gets the default ip sent by the user
+	$directIP = $remoteAddr;
+	if (!empty($remoteAddr)) {
+	}
+
+	// Gets the proxy ip sent by the user
+	$proxyIP = '';
+	if (!empty($httpXForwardedFor)) {
+		$proxyIP = $httpXForwardedFor;
+	} else if (!empty($httpXForwarded)) {
+		$proxyIP = $httpXForwarded;
+	} else if (!empty($httpForwardedFor)) {
+		$proxyIP = $httpForwardedFor;
+	} else if (!empty($httpForwarded)) {
+		$proxyIP = $httpForwarded;
+	} else if (!empty($httpVia)) {
+		$proxyIP = $httpVia;
+	} else if (!empty($httpXComingFrom)) {
+		$proxyIP = $httpXComingFrom;
+	} else if (!empty($httpComingFrom)) {
+		$proxyIP = $httpComingFrom;
+	}//end if
+
+	// Returns the true IP if it has been found, else FALSE
+	if (empty($proxyIP)) {
+		// True IP without proxy
+		return $directIP;
+	} else {
+		$isIP = preg_match('/^([0-9]{1,3}\.) {3,3}[0-9]{1,3}/', $proxyIP, $regs);
+		if ($isIP && (count($regs) > 0)) {
+			// True IP behind a proxy
+			return $regs[0];
+		} else {
+			// Can't define IP: there is a proxy but we don't have
+			// information about the true IP
+			return false;
+		}
+	}//end if
+}
+function suffixChooser($number, $one, $two, $many) {
+	$tensDigit = (int)($number % 100 / 10);
+	$lastDigit = $number % 10;
+	if ($tensDigit != 1) {
+		if ($lastDigit == 1) return $one;
+		if (($lastDigit >= 2) && ($lastDigit <= 4)) return $two;
+	}
+	return $many;
+}
+
+function getErrorTip($object, $message = 'fieldrequired') {
+	return "errortip{{$object}}".s($message);
+}
+/**
+ * Разбивает строку в массив через запятую
+ * @param string $str
+ * @return array
+ */
+function arrayString($str) {
+	return explode(',', $str);
+}
+function getDaysInMonth($month) {
+	switch ($month) {
+		case 1:
+		case 3:
+		case 5:
+		case 7:
+		case 8:
+		case 10:
+		case 12:
+			return 31;
+		case 4:
+		case 6:
+		case 9:
+		case 11:
+			return 30;
+		case 2:
+			return 28;
+		default:
+			//
+		break;
+	}
+}
+function translateSelector($item, $prefix = '') {
+	if (count($item->options)) foreach ($item->options as $f => &$v) $v = s($prefix.$v);
+}
+/**
+ * Возвращает float значение из строки
+ * отформатированной в локализованном стиле
+ * (т.е. в зависимости от локали)
+ * @param $string
+ * @return float
+ */
+function parseFloat($string) {
+	$locale     = localeconv();
+	$point      = $locale['decimal_point'];
+	$isNegative = (strpos($string, $locale['negative_sign']) !== false);
+	$floatStringStripped = preg_replace(array("/[^[:alnum:]{$point}]/", "/[{$point}]/"), array('', '.'), $string);
+	if (!is_numeric($floatStringStripped)) return $string;
+	$float = (float)$floatStringStripped;
+	if ($isNegative) $float = -$float;
+	return $float;
+}
+/**
+ * Разделить дробное число на целую и дробную часть
+ * @param float $float
+ * @return array
+ */
+function separateFloat($float) {
+	$whole = (int)$float;
+	$fractional = abs($float - $whole);
+	return array($whole, $fractional);
+}
+function getSQLparseRegex() {
+	$regex = '/
+	\s* #убираем лишние пробелы
+	(?<var>
+		# тут либо функция..
+		(?<recurse> #рекурсивный поиск вложенных скобок
+			(?:
+				[^(),]*?
+				(?:\( (?: (?>[^()]+ | (?P>recurse))	 )* \))
+			)+?
+		)
+		|
+		# либо строка в кавычках (одинарных или двойных)
+		(?<sign>"|\') .+? (?P=sign)
+		|
+		# либо просто текст
+		.+?
+	)
+	
+	(?:
+		\s+ as \s+ # as в окружении пробелов
+		(?<alias>.+?) #alias поля
+	)? # часть "as xxx" необязательна
+	
+	(?<end>,|$) #в конце стоит либо запятая, либо конец строки
+	/x';
+	return $regex;
+}
+function convertDateCallback($value, $formElement) {
+	if ($value === null) return '-';
+	return formatDate($value, isset($formElement->format) ? $formElement->format : '%d.%m.%Y');
+}
+function translateCallback($value, $formElement) {
+	if ($value === null) return '-';
+	return s((isset($formElement->prefix) ? $formElement->prefix : '').$value);
+}
+
+/**
+ * Получить список файлов и папок по заданному пути
+ * Результат в виде массива объектов:
+ * stdClass{
+ *    name,
+ *    isFolder
+ * }
+ *
+ * @param string $path
+ * @param null $conditions
+ *
+ * @return array
+ */
+function getDirContent($path, $conditions = null) {
+	$files  = array();
+	$handle = opendir($path);
+	if ($conditions != null) {
+		if (substr($conditions, 0, 1) == '!') {
+			$conditions = substr($conditions, 1);
+			$conditionFlag = true;
+		} else {
+			$conditionFlag = false;
+		}
+	}
+	do {
+		$e = readdir($handle);
+		if ( ($e == '.') || ($e == '..') || ($e == '')) continue;
+		if ($conditions != null) {
+			if (preg_match($conditions, $e) == $conditionFlag) continue;
+		}
+		$files[] = (object)array(
+			'name'     => $e,
+			'isFolder' => is_dir($path.'/'.$e)
+		);
+	} while ($e != false);
+	closedir($handle);
+	return $files;
+}
+if (!function_exists('http_build_url'))
+{
+	define('HTTP_URL_REPLACE', 1);              // Replace every part of the first URL when there's one of the second URL
+	define('HTTP_URL_JOIN_PATH', 2);            // Join relative paths
+	define('HTTP_URL_JOIN_QUERY', 4);           // Join query strings
+	define('HTTP_URL_STRIP_USER', 8);           // Strip any user authentication information
+	define('HTTP_URL_STRIP_PASS', 16);          // Strip any password authentication information
+	define('HTTP_URL_STRIP_AUTH', 32);          // Strip any authentication information
+	define('HTTP_URL_STRIP_PORT', 64);          // Strip explicit port numbers
+	define('HTTP_URL_STRIP_PATH', 128);         // Strip complete path
+	define('HTTP_URL_STRIP_QUERY', 256);        // Strip query string
+	define('HTTP_URL_STRIP_FRAGMENT', 512);     // Strip any fragments (#identifier)
+	define('HTTP_URL_STRIP_ALL', 1024);         // Strip anything but scheme and host
+
+	// Build an URL
+	// The parts of the second URL will be merged into the first according to the flags argument.
+	//
+	// @param   mixed           (Part(s) of) an URL in form of a string or associative array like parse_url() returns
+	// @param   mixed           Same as the first argument
+	// @param   int             A bitmask of binary or'ed HTTP_URL constants (Optional)HTTP_URL_REPLACE is the default
+	// @param   array           If set, it will be filled with the parts of the composed url like parse_url() would return
+	function http_build_url($url, $parts=array(), $flags=HTTP_URL_REPLACE, &$new_url=false)
+	{
+		$keys = array('user','pass','port','path','query','fragment');
+
+		// HTTP_URL_STRIP_ALL becomes all the HTTP_URL_STRIP_Xs
+		if ($flags & HTTP_URL_STRIP_ALL)
+		{
+			$flags |= HTTP_URL_STRIP_USER;
+			$flags |= HTTP_URL_STRIP_PASS;
+			$flags |= HTTP_URL_STRIP_PORT;
+			$flags |= HTTP_URL_STRIP_PATH;
+			$flags |= HTTP_URL_STRIP_QUERY;
+			$flags |= HTTP_URL_STRIP_FRAGMENT;
+		}
+		// HTTP_URL_STRIP_AUTH becomes HTTP_URL_STRIP_USER and HTTP_URL_STRIP_PASS
+		else if ($flags & HTTP_URL_STRIP_AUTH)
+		{
+			$flags |= HTTP_URL_STRIP_USER;
+			$flags |= HTTP_URL_STRIP_PASS;
+		}
+
+		// Parse the original URL
+		if (is_string($url)) {
+			$parse_url = parse_url($url);
+		} else {
+			$parse_url = $url;
+		}
+
+		// Scheme and Host are always replaced
+		if (isset($parts['scheme']))
+			$parse_url['scheme'] = $parts['scheme'];
+		if (isset($parts['host']))
+			$parse_url['host'] = $parts['host'];
+
+		// (If applicable) Replace the original URL with it's new parts
+		if ($flags & HTTP_URL_REPLACE)
+		{
+			foreach ($keys as $key)
+			{
+				if (isset($parts[$key]))
+					$parse_url[$key] = $parts[$key];
+			}
+		}
+		else
+		{
+			// Join the original URL path with the new path
+			if (isset($parts['path']) && ($flags & HTTP_URL_JOIN_PATH))
+			{
+				if (isset($parse_url['path']))
+					$parse_url['path'] = rtrim(str_replace(basename($parse_url['path']), '', $parse_url['path']), '/') . '/' . ltrim($parts['path'], '/');
+				else
+					$parse_url['path'] = $parts['path'];
+			}
+
+			// Join the original query string with the new query string
+			if (isset($parts['query']) && ($flags & HTTP_URL_JOIN_QUERY))
+			{
+				if (isset($parse_url['query']))
+					$parse_url['query'] .= '&' . $parts['query'];
+				else
+					$parse_url['query'] = $parts['query'];
+			}
+		}
+
+		// Strips all the applicable sections of the URL
+		// Note: Scheme and Host are never stripped
+		foreach ($keys as $key)
+		{
+			if ($flags & (int)constant('HTTP_URL_STRIP_' . strtoupper($key)))
+				unset($parse_url[$key]);
+		}
+
+
+		$new_url = $parse_url;
+
+		return
+			((isset($parse_url['scheme'])) ? $parse_url['scheme'] . '://' : '')
+			.((isset($parse_url['user'])) ? $parse_url['user'] . ((isset($parse_url['pass'])) ? ':' . $parse_url['pass'] : '') .'@' : '')
+			.((isset($parse_url['host'])) ? $parse_url['host'] : '')
+			.((isset($parse_url['port'])) ? ':' . $parse_url['port'] : '')
+			.((isset($parse_url['path'])) ? $parse_url['path'] : '')
+			.((isset($parse_url['query'])) ? '?' . $parse_url['query'] : '')
+			.((isset($parse_url['fragment'])) ? '#' . $parse_url['fragment'] : '')
+			;
+	}
+}
+function JSONserialize($object, $encode = true){
+	static $cache = array();
+	if (is_array($object)){
+		foreach($object as &$item){
+			$item = JSONserialize($item, false);
+		}
+	}elseif(is_object($object)){
+		// проверяем на вхождение в кэш
+		foreach($cache as $objectCached) if ($objectCached === $object) return ;
+		$res = new stdClass();
+//		$res->classname = get_class($object);
+		foreach($object as $f => $v){
+//			if (!isset($object->$f)) continue;
+			// при входе в рекурсию вносим объект родитель в список кэша
+			$cache[] = $object;
+			$res->$f = JSONserialize($v, false);
+			// при выходе, удаляем
+			array_pop($cache);
+		}
+		$object = $res;
+	}
+	if (!$encode) return $object;
+	return json_encode($object);
+}
+/**
+ * @property int $id
+ * @property string $login
+ * @property string $password
+ * @property bool $type
+ * @property bool $config
+ * @property bool $remembering
+ */
+class UserDefaultModel extends DModelValidated {
+	static public $SETTINGS_CLASS = null;
+	static public $PROXY_CLASS = 'AuthProxyDB';
+
+	public $config;
+	function setup() {
+		$this
+			->addProperty('id', 'int unsigned')
+			->addProperty('login', 'string required', 50)
+			->addProperty('password', 'string required', 50)
+			->addProperty('type', 'string', 50, 'guest')
+			->addProperty('remembering', 'bool', null, false)
+			->addProperty('config', 'blob')
+		;
+	}
+	protected function createProxy() {
+		$proxyClass = self::$PROXY_CLASS;
+		return new $proxyClass();
+	}
+	function afterLoad($params = null) {
+		parent::afterLoad($params);
+		/*
+		 * вывести config из виртуальных свойств в настоящее config
+		 */
+		if ($this->id && (self::$SETTINGS_CLASS != null)) {
+			$raw = $this->getRawData();
+			$settingsClassName = self::$SETTINGS_CLASS;
+			$this->config  = new $settingsClassName($this->id);
+			$raw['config'] = unserialize($raw['config']);
+			if (is_object($raw['config'])) {
+				$this->config->sets($raw['config']);
+			}
+		}
+	}
+	function getterConversions($field, $value) {
+		switch ($field) {
+			case 'remembering':
+				if ($value !== null) {
+					$value = ($value == '1');
+				}
+				break;
+		}
+		return parent::getterConversions($field, $value);
+	}
+	function setterConversions($field, $value) {
+		switch ($field) {
+			case 'password':
+				if (isset(CONFIG::$PASSWORD_SALT)) {
+					$value .= CONFIG::$PASSWORD_SALT;
+				}
+				$value = md5($value);
+				break;
+			case 'remembering':
+				$value = $value ? '1' : '0';
+				break;
+		}
+		return parent::setterConversions($field, $value);
+	}
+}
+
+/**
+ * Заполняет модель данными из базы данных
+ *
+ * @author dron
+ */
+class DModelProxyDatabase extends DModelProxy {
+	protected $tableName;
+	protected $fieldsToRead;
+	protected $db;
+	function __construct($tableName) {
+		parent::__construct();
+		$this->setTableName($tableName);
+		$this->db = ObjectsPool::get('DataBase');
+	}
+	function setFieldsRead($fieldsToRead) {
+		$this->fieldsToRead = $fieldsToRead;
+		return $this;
+	}
+	protected $fieldsToWrite;
+	function setFieldsWrite($fieldsToWrite) {
+		if (is_scalar($fieldsToWrite)) {
+			$fieldsToWrite = array($this->tableName => $fieldsToWrite);
+		}
+		foreach ($fieldsToWrite as $table => $fields) {
+			if (is_scalar($fields)) {
+				$fieldsToWrite[$table] = explode(',', $fields);
+			}
+			foreach($fieldsToWrite[$table] as $field => &$value) {
+				$value = trim($value);
+			}
+		}
+		$this->fieldsToWrite = $fieldsToWrite;
+		return $this;
+	}
+	function create() {
+		return $this->update();
+	}
+	function update() {
+		$keyValue       = $this->model->getKeyValue();
+		/*
+		 * получить массив значений изменившихся свойств
+		 */
+		if (empty($keyValue)) {
+			$data = $this->model->getAsStdObject(DModel::CONVERSIONS_BYPASS);
+			$this->doInsert((array)$data);
+		} else {
+			$modifiedFields = $this->model->getFieldsModified();
+			if (count($modifiedFields) == 0) return;
+			$data = array();
+			foreach ($modifiedFields as $f) {
+				$data[$f] = $this->model->get($f, DModel::CONVERSIONS_BYPASS);
+			}
+			$this->doUpdate($data, $keyValue);
+		}
+	}
+	function read($params = null) {
+		$isCollection = ($this->model instanceof DModelsCollection);
+		if ($isCollection) {
+			$this->model = $this->model->getModelInstance();
+		}
+		$keyName  = $this->model->keyName;
+		$keyValue = $this->model->getKeyValue();
+		if ($params == null) {
+			if (empty($keyValue)) {
+				throw new Exception('No reading parameters specified and key property is empty. Unable to load within DB proxy');
+			}
+			// обновление текущей модели,у которой указан primary ID
+			$sql = sprintf('`%s`.%s = "{%s}"', $this->tableName, $keyName, $keyValue);
+		} elseif (is_numeric($params)) {
+			// params как число, понимать как значение primary ID
+			$sql = sprintf('`%s`.%s = %s', $this->tableName, $keyName, $params);
+		} elseif (is_string($params)) {
+			// params как строка, понимать как часть SQL
+			$sql = $params;
+		} else {
+			throw new Exception('No parameters specified for load model');
+		}
+		/*
+		 * установлен список полей, которые следует в базе трогать
+		 */
+		if ($this->fieldsToRead != null) {
+			$fields = explode(',', $this->fieldsToRead);
+			foreach ($fields as &$field) {
+				/*
+				 * в списке полей для выборки, поле с названием ключа сопроводить префиксом имени таблицы
+				 */
+				if ($field == $keyName) {
+					$field = sprintf('`%s`.%s', $this->tableName, $field);
+				}
+			}
+		} else {
+			$fields = array_keys($this->model->getProperties());
+			foreach ($fields as &$field) {
+				/*
+		        * в списке полей для выборки, поле с названием ключа сопроводить префиксом имени таблицы
+		        */
+				if ($field == $keyName) {
+					$field = sprintf('`%s`.%s', $this->tableName, $field);
+				} else {
+					/*
+					 * остальные поля экранировать (там заведомо нет БД-функций и т.д., т.к. getProperties)
+					 */
+					$field = '`'.$field.'`';
+				}
+			}
+		}
+		if (isset($fields)) {
+			$fields = implode(',', $fields);
+		} else {
+			$fields = '*';
+		}
+		/*
+		 * если указан pager выяснить пределы
+		 */
+		if ($this->pager instanceof PagerHelper) {
+			if (!preg_match('/\blimit\s+\d+\s*,\s*\d+\b/i', $sql)) {
+				$sql .= $this->pager->getLimit();
+			}
+		}
+		$result = $this->doSelect($sql, $fields);
+		if (!is_array($result)) return array();
+		if (!$isCollection) {
+			$result = reset($result);
+		}
+		return $result;
+	}
+	function delete($params = null) {
+		$keys = array();
+		$items = array();
+		if ($this->model instanceof DModel) {
+			$items = array($this->model);
+		} elseif ($this->model instanceof DModelsCollection) {
+			$items = $this->model;
+		}
+		foreach ($items as $item) {
+			$keyValue = $item->getKeyValue();
+			if (empty($keyValue)) {
+				trigger_error('Unable to delete model with empty key', E_USER_NOTICE);
+				return;
+			}
+			$keys[] = $keyValue;
+		}
+		$this->doDelete($keys, $params);
+	}
+	protected $lastSQLquery;
+	function getLastQuery() {
+		return $this->lastSQLquery;
+	}
+	function doInsert($data) {
+		if ($this->fieldsToWrite == null) {
+			$this->db->insert($this->tableName, $data, $this->lastSQLquery);
+			// update key property
+			$keyName  = $this->model->keyName;
+			$keyValue = $this->db->lastId();
+			$this->model->$keyName = $keyValue;
+		} else {
+			$dataToTables  = array();
+			foreach ($this->fieldsToWrite as $table => $fields) {
+				$dataToTables[$table] = array_intersect_key($data, array_flip($fields));
+			}
+			$defKeyName = $this->model->keyName;
+			$this->lastSQLquery = array();
+			$isPrimaryTable = true;
+			$keyValue = null;
+			foreach ($dataToTables as $table => $data) {
+				if (strpos($table, '.') !== false) {
+					list($table, $keyName) = explode('.', $table);
+				} else {
+					$keyName = $defKeyName;
+				}
+				if (!$isPrimaryTable) {
+					$data[$keyName] = $keyValue;
+				}
+				$q = '';
+				$insertedValue = $this->db->insert($table, $data, $q);
+				$this->lastSQLquery[] = $q;
+				if ($isPrimaryTable) {
+					$keyValue = $insertedValue;
+					$this->model->setKeyValue($keyValue);
+				}
+				$isPrimaryTable = false;
+			}
+		}
+	}
+	/**
+	 * Кнвертирует null значения в массиве $data в NULL (SQLvar(null))
+	 * @param $data
+	 *
+	 * @return mixed
+	 */
+	private function convertNullToDBNULL($data) {
+		foreach ($data as $f => &$v) {
+			if ($v === null) {
+				$v = new SQLvar('NULL');
+			}
+		}
+		return $data;
+	}
+	/**
+	 * Обновление БД в соответствие с картой таблица[.ключ]-поля
+	 *
+	 * @param $data
+	 * @param $keyValue
+	 */
+	function doUpdate($data, $keyValue) {
+		$data = $this->convertNullToDBNULL($data);
+		if ($this->fieldsToWrite == null) {
+			$keyName = $this->model->keyName;
+			$keySQL  = sprintf('`%s%s`.%s = "%s"', CONFIG::getDBCfg()->prefix, $this->tableName, $keyName, $keyValue);
+			$this->db->update($this->tableName, $data, $keySQL, $this->lastSQLquery);
+		} else {
+			$dataToTables  = array();
+			foreach ($this->fieldsToWrite as $table => $fields) {
+				$dataToTables[$table] = array_intersect_key($data, array_flip($fields));
+			}
+			$defKeyName = $this->model->keyName;
+			$this->lastSQLquery = array();
+			foreach ($dataToTables as $table => $data) {
+				if (strpos($table, '.') !== false) {
+					list($table, $keyName) = explode('.', $table);
+				} else {
+					$keyName = $defKeyName;
+				}
+				$keySQL  = sprintf('`%s%s`.%s = "%s"', CONFIG::getDBCfg()->prefix, $table, $keyName, $keyValue);
+				$q = '';
+				$this->db->update($table, $data, $keySQL, $q);
+				$this->lastSQLquery[] = $q;
+			}
+		}
+	}
+	function doSelect($sql, $fieldsToSelect) {
+		if (empty($fieldsToSelect)) trigger_error('No fields to select', E_USER_ERROR);
+		$this->lastSQLquery = ObjectsPool::get('DataBase')->select($this->tableName, $fieldsToSelect, $sql, DB_GETQUERY);
+		return ObjectsPool::get('DataBase')->query(
+			$this->lastSQLquery,
+			DBFetchModes::$ITEM_IS_ASC | DBFetchModes::$INDEX_ARRAY | DBFetchModes::$ONE_ROW_KEEP | DBFetchModes::$ONE_FIELD_ITEM_KEEP
+		);
+	}
+	/**
+	 * Выполнение запроса на удаление записей по списку ключей
+	 * @param int[] $keys
+	 * Массив ключей
+	 * @param null $params
+	 * Опциональное SQL условие удаления
+	 */
+	function doDelete($keys, $params = null) {
+		$keySQL = sprintf('%s IN (%s) %s', $this->model->getModelInstance()->keyName, implode(',', $keys), ($params == null) ? '' : "AND $params");
+		$this->db->delete($this->tableName, $keySQL);
+	}
+	public function setTableName($tableName) {
+		$this->tableName = $tableName;
+		return $this;
+	}
+}
+if (!class_exists('CONFIG')) {
+	die ("Class CONFIG is not defined!\n");
+}
+if (!method_exists('CONFIG', 'init')) {
+	die ("Class CONFIG should extend ConfigKernel!\n");
+}
+CONFIG::init();
+ini_set('include_path', implode(CONFIG::$INCPATH_SEPARATOR, CONFIG::$INCPATH));
+ini_set('error_reporting', CONFIG::$ERROR_LEVEL);
+ini_set('display_errors', (CONFIG::$ERROR_DISPLAY) ? 'On' : 'Off');
+ini_set('magic_quotes_gpc', 0);
+ini_set('magic_quotes_runtime', 0);
+ini_set('request_order', 'GP');
+if (ini_get('magic_quotes_gpc') || get_magic_quotes_gpc()) {
+	echo('Disable magic_quotes_gpc in php.ini');
+	exit();
+}
+if (!empty(CONFIG::$TIMEZONE)) {
+	date_default_timezone_set(CONFIG::$TIMEZONE);
+}
+if (!empty(CONFIG::$LOCALE))
+	setlocale(LC_ALL, CONFIG::$LOCALE);
+if (!class_exists('CMS', false))
+	require_once 'CMS/cms.php';
+if (!class_exists('KernelListeners', false))
+	require_once 'CMS/kernelListeners.php';
+if (!class_exists('DController', false))
+	require_once 'CMS/DController.php';
+if (!class_exists('ObjectsPool', false))
+	require_once 'CMS/objectspool.php';
+if (!class_exists('Debug', false))
+	require_once 'CMS/debug.php';
+if (!class_exists('View', false))
+	require_once 'CMS/views/View.php';
+if (!class_exists('DI', false))
+	require_once 'CMS/DI.php';
+if (!class_exists('DModelAbstract', false))
+	require_once 'CMS/DModel/DModelAbstract.php';
+if (!class_exists('DModel', false)) {
+	require_once 'CMS/DModel/DModel.php';
+	require_once 'CMS/DModel/DModelDynamic.php';
+}
+if (!class_exists('DModelValidated', false))
+	require_once 'CMS/DModel/DModelValidated.php';
+if (!class_exists('DModelsCollection', false))
+	require_once 'CMS/DModel/DModelsCollection.php';
+if (!class_exists('DModelProxy', false))
+	require_once 'CMS/DModel/proxies.php';
+define('KERNEL_SETTED_UP', true);
+if (file_exists($f = CONFIG::$PATH_KERNEL_ABS.'/funcs/_init.php')) {
+	require_once $f;
+}
+//if (file_exists($f = CONFIG::$PATH_ABS.'/funcs/_init.php')) {
+//	require_once $f;
+//}
+register_shutdown_function('kernelShutdown');
+if (CONFIG::$BENCHMARK)
+	Debug::timerStart();
+
+Events::addListener('beforeRouter', 'KernelListeners/beforeRouter');
+Events::addListener('beforeController', 'KernelListeners/beforeController');
+
+Page::$url = isset($_REQUEST[CONFIG::$ACTION_VAR_NAME]) ? $_REQUEST[CONFIG::$ACTION_VAR_NAME] : '';
+if (isset($_REQUEST[CONFIG::$SESSIONVAR])) {
+	session_id($_REQUEST[CONFIG::$SESSIONVAR]);
+	session_start();
+}
+?>
