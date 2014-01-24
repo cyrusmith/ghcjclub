@@ -1,0 +1,134 @@
+<div ng-controller="SignedUserCtrl">
+
+	<!-- user section -->
+	<div ng-if="!isSigned" class="top_r">
+		<div class="enter_reg">
+			<div id="btn_enter" class="f_btn enter_reg_btn"><a href="#/signup">Регистрация</a></div>
+			<div id="btn_reg" class="f_btn enter_reg_btn" onclick="$('#popup_auth').fadeToggle();">Войти</div>
+		</div>
+
+		<form class="popup popup_auth center hide" id="popup_auth">
+			<input type="text" value="" placeholder="Логин" class="f_text" />
+			<input type="password" value="" placeholder="Пароль" class="f_text" />
+			<input type="submit" value="Войти" class="f_btn" />
+
+			<div class="save_me"><input type="checkbox" name="save" id="save" value="1" /><label for="save">Запомнить меня</label> </div>
+			<div class="f_links">
+				<a href="#/resetPassword">Забыли пароль?</a>
+				<a ng-if="0">Регистрация</a>
+			</div>
+		</form>
+	</div>
+
+	<div ng-if="isSigned" class="user">
+		<div class="user_line cf">
+			<img class="user_img" src="views/main/img/ava.jpg" alt="" title="" />
+
+			<div class="user_right">
+				<!-- user menu -->
+				<div class="user_menu cf">
+					<span  class="user_menu_item user_sett" onclick="$('#popup_user_menu').fadeToggle(300);"></span>
+					<a  class="user_menu_item user_exit"></a>
+				</div>
+
+				<ul id="popup_user_menu" class="popup popup_user_menu hide">
+					<li><a  class="user_menu_1">Что нового?</a> <a href="#link2" class="user_menu_cogwheel"><img src="views/main/img/ico_cogwheel.png" alt="" title=""></a></li>
+					<li><a  class="user_menu_2">Центр управления</a></li>
+					<li><a  class="user_menu_3">Платные услуги</a></li>
+					<li><a  class="user_menu_4">Мои аудиозаписи</a>
+						<a  class="user_menu_5">Мои альбомы</a>
+						<a  class="user_menu_6">Избранные треки</a></li>
+					<li><a  class="user_menu_7">Мои блоги</a>
+						<a  class="user_menu_8">Избранные блоги</a></li>
+					<li><a  class="user_menu_9">Мои файлы</a></li>
+					<li><a  class="user_menu_10">Мои друзья</a></li>
+					<li><a  class="user_menu_11">Мои фотоальбомы</a></li>
+					<li><a  class="user_menu_12">Профиль</a>
+						<a  class="user_menu_13">Оформление</a>
+						<a  class="user_menu_14">Настройки</a></li>
+				</ul>
+				<!-- messages -->
+				<div class="user_messages">
+					<div class="user_messages_line">
+						<span class="user_messages_ico" onclick="$('#popup_messages').fadeToggle(300);">12</span>
+					</div>
+					<!-- popup messages -->
+					<div class="popup popup_messages hide" id="popup_messages">
+						<div class="popup_messages_list">
+							<div class="mess_pk"><a >Личные сообщения (12)</a></div>
+							<div class="mess_comm">
+								Новые комментарии (<a >23</a>)
+
+								<div class="mess_title">К вашим материалам:</div>
+								<ul class="mess_list">
+									<li><a  class="ico_minus">Треки (0)</a></li>
+									<li><a  class="ico_minus">Блоги (0)</a></li>
+									<li><a  class="ico_minus">Стена (0)</a></li>
+								</ul>
+
+								<div class="mess_title">К подпискам:</div>
+								<ul class="mess_list">
+									<li><a  class="ico_minus">Треки (0)</a></li>
+									<li><a  class="ico_minus">Блоги (0)</a></li>
+									<li><a  class="ico_minus">Стена (0)</a></li>
+								</ul>
+
+								<div class="mess_title">Другое</div>
+								<ul class="mess_list">
+									<li><a  class="ico_minus">Ответы на ваши комментарии (0)</a></li>
+								</ul>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="user_name"><span class="user_name__text" onclick="$('#popup_user').fadeToggle();">Dj Kazak</span></div>
+
+			<!-- popup messages -->
+			<div class="popup popup_user hide" id="popup_user">
+				<ul class="popup_user_list">
+					<li>
+						<a  class="popup_user_list__img"><img src="views/main/img/popup_user_1.png" alt="" title="" /></a>
+						<a  class="popup_user_list__name" title="fadeToggle">fadeToggle</a>
+						<a  class="user_stat user_stat_1">pro</a>
+					</li>
+					<li>
+						<a  class="popup_user_list__img"><img src="views/main/img/popup_user_2.png" alt="" title="" /></a>
+						<a  class="popup_user_list__name" title="LastLife">LastLife</a>
+						<a  class="user_stat user_stat_1">pro</a>
+					</li>
+					<li>
+						<a  class="popup_user_list__img"><img src="views/main/img/popup_user_1.png" alt="" title="" /></a>
+						<a  class="popup_user_list__name" title="Dj Kazzzazzzzk">Dj Kazzzzzzazzzzk</a>
+						<a  class="user_stat user_stat_1">pro</a>
+					</li>
+				</ul>
+			</div>
+
+			<a  class="user_stat user_stat_1">pro</a>
+
+		</div>
+
+		<!-- user stat line -->
+		<div class="user_line cf">
+			<div class="music_stat cf">
+				<div class="music_stat_item music_stat_1"></div>
+				<a  class="music_stat_item music_stat_2">52412</a>
+				<a  class="music_stat_item music_stat_3">51088</a>
+				<a  class="music_stat_item music_stat_4">320</a>
+				<a  class="music_stat_item music_stat_5"></a>
+			</div>
+
+			<div class="user_rzd"></div>
+
+			<div class="user_btns">
+				<a >Загрузить трек</a>
+				<a >Написать в блог</a>
+			</div>
+		</div>
+
+	</div>
+
+</div>

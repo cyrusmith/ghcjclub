@@ -1,0 +1,13 @@
+.submenu, .track_image__controls, .mini_player { display:none;}
+.menu li:hover .submenu, .track_image:hover .track_image__controls, .playlist_item:hover .mini_player { display:block;}
+
+.save_me input[type="checkbox"] { position:static; margin:2px 5px 0 0; padding:0; vertical-align:top;}
+.save_me input[type="checkbox"] + label { padding:0; background:none;}
+.save_me input[type="checkbox"] + label:hover { color:#ccc;}
+
+.file_file { filter:progid:DXImageTransform.Microsoft.Alpha(opacity=1);}
+
+.search_sort__active { background:#c6c6c6;}
+.mc_out{height:300px;}
+.ico2{position:relative;top:-1px;border:1px solid red;} .ico2_close_dias{position:absolute;top:0;right:0;}
+.mess-amount{position:relative;left:4px;}.mc_i_checkbox{position: relative;left:4px;top:-10px;}

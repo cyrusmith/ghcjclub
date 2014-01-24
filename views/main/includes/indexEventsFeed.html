@@ -1,0 +1,136 @@
+<!-- news list -->
+<div class="news_list" ng-controller="EventsFeedCtrl">
+	<div ng-repeat="event in events">
+		<!-- news track -->
+		<article ng-if="event.type == 'track'" class="b">
+			<hgroup class="article_head cf">
+				<div class="article_stat">
+					<div class="article_stat__author">Автор: <a >Админ какой-то с длинным ником</a></div>
+					<a  class="article_stat__like">128</a>
+				</div>
+
+				<time class="article_date">
+					<div class="article_date__day">15</div>
+					<div class="article_date__mon">дек</div>
+					<div class="article_date__time">18:53</div>
+				</time>
+
+				<h2 class="article_title">Rainbow - Лучший трек месяца!</h2>
+			</hgroup>
+
+			<div class="new_track cf">
+				<div class="track_image new_track__image">
+					<img src="views/main/img/bt1.jpg" alt="" title="" />
+					<div class="track_image__controls">
+						<a class="cover_play" href="#l1"></a>
+						<a class="cover_plus" href="#l2"></a>
+					</div>
+				</div>
+
+				<div class="sound_control">
+					<div class="sound_control_mute"></div>
+					<div class="sound_control_slider"></div>
+				</div>
+
+				<div class="new_track__c">
+
+					<div class="new_track__name"><a >Dante and long long user name</a> <a  class="user_stat user_stat_1"></a></div>
+					<div class="new_track__title"><a >Моя Любовь Онлайн и очень длинное название</a></div>
+					<div class="new_track__data">Track | Dubstep | 07:34 | 18.9 MB </div>
+
+					<div class="player cf">
+						<a class="player_ico player_start">126</a>
+						<a class="player_ico player_dwnl">70</a>
+						<a class="player_ico player_like">126</a>
+						<a class="player_ico player_plus">+</a>
+					</div>
+
+				</div>
+
+				<div class="track_vision new_track__vision" style="background:url(views/main/img/new_track_vision_big_g.png) no-repeat;">
+					<div class="track_vision_in" style="background:url(views/main/img/new_track_vision_big_w.png) no-repeat; width:75%;"></div>
+					<div class="track_vision_in" style="background:url(views/main/img/new_track_vision_big_o.png) no-repeat; width:35%;"></div>
+				</div>
+
+			</div>
+		</article>
+		<!-- news article -->
+		<article ng-if="event.type == 'article'" class="b">
+			<hgroup class="article_head cf">
+				<div class="article_stat">
+					<div class="article_stat__author">Автор: <a >Админ</a></div>
+					<a  class="article_stat__like">8</a>
+				</div>
+
+				<time class="article_date">
+					<div class="article_date__day">15</div>
+					<div class="article_date__mon">дек</div>
+					<div class="article_date__time">18:53</div>
+				</time>
+
+				<h2 class="article_title">Добавлена новая статья</h2>
+			</hgroup>
+
+			<div class="new_article cf">
+				<div class="new_article__image"><img src="views/main/img/new1.jpg" alt="" title="" /></div>
+				<h3 class="article_title2"><a >Глобальное CjClub PARTY! Битва Сиджеев (Диджеев). Победителю путевка в жаркую страну!</a></h3>
+				<div class="new_article_text">Основные положения: Тип события: Битва диджеев/сиджеев Условия: Необходимо отыграть сэт на 15-20 минут из собственных треков (Virtual DJ, Traktor DJ, hardware (модель железа уточняется)) Основная задача: Дискотека, веселье. Результаты: Голосование зала определит победителя. Главный приз - туристическая путевка в жаркую страну для Победителя! </div>
+			</div>
+		</article>
+		<!-- news photos -->
+		<article ng-if="event.type == 'photos'" class="b">
+			<hgroup class="article_head cf">
+				<div class="article_stat">
+					<div class="article_stat__author">Автор: <a >Ujean7</a></div>
+					<a  class="article_stat__like">741</a>
+				</div>
+
+				<time class="article_date">
+					<div class="article_date__day">15</div>
+					<div class="article_date__mon">дек</div>
+					<div class="article_date__time">18:53</div>
+				</time>
+
+				<h2 class="article_title">Добавлено 8 новых фотографий</h2>
+			</hgroup>
+
+			<div class="new_photos">
+				<h3 class="article_title2"><a >Sunday Party Nightmare XL</a></h3>
+				<div class="new_photos_text">Фотоотчет с самой долгожданной предновогодней вечеринки!</div>
+				<div class="new_photos__images cf">
+					<a  class="new_photos__images__big"><img src="views/main/img/ph1.jpg" width="200" height="150" alt="" title="" /></a>
+					<a  class="new_photos__images__big"><img src="views/main/img/ph2.jpg" width="200" height="150" alt="" title="" /></a>
+					<a  class="new_photos__images__sm"><img src="views/main/img/ph3.jpg" width="89" height="67" alt="" title="" /></a>
+					<a  class="new_photos__images__sm"><img src="views/main/img/ph4.jpg" width="89" height="67" alt="" title="" /></a>
+					<a  class="new_photos__images__sm"><img src="views/main/img/ph5.jpg" width="89" height="67" alt="" title="" /></a>
+					<a  class="new_photos__images__sm"><img src="views/main/img/ph6.jpg" width="89" height="67" alt="" title="" /></a>
+					<a  class="new_photos__images__sm"><img src="views/main/img/ph7.jpg" width="89" height="67" alt="" title="" /></a>
+					<a  class="new_photos__images__sm"><img src="views/main/img/ph8.jpg" width="89" height="67" alt="" title="" /></a>
+				</div>
+			</div>
+		</article>
+		<!-- news label -->
+		<article ng-if="event.type == 'label'" class="b">
+			<hgroup class="article_head cf">
+				<div class="article_stat">
+					<div class="article_stat__author">Автор: <a >Админ</a></div>
+					<a  class="article_stat__like">128</a>
+				</div>
+
+				<time class="article_date">
+					<div class="article_date__day">15</div>
+					<div class="article_date__mon">дек</div>
+					<div class="article_date__time">18:53</div>
+				</time>
+
+				<h2 class="article_title">Новый лэйбл от PromoIndustry</h2>
+			</hgroup>
+
+			<div class="new_label cf">
+				<div class="new_label__image"><img src="views/main/img/label1.jpg" alt="" title="" /></div>
+				<h3 class="article_title2"><a >Dj Hiro — Memory</a></h3>
+				<div class="new_label_text">Независимый цифровой лейбл основан в 2012 году, расположение лейбла - Москва. Музыкальные предпочтения лейбла, House и поджанры (progressive, tech, deep, minimal) Дистрибьюция: Beatport и многие другие Мы принимаем Demo. У нас есть несколько стандартных правил. Пожалуйста, прочитайте их, прежде чем отправлять нам свое демо, если вам не впервой), вы можете не читать это.</div>
+			</div>
+		</article>
+	</div>
+</div>

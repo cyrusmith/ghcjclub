@@ -1,0 +1,1209 @@
+<div id="c">
+
+	<!-- main section -->
+	<section class="main">
+		<div class="width">
+
+			<!-- content -->
+			<section class="content cf">
+
+				<!-- center section -->
+				<section class="cont_c">
+
+					<!-- menu -->
+					<ul class="gray_menu">
+						<li class="gray_menu__item"><a href="#/projects/{{track.projectId}}">Профиль</a></li>
+						<li class="gray_menu__item gray_menu__active"><a href="#/projects/{{track.projectId}}/tracks">Треки</a></li>
+						<li class="gray_menu__item"><a href="#/projects/{{track.projectId}}/albums">Альбомы</a></li>
+						<li class="gray_menu__item"><a href="#/projects/{{track.projectId}}/blogs">Блоги</a></li>
+						<li class="gray_menu__item"><a href="#" ng-if="0">Группы</a></li>
+						<li class="gray_menu__item"><a href="#" ng-if="0">Подписчики</a></li>
+					</ul>
+
+					<div class="vb">
+						<div class="tr_data">
+							<a title="{{track.project}}" class="gbt_gr gbt_gr2">{{track.project}}</a>
+							<span class="ccp__rzd">|</span>
+							Альбом: <a title="{{track.album}}" class="gbt_gr gbt_gr2">{{track.album}}</a>
+							<span class="ccp__rzd">|</span>
+							В топе: <a href="#">{{track.style}}</a>
+							<span class="ico_rat ico_rat_max">123</span>
+							<span class="ico_rat ico_rat_min">- 123</span>
+						</div>
+
+						<div class="gb_data"><div class="gb_data_in">Опубликован: 18 ноября 1988</div></div>
+
+						<div class="tr_head cf">
+							<div class="ico_bcs fr">
+								<a href="#" class="ico_bc ico_bc1"></a>
+								<!--a href="#" class="ico_bc ico_bc2"></a-->
+								<a href="#" class="ico_bc ico_bc3"></a>
+								<a href="#" class="ico_bc ico_bc4"></a>
+							</div>
+
+							<div class="tr_name">
+								<div class="tr_controls">
+									<div class="gbt_play__ico gbt_pause__ico"></div>
+									<div class="gbt_down__ico"></div>
+								</div>
+								<div class="tr_name__text">
+									{{track.name}}
+								</div>
+								<i class="ico_top100"></i>
+								<div class="cb"></div>
+							</div>
+						</div>
+
+						<div class="track_vision full_track_vision" style="background:url(views/main/img/track_pic_big.png) repeat-x 0 0;">
+							<div class="track_vision_in" style="background:url(views/main/img/track_pic_big.png) repeat-x 0 -140px; width:75%;"></div>
+							<div class="track_vision_in" style="background:url(views/main/img/track_pic_big.png) repeat-x 0 -280px; width:35%;">
+								<span class="tr_time tr_pos_curr">14:48</span>
+							</div>
+
+							<span class="tr_time tr_full_len">48:24</span>
+
+							<ul class="tr_coms">
+								<li class="tr_com" style="left:20%">
+									<img class="tr_com__face" src="views/main/img/ava.jpg" alt="" title="" />
+									<div class="tr_com__comm" >
+										<a href="#" class="tr_com__link">Nonameuser123123123123123123123</a>
+										<span class="tr_com__text">Это очень крутой момент!!!</span>
+									</div>
+								</li>
+								<li class="tr_com tr_com__open" style="left:80%">
+									<img class="tr_com__face" src="views/main/img/ava1.png" alt="" title="" />
+									<div class="tr_com__comm" >
+										<a href="#" class="tr_com__link">Nonameuser2</a>
+										<span class="tr_com__text">Это очень крутой момент!!!</span>
+									</div>
+								</li>
+								<li class="tr_com" style="left:50%">
+									<img class="tr_com__face" src="views/main/img/ava_empty.png" alt="" title="" />
+									<div class="tr_com__comm">
+										<a href="#" class="tr_com__link">Nonameuser3</a>
+										<span class="tr_com__text">Это очень крутой момент!!!</span>
+									</div>
+								</li>
+								<li class="tr_com" style="left:36%">
+									<img class="tr_com__face" src="views/main/img/ava1.png" alt="" title="" />
+									<div class="tr_com__comm" >
+										<a href="#" class="tr_com__link">Nonameuser4</a>
+										<span class="tr_com__text">Это очень крутой момент!!!</span>
+									</div>
+								</li>
+							</ul>
+						</div>
+						<form class="cot" action="#" id="cot">
+							<img class="cot_ava" src="views/main/img/ava1.png" alt="" title="" />
+							<input type="text" value="" class="cot_text" name="cot" id="cot_text" onfocus="$('#cot').addClass('cot_focus');" onblur="$('#cot').removeClass('cot_focus');" />
+						</form>
+
+						<div class="tr_btns cf">
+							<div class="col_btns fl">
+								<a href="#" class="btn_orange"><i class="ico2 ico2_like"></i> Нравиться</a>
+								<a href="#" class="btn_orange"><i class="ico2 ico2_star"></i> В избранное</a>
+								<a href="#" class="btn_orange"><i class="ico2 ico2_topl"></i> В плейлист</a>
+								<a href="#" class="btn_orange"><i class="ico2 ico2_share"></i> Поделиться</a>
+							</div>
+
+							<div class="player tr_data fr cf">
+								<a href="#" class="ico_mic"></a>
+								<span class="ccp__rzd">|</span>
+								<a href="#" class="player_ico player_pit">PiT 235</a>
+								<span class="ccp__rzd">|</span>
+								<span class="player_ico player_size">135.6 Mb</span>
+								<span class="ccp__rzd">|</span>
+								<span class="player_ico player_start">126</span>
+								<span class="ccp__rzd">|</span>
+								<span class="player_ico player_dwnl">70</span>
+								<span class="ccp__rzd">|</span>
+								<span class="player_ico player_like">126</span>
+							</div>
+						</div>
+					</div>
+
+
+					<div class="tr_buy">
+						Купить трек:
+						<a href="#" class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
+						<a href="#" class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
+						<a href="#" class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
+						<a href="#" class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
+					</div>
+				</section>
+
+
+				<!-- left side  -->
+
+				<section class="left_side_s track-left">
+
+					<div class="aside2 center">
+						<div class="tr_cover"><img src="views/main/img/vinyl.jpg" alt="" title="" /></div>
+						<a href="#" class="rights_link"><i class="ico2 ico2_rights"></i> <span class="tdu">Нарушение авторских прав!</span></a>
+					</div>
+
+					<div class="aside2">
+						<h3 class="aside_title">Тут побывали</h3>
+						<ul class="faces cf">
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a href="#"><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
+						</ul>
+					</div>
+
+
+				</section>
+
+				<!-- right side  -->
+				<section class="right_side_s">
+
+					<section class="tr_side_r cf">
+
+						<div class="tr_aside">
+							<div class="tr_likes">
+								<h3 class="block_title block_title_nm">Трек понравился:</h3>
+								<ul class="fa_tabs tabs cf">
+									<li class="fa_tab fa_tab__active tab" data-rel="tab0"><span class="user_stat user_stat_1"></span> 34</li> <!-- fa_tab__active -->
+									<li class="fa_tab tab" data-rel="tab1"><span class="user_stat user_stat_2"></span> 2</li>
+									<li class="fa_tab tab" data-rel="tab2"><span class="user_stat user_stat_3"></span> 4</li>
+									<li class="fa_tab tab" data-rel="tab3"><span class="user_stat user_stat_4"></span> 3</li>
+								</ul>
+								<div class="tab_c">
+									<div id="tab0" class="tab_cont"> <!-- first tab content -->
+										<div class="faces_sm cf">
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser1111111111111111111</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser222222222222222222222</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3333333333333333</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser4444444444444444444444</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser666666666666666666666666666</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser100500++++++++++++++++++++++</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+
+											<div class="hide" id="more_faces"> <!-- more hidden elements -->
+												<span class="face_sm">
+													<img src="views/main/img/face_sm.png" alt="" title="" />
+													<span class="face_sm__desc">
+														<img src="views/main/img/face_sm65.png" alt="" title="" />
+														<dl class="face_sm__dl">
+															<dt>Имя:</dt>
+															<dd>Новый ряд</dd>
+															<dt>Статус:</dt>
+															<dd>Expert</dd>
+															<dt>Оценил:</dt>
+															<dd>11.03.2013 в 14:40</dd>
+														</dl>
+													</span>
+												</span>
+												<span class="face_sm">
+													<img src="views/main/img/face_sm.png" alt="" title="" />
+													<span class="face_sm__desc">
+														<img src="views/main/img/face_sm65.png" alt="" title="" />
+														<dl class="face_sm__dl">
+															<dt>Имя:</dt>
+															<dd>Nonameuser3</dd>
+															<dt>Статус:</dt>
+															<dd>Expert</dd>
+															<dt>Оценил:</dt>
+															<dd>11.03.2013 в 14:40</dd>
+														</dl>
+													</span>
+												</span>
+												<span class="face_sm">
+													<img src="views/main/img/face_sm.png" alt="" title="" />
+													<span class="face_sm__desc">
+														<img src="views/main/img/face_sm65.png" alt="" title="" />
+														<dl class="face_sm__dl">
+															<dt>Имя:</dt>
+															<dd>Nonameuser3</dd>
+															<dt>Статус:</dt>
+															<dd>Expert</dd>
+															<dt>Оценил:</dt>
+															<dd>11.03.2013 в 14:40</dd>
+														</dl>
+													</span>
+												</span>
+												<span class="face_sm">
+													<img src="views/main/img/face_sm.png" alt="" title="" />
+													<span class="face_sm__desc">
+														<img src="views/main/img/face_sm65.png" alt="" title="" />
+														<dl class="face_sm__dl">
+															<dt>Имя:</dt>
+															<dd>Nonameuser3</dd>
+															<dt>Статус:</dt>
+															<dd>Expert</dd>
+															<dt>Оценил:</dt>
+															<dd>11.03.2013 в 14:40</dd>
+														</dl>
+													</span>
+												</span>
+											</div>
+
+										</div>
+
+										<div class="show_more"><a href="#more_faces" class="show_link green2">Показать всех</a></div>
+									</div>
+									<!-- end tab 0 -->
+									<div id="tab1" class="tab_cont hide">
+										<div class="faces_sm cf">
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+										</div>
+									</div>
+									<!-- end tab 1 -->
+									<div id="tab2" class="tab_cont hide">
+										<div class="faces_sm cf">
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+										</div>
+									</div>
+									<!-- end tab 2 -->
+									<div id="tab3" class="tab_cont hide">
+										<div class="faces_sm cf">
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+											<span class="face_sm">
+												<img src="views/main/img/face_sm.png" alt="" title="" />
+												<span class="face_sm__desc">
+													<img src="views/main/img/face_sm65.png" alt="" title="" />
+													<dl class="face_sm__dl">
+														<dt>Имя:</dt>
+														<dd>Nonameuser3</dd>
+														<dt>Статус:</dt>
+														<dd>Expert</dd>
+														<dt>Оценил:</dt>
+														<dd>11.03.2013 в 14:40</dd>
+													</dl>
+												</span>
+											</span>
+										</div>
+									</div>
+									<!-- end tab 3 -->
+								</div>
+								<!-- end tabs content -->
+							</div>
+						</div>
+
+						<div class="tr_center">
+							<ul class="ae_tags">
+								<li class="ae_tag">Rebirth</li>
+								<li class="ae_tag">Music</li>
+								<li class="ae_tag ae_tag__active">Discover</li>
+								<li class="ae_tag">Electro</li>
+								<li class="ae_tag">Step</li>
+								<li class="ae_tag">Trance</li>
+								<li class="ae_tag">Vocal</li>
+							</ul>
+
+							<div class="tr_desc">
+								В число новых работ вошла переработанная версия «Let U Go» с голосом бывшего гитариста-
+								рокера, а ныне немецкого транс-деятеля Яна Лёээля (нем. Jan Löehel), который спел в «Believe
+								In Me», также вошедшем в «Seven years». Появилась вторая часть «Трилогии» — «Trilogie Part 2»;
+								композиция с вокалом Николь Кенна (англ. Nicole McKenna) — «Take Me Over», инструменталь-
+								ная работа «Far Beyond» и «Humanity», записанный с Тифф Лейси (англ. Tiff Lacey).
+
+								<div id="tr_more" class="hide">
+									Пример больше всего  years». Появилась вторая часть «Трилогии» — «Trilogie Part 2»;
+									композиция с вокалом Николь Кенна (англ. Nicole McKenna) — «Take Me Over», инструменталь-
+									ная работа «Far Beyond» и «Humanity», записанный с Тифф Лейси (англ. Tiff Lacey)
+								</div>
+
+								<div class="tr_desc_more show_more"><a href="#tr_more" class="show_link green2">Показать полную информацию</a></div>
+							</div>
+
+							<!-- code of track -->
+							<div class="tr_bnn">
+								<div class="tr_bnn__bl">
+									<a href="#tr_bnn" class="dashed tr_bnn__link show_link">Получить код баннера трека</a>
+								</div>
+
+								<div class="tr_bnn_content hide" id="tr_bnn">
+									<a href="#" class="tr_bnn__pr">
+										<b>Dash Berlin & Emma Hewitt</b> <br/>
+										Waiting (Vocal Mix)
+									</a>
+
+									<div class="tr_code">
+										<h3 class="f_title">HTML-код для вставки</h3>
+										<textarea rows="2" size="2" class="tr_code__area" onfocus="this.select();"><a href="http://www.cjclub.ru/tracks/20966"><img src="http://www.cjclub.ru/skins/cjclub2/images/banners/banner_20966.jpg" alt="CjClub.ru: Electrical Suite - In a new life"/></a></textarea>
+									</div>
+
+									<div class="tr_code">
+										<h3 class="f_title">BB-код для вставки</h3>
+										<textarea rows="2" class="tr_code__area tr_code__area2" onfocus="this.select();">[url="http://www.cjclub.ru/tracks/20966"][img]http://www.cjclub.ru/skins/cjclub2/images/banners/banner_20966.jpg [/img][/url] </textarea>
+									</div>
+
+								</div>
+							</div>
+
+
+						</div>
+
+					</section>
+
+
+
+					<!-- comments form -->
+					<h3 ng-if="0" class="block_title block_title_nm">Комментарии</h3>
+					<div ng-if="0" class="wys" id="wysiwyg">
+						<div class="wys_editor">
+							<textarea class="wiki_editor"></textarea>
+						</div>
+						<div class="btns_wys">
+							<input type="submit" value="Отправить (Ctrl+Enter)" class="btn_orange btn_orange_sm" />
+							<em class="btns_wys_text">Важно: не оскорблять, не флудить, не спамить. Иначе — тра-та-та!</em>
+						</div>
+					</div>
+
+					<!-- comments list -->
+					<div  ng-if="0" id="comments" class="comments">
+
+						<!-- pager -->
+						<div class="nav comments_nav">
+							<a class="renew" href="#">Обновить</a>
+							<a class="act" href="#">1</a>
+							<a href="#">2</a>
+							<a href="#">3</a>
+							<a href="#">4</a>
+							<a href="#">5</a>
+							<a href="#">6</a>
+							<a href="#">...</a>
+							<a href="#">187</a>
+						</div>
+
+
+						<!-- 1 -->
+						<div class="com">
+							<div class="com_in">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="views/main/img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr green">+1</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+										<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">Интересный трек. Приятно было его прослушать.</div>
+								<div class="com_menu">
+									<a href="#" class="ico2 ico2_come_edit"></a>
+									<a href="#" class="ico2 ico2_come_del"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 2 -->
+						<div class="com">
+							<div class="com_in">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="views/main/img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr red2">-11</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">
+									<!-- cite -->
+									<div class="quote">классно! оч. понравилось!)</div>
+									Интересный трек. Приятно было его прослушать.
+								</div>
+							</div>
+						</div>
+
+						<!-- 3 -->
+						<div class="com">
+							<div class="com_img">
+								<div class="com_img_img">
+									<img src="views/main/img/fa1.jpg" alt="" title="" />
+								</div>
+								<div class="com_rat">
+									<div class="hd"></div>
+									<div class="hu"></div>
+									<div class="hr green">0</div>
+								</div>
+							</div>
+							<div class="com_data">
+								<div class="fl">
+									<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+								</div>
+								<div class="fr">
+									<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+									<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
+									<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+									<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+									<a href="#"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+								</div>
+							</div>
+							<div class="com_mess">И снова на высоте !!! Приятная жизненная волна захватывает.... :) Ощутимое полное погружение в ваше творение...
+								Оч понравилось !!! без пианинки 0_o</div>
+							<div class="com_menu">
+								<a href="#" class="ico2 ico2_come_edit"></a>
+								<a href="#" class="ico2 ico2_come_del"></a>
+							</div>
+						</div>
+
+						<!-- 4 deleted comment closed -->
+						<div class="com com_deleted">
+							<div class="com_pre gray">Когда-то здесь был комментарий — <a href="#" class="link_g com_deleted">Оригинал</a></div>
+							<div class="com_in hide">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="views/main/img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr red2">-11</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">Интересный трек. Приятно было его прослушать.</div>
+								<div class="com_menu">
+									<a href="#" class="link_g">Восстановить</a>
+									<a href="#" class="ico2 ico2_come_edit"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 5 -->
+						<div class="com">
+							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_appeal">Смотреть</a></div>
+							<div class="com_in hide">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="views/main/img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr green">0</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+									</div>
+								</div>
+								<div class="com_mess">
+									без пианинки 0_o
+									<div class="appear">
+										<div class="bold">Жалоба от: <a href="#" class="link_g">Dj Mig</a></div>
+										<em>Ненормативная лексика и оскорбления!</em>
+									</div>
+								</div>
+								<div class="com_menu">
+									<a href="#" class="ico2 ico2_come_refresh"></a>
+									<a href="#" class="ico2 ico2_come_del"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 6 deleted comment open -->
+						<div class="com com_deleted_prev">
+							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_deleted">Оригинал</a></div>
+							<div class="com_in hide">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="views/main/img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr red2">-13</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+									</div>
+								</div>
+								<div class="com_mess">без пианинки 0_o</div>
+								<div class="com_menu">
+									<a href="#" class="link_g">Восстановить</a>
+									<a href="#" class="ico2 ico2_come_edit"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 7 open appear comment open -->
+						<div class="com com_appeal_prev">
+							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_appeal">Скрыть</a></div>
+							<div class="com_in hide">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="views/main/img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr green">0</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#" class="active_link"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">
+									<div class="appear">
+										<div class="bold">Жалоба от: <a href="#" class="link_g">Dj Mig</a></div>
+										<em>Ненормативная лексика и оскорбления!</em>
+									</div>
+									без пианинки 0_o вы все ****
+								</div>
+								<div class="com_menu">
+									<a href="#" class="ico2 ico2_come_refresh"></a>
+									<a href="#" class="ico2 ico2_come_edit"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 8 with appear form -->
+						<div class="com">
+							<div class="com_in">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="views/main/img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr green">0</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+										<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#" class="active_link"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">
+									<div class="quote">Ненормативная лексика и оскорбления!</div>
+									И снова на высоте !!! Приятная жизненная волна захватывает.... :) Ощутимое полное погружение в ваше творение...
+									И снова на высоте !!! Приятная жизненная волна захватывает.... :) Ощутимое полное погружение в ваше творение...
+									Оч понравилось !!!
+								</div>
+								<div class="com_menu">
+									<a href="#" class="ico2 ico2_come_edit"></a>
+									<a href="#" class="ico2 ico2_come_del"></a>
+								</div>
+							</div>
+							<!-- appeal form -->
+							<form class="form_appeal" action="#">
+								<div class="form_appeal_title">Объясните причину жалобы:</div>
+								<div class="form_appeal_area"><textarea class="f_text2 f_area2"></textarea></div>
+								<input type="submit" value="Отправить (Ctrl+Enter)" class="btn_orange btn_orange_sm" />
+							</form>
+						</div>
+
+						<!-- end comments -->
+
+
+						<!-- pager -->
+						<div class="nav comments_nav">
+							<a class="renew" href="#">Обновить</a>
+							<a class="act" href="#">1</a>
+							<a href="#">2</a>
+							<a href="#">3</a>
+							<a href="#">4</a>
+							<a href="#">5</a>
+							<a href="#">6</a>
+							<a href="#">...</a>
+							<a href="#">187</a>
+						</div>
+					</div>
+
+				</section>
+
+
+			</section>
+		</div>
+
+	</section>
+</div>

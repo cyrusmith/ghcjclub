@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8" />
+	<meta name="robots" content="index, follow" />
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<base href="<?=CONFIG::$PATH_URL?>/"/>
+	<title>CJ Club</title>
+	<link href="views/main/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+	<link href="views/main/css/main.css" rel="stylesheet" />
+	<!--[if lt IE 9]>
+	<script src="views/main/js/html5.js"></script>
+	<link href="views/main/css/ie.css" rel="stylesheet" />
+	<![endif]-->
+	<script src="views/main/js/prefixfree.min.js"></script>
+	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular.min.js"></script>
+	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-cookies.min.js"></script>
+	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-route.min.js"></script>
+	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-resource.min.js"></script>
+	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-animate.min.js"></script>
+	<script src="<?=CONFIG::$PATH_URL?>/views/libs/underscore-min.js"></script>
+	<script src="<?=CONFIG::$PATH_URL?>/views/js/apps/userApp.js"></script>
+	<?
+	$files = scandir(CONFIG::$PATH_ABS.'/views/js/resources');
+	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
+	<script src="<?=CONFIG::$PATH_URL?>/views/js/resources/<?=$file?>"></script>
+	<?endforeach?>
+	<?
+	$files = scandir(CONFIG::$PATH_ABS.'/views/js/directives');
+	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
+	<script src="<?=CONFIG::$PATH_URL?>/views/js/directives/<?=$file?>"></script>
+	<?endforeach?>
+	<?
+	$files = scandir(CONFIG::$PATH_ABS.'/views/js/controllers');
+	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
+	<script src="<?=CONFIG::$PATH_URL?>/views/js/controllers/<?=$file?>"></script>
+	<?endforeach?>
+</head>
+<body ng-app="CjClubUserApp">
+<div id="p"> <!-- style="background:#000 url(./img/branding.jpg) no-repeat 50% 0;" -->   <!-- branding -->
+<!-- header -->
+<div class="header-bg"><ins class="header_shadow" id="header_shadow"></ins></div>
+<header id="header">
+<div class="width">
+<div id="top" class="top cf">
+<div class="top_l" ng-controller="StatInfoCtrl">
+	<a href="#" class="logo"><img src="views/main/img/logo.png" alt="CJCLUB.ru" title="CJCLUB.ru" width="147" height="79" /></a>
+	<div class="t_counts cf" ng-cloak>
+		<div class="t_counts__item t_counts_item_3">{{stat.users}}</div>
+		<div class="t_counts__item t_counts_item_1">{{stat.tracks}}</div>
+		<a  class="t_counts__item t_counts_item_2">{{stat.projects}}</a>
+	</div>
+</div>
+
+<div class="top_c">
+	<div class="player" ng-controller="PlayerCtrl" ng-cloak>
+		<!-- left small btns -->
+		<div class="player_changer_left">
+			<div class="player_changer__item brl7"><span class="player_changer__item_text act">Плеер</span></div>
+			<div class="player_changer__item brl7"><span class="player_changer__item_text">Радио</span></div>
+			<div class="player_changer__item brl7"><span class="player_changer__item_text2">Low</span><span class="player_changer__item_text2 player_changer__item_text_border act">Hi</span></div>
+		</div>
+
+		<!-- composition controls -->
+		<div class="composition_b">
+			<div class="composition cf">
+				<div class="track_image">
+					<img title="" alt="" src="views/main/img/co1.png" width="68" height="60" />
+					<div class="track_image__controls">
+						<a class="cover_play" ></a>
+						<a class="cover_plus" ></a>
+					</div>
+				</div>
+
+				<div class="composition__c">
+					<div class="composition__title"><a >{{track.project}}</a></div>
+					<div class="composition__title"><a >{{track.name}}</a></div>
+					<div class="composition__data">Track | Pop | {{track.timelengthStr}} | {{track.filesizeStr}}</div>
+				</div>
+
+				<div class="sound_control">
+					<div class="sound_control_mute"></div>
+					<div class="sound_control_slider sound_control_slider_sm"></div>
+				</div>
+
+				<div class="track_vision player_visio" style="background:url(views/main/img/new_track_vision_g.png) no-repeat;">
+					<div class="track_vision_in" style="background:url(views/main/img/new_track_vision_w.png) no-repeat; width:75%;"></div>
+					<div class="track_vision_in" style="background:url(views/main/img/new_track_vision_o.png) no-repeat; width:25%;"></div>
+				</div>
+
+			</div>
+			<div ng-if="0" id="playlist_opener" class="playlist_opener"><span class="dot">Плейлист Избранное</span> (103)</div>
+
+			<!-- playlist -->
+			<div class="playlist brb22" id="playlist">
+				<div class="playlist_charts">
+					<a  class="playlist_chart">Популярные треки</a>
+					<a  class="playlist_chart">Лучшие треки недели</a>
+					<a  class="playlist_chart">Избранные</a>
+				</div>
+
+				<div class="playlist_holder">
+
+					<div class="playlist_content" id="playlist_content">
+
+						<ul class="playlist_list" id="playlist_list">
+							<li class="playlist_item cf">
+								<ins class="draggable"></ins>
+								<img src="views/main/img/pl1.png" alt="" title="" class="playlist_item__cover" />
+								<div class="playlist_item__data">
+									<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+									<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+								</div>
+								<div class="mini_player cf">
+									<div class="mini_player_btn mini_player_play"></div>
+									<div class="mini_player_btn mini_player_md"></div>
+									<div class="mini_player_btn mini_player_mu"></div>
+									<div class="mini_player_btn mini_player_re"></div>
+								</div>
+							</li>
+
+							<li class="playlist_item cf">
+								<ins class="draggable"></ins>
+								<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
+								<div class="playlist_item__data">
+									<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+									<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+								</div>
+								<div class="mini_player cf">
+									<div class="mini_player_btn mini_player_play"></div>
+									<div class="mini_player_btn mini_player_md"></div>
+									<div class="mini_player_btn mini_player_mu"></div>
+									<div class="mini_player_btn mini_player_re"></div>
+								</div>
+							</li>
+
+							<li class="playlist_item cf">
+								<ins class="draggable"></ins>
+								<img src="views/main/img/pl1.png" alt="" title="" class="playlist_item__cover" />
+								<div class="playlist_item__data">
+									<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+									<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+								</div>
+								<div class="mini_player cf">
+									<div class="mini_player_btn mini_player_play"></div>
+									<div class="mini_player_btn mini_player_md"></div>
+									<div class="mini_player_btn mini_player_mu"></div>
+									<div class="mini_player_btn mini_player_re"></div>
+								</div>
+							</li>
+
+							<li class="playlist_item cf">
+								<ins class="draggable"></ins>
+								<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
+								<div class="playlist_item__data">
+									<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+									<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+								</div>
+								<div class="mini_player cf">
+									<div class="mini_player_btn mini_player_play"></div>
+									<div class="mini_player_btn mini_player_md"></div>
+									<div class="mini_player_btn mini_player_mu"></div>
+									<div class="mini_player_btn mini_player_re"></div>
+								</div>
+							</li>
+
+							<li class="playlist_item cf">
+								<ins class="draggable"></ins>
+								<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
+								<div class="playlist_item__data">
+									<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+									<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+								</div>
+								<div class="mini_player cf">
+									<div class="mini_player_btn mini_player_play"></div>
+									<div class="mini_player_btn mini_player_md"></div>
+									<div class="mini_player_btn mini_player_mu"></div>
+									<div class="mini_player_btn mini_player_re"></div>
+								</div>
+							</li>
+
+							<li class="playlist_item cf">
+								<ins class="draggable"></ins>
+								<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
+								<div class="playlist_item__data">
+									<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+									<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+								</div>
+								<div class="mini_player cf">
+									<div class="mini_player_btn mini_player_play"></div>
+									<div class="mini_player_btn mini_player_md"></div>
+									<div class="mini_player_btn mini_player_mu"></div>
+									<div class="mini_player_btn mini_player_re"></div>
+								</div>
+							</li>
+						</ul>
+					</div>
+
+					<div class="playlist_scroll" id="playlist_scroll"></div>
+				</div>
+				<div class="playlist_closer" onclick="$('#playlist').slideToggle(300);"><span class="dot">Свернуть</span></div>
+			</div>
+		</div>
+		<!-- right small btns -->
+		<div class="player_changer_right">
+			<div class="player cf">
+				<div class="player_changer__item brr7"><a class="player_ico player_pause">{{track.count_listen}}</a></div>
+				<div class="player_changer__item brr7"><a class="player_ico player_dwnl">{{track.count_download}}</a></div>
+				<div class="player_changer__item brr7"><a class="player_ico player_like">{{track.count_liked}}</a></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- user section -->
+<div class="top_r">
+
+	<!-- enter reg (no logined) -->
+
+	<div class="enter_reg hide">
+		<div id="btn_enter" class="f_btn enter_reg_btn">Регистрация</div>
+		<div id="btn_reg" class="f_btn enter_reg_btn" onclick="$('#popup_auth').fadeToggle();">Войти</div>
+	</div>
+
+	<form class="popup popup_auth center hide" id="popup_auth">
+		<input type="text" value="" placeholder="Логин" class="f_text" />
+		<input type="password" value="" placeholder="Пароль" class="f_text" />
+		<input type="submit" value="Войти" class="f_btn" />
+
+		<div class="save_me"><input type="checkbox" name="save" id="save" value="1" /><label for="save">Запомнить меня</label> </div>
+		<div class="f_links">
+			<a >Забыли пароль?</a>
+			<a >Регистрация</a>
+		</div>
+	</form>
+
+	<ng-include src="'views/main/includes/userCorner.html'"></ng-include>
+
+</div>
+
+</div>
+<div id="topmini" class="top cf">
+<div class="header_opener"></div>
+<a class="logo_mini" href="./"><img src="views/main/img/logo_mini.png" alt="CJCLUB.ru" title="CJCLUB.ru" width="146" height="45" /></a>
+
+
+<div class="top_c">
+	<div class="pl_c">
+		<div class="pleer_changer pl_act cf">  <!-- rd_act -->
+			<div class="pleer">Плеер</div>
+			<div class="radio">Радио</div>
+		</div>
+		<div id="playlist_opener" class="playlist_opener_mini"><span class="dot1">Плейлист Избранное</span> (103)</div>
+	</div>
+
+	<div class="pl_player">
+		<div class="ico5 ico5_prev"></div>
+		<div class="ico5 ico5_play"></div>
+		<div class="ico5 ico5_next"></div>
+		<div class="ico5 ico5_down"></div>
+	</div>
+
+	<div class="track_vision player_visio player_visio_sm" style="background:url(views/main/img/mini_voice.png) no-repeat 0 0;">
+		<div class="track_vision_in" style="background:url(views/main/img/mini_voice.png) no-repeat 0 -30px; width:75%;"></div>
+		<div class="track_vision_in" style="background:url(views/main/img/mini_voice.png) no-repeat 0 -60px; width:25%;"></div>
+	</div>
+
+
+	<div class="pl_name fl">
+		<a  class="pl_name1">Cuberpank</a>
+		<a  class="pl_name2">Широко закрытые глаза</a>
+	</div>
+
+	<div class="vol">
+		<div class="vol_in" style="width:50%;"></div>
+	</div>
+</div>
+
+
+<!-- playlist -->
+<div class="playlist brb22" id="playlist1">
+	<div class="playlist_charts">
+		<a  class="playlist_chart">Популярные треки</a>
+		<a  class="playlist_chart">Лучшие треки недели</a>
+		<a  class="playlist_chart">Избранные</a>
+	</div>
+
+	<div class="playlist_holder">
+
+		<div class="playlist_content" id="playlist_content">
+
+			<ul class="playlist_list" id="playlist_list">
+				<li class="playlist_item cf">
+					<ins class="draggable"></ins>
+					<img src="views/main/img/pl1.png" alt="" title="" class="playlist_item__cover" />
+					<div class="playlist_item__data">
+						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+					</div>
+					<div class="mini_player cf">
+						<div class="mini_player_btn mini_player_play"></div>
+						<div class="mini_player_btn mini_player_md"></div>
+						<div class="mini_player_btn mini_player_mu"></div>
+						<div class="mini_player_btn mini_player_re"></div>
+					</div>
+				</li>
+
+				<li class="playlist_item cf">
+					<ins class="draggable"></ins>
+					<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
+					<div class="playlist_item__data">
+						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+					</div>
+					<div class="mini_player cf">
+						<div class="mini_player_btn mini_player_play"></div>
+						<div class="mini_player_btn mini_player_md"></div>
+						<div class="mini_player_btn mini_player_mu"></div>
+						<div class="mini_player_btn mini_player_re"></div>
+					</div>
+				</li>
+
+				<li class="playlist_item cf">
+					<ins class="draggable"></ins>
+					<img src="views/main/img/pl1.png" alt="" title="" class="playlist_item__cover" />
+					<div class="playlist_item__data">
+						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+					</div>
+					<div class="mini_player cf">
+						<div class="mini_player_btn mini_player_play"></div>
+						<div class="mini_player_btn mini_player_md"></div>
+						<div class="mini_player_btn mini_player_mu"></div>
+						<div class="mini_player_btn mini_player_re"></div>
+					</div>
+				</li>
+
+				<li class="playlist_item cf">
+					<ins class="draggable"></ins>
+					<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
+					<div class="playlist_item__data">
+						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+					</div>
+					<div class="mini_player cf">
+						<div class="mini_player_btn mini_player_play"></div>
+						<div class="mini_player_btn mini_player_md"></div>
+						<div class="mini_player_btn mini_player_mu"></div>
+						<div class="mini_player_btn mini_player_re"></div>
+					</div>
+				</li>
+
+				<li class="playlist_item cf">
+					<ins class="draggable"></ins>
+					<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
+					<div class="playlist_item__data">
+						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+					</div>
+					<div class="mini_player cf">
+						<div class="mini_player_btn mini_player_play"></div>
+						<div class="mini_player_btn mini_player_md"></div>
+						<div class="mini_player_btn mini_player_mu"></div>
+						<div class="mini_player_btn mini_player_re"></div>
+					</div>
+				</li>
+
+				<li class="playlist_item cf">
+					<ins class="draggable"></ins>
+					<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
+					<div class="playlist_item__data">
+						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+					</div>
+					<div class="mini_player cf">
+						<div class="mini_player_btn mini_player_play"></div>
+						<div class="mini_player_btn mini_player_md"></div>
+						<div class="mini_player_btn mini_player_mu"></div>
+						<div class="mini_player_btn mini_player_re"></div>
+					</div>
+				</li>
+			</ul>
+		</div>
+
+		<div class="playlist_scroll" id="playlist_scroll"></div>
+	</div>
+	<div class="playlist_closer" onclick="$('#playlist').slideToggle(300);"><span class="dot1">Свернуть</span></div>
+</div>
+
+
+
+<!-- user section -->
+<div class="top_r">
+
+	<div class="user">
+		<div class="user_line cf">
+			<img class="user_img" src="views/main/img/ava.jpg" alt="" title="" width="32" height="32" />
+
+			<div class="user_right">
+				<!-- user menu -->
+				<div class="user_menu cf">
+					<span  class="user_menu_item1 user_sett" onclick="$('#popup_user_menu1').fadeToggle(300);"></span>
+					<a  class="user_menu_item user_exit"></a>
+				</div>
+
+				<ul id="popup_user_menu1" class="popup popup_user_menu1 hide">
+					<li><a  class="user_menu_1">Что нового?</a> <a href="#link2" class="user_menu_cogwheel"><img src="views/main/img/ico_cogwheel.png" alt="" title=""></a></li>
+					<li><a  class="user_menu_2">Центр управления</a></li>
+					<li><a  class="user_menu_3">Платные услуги</a></li>
+					<li><a  class="user_menu_4">Мои аудиозаписи</a>
+						<a  class="user_menu_5">Мои альбомы</a>
+						<a  class="user_menu_6">Избранные треки</a></li>
+					<li><a  class="user_menu_7">Мои блоги</a>
+						<a  class="user_menu_8">Избранные блоги</a></li>
+					<li><a  class="user_menu_9">Мои файлы</a></li>
+					<li><a  class="user_menu_10">Мои друзья</a></li>
+					<li><a  class="user_menu_11">Мои фотоальбомы</a></li>
+					<li><a  class="user_menu_12">Профиль</a>
+						<a  class="user_menu_13">Оформление</a>
+						<a  class="user_menu_14">Настройки</a></li>
+				</ul>
+
+			</div>
+
+			<div class="user_name"><span class="user_name__text1" onclick="$('#popup_user1').fadeToggle();">Dj Kazak</span></div>
+
+			<!-- popup messages -->
+			<div class="popup popup_user hide" id="popup_user1">
+				<ul class="popup_user_list">
+					<li>
+						<a  class="popup_user_list__img"><img src="views/main/img/popup_user_1.png" alt="" title="" /></a>
+						<a  class="popup_user_list__name" title="fadeToggle">fadeToggle</a>
+						<a  class="user_stat user_stat_1">pro</a>
+					</li>
+					<li>
+						<a  class="popup_user_list__img"><img src="views/main/img/popup_user_2.png" alt="" title="" /></a>
+						<a  class="popup_user_list__name" title="LastLife">LastLife</a>
+						<a  class="user_stat user_stat_1">pro</a>
+					</li>
+					<li>
+						<a  class="popup_user_list__img"><img src="views/main/img/popup_user_1.png" alt="" title="" /></a>
+						<a  class="popup_user_list__name" title="Dj Kazzzazzzzk">Dj Kazzzzzzazzzzk</a>
+						<a  class="user_stat user_stat_1">pro</a>
+					</li>
+				</ul>
+			</div>
+
+			<!-- messages -->
+			<div class="user_messages">
+				<div class="user_messages_line">
+					<span class="ico5 ico5_letter" onclick="$('#popup_messages1').fadeToggle(300);">12</span>
+				</div>
+				<!-- popup messages -->
+				<div class="popup popup_messages hide" id="popup_messages1">
+					<div class="popup_messages_list">
+						<div class="mess_pk"><a >Личные сообщения (12)</a></div>
+						<div class="mess_comm">
+							Новые комментарии (<a >23</a>)
+
+							<div class="mess_title">К вашим материалам:</div>
+							<ul class="mess_list">
+								<li><a  class="ico_minus">Треки (0)</a></li>
+								<li><a  class="ico_minus">Блоги (0)</a></li>
+								<li><a  class="ico_minus">Стена (0)</a></li>
+							</ul>
+
+							<div class="mess_title">К подпискам:</div>
+							<ul class="mess_list">
+								<li><a  class="ico_minus">Треки (0)</a></li>
+								<li><a  class="ico_minus">Блоги (0)</a></li>
+								<li><a  class="ico_minus">Стена (0)</a></li>
+							</ul>
+
+							<div class="mess_title">Другое</div>
+							<ul class="mess_list">
+								<li><a  class="ico_minus">Ответы на ваши комментарии (0)</a></li>
+							</ul>
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+
+		</div>
+
+	</div>
+</div>
+
+</div>
+
+<!-- navigation -->
+
+
+</div>
+
+</header>
+<nav class="cf" ng-controller="NavCtrl">
+	<a  class="error_link">Сообщить об ошибке</a>
+	<div class="header_closer"></div>
+	<ul class="menu">
+		<li><a href="#tracks">Треки</a></li>
+		<li><a href="#tops">Топы</a></li>
+		<li>
+			<a>Резиденты</a>
+			<ul class="submenu">
+				<li><a href="#/projects">Авторы</a></li>
+				<li><a href="#/labels">Лейблы</a></li>
+				<li>
+					<a href="#/podcasts">Подкасты</a>
+					<!--
+					<ul class="submenu2">
+						<li><a href="#podcasts/music">О музыке</a></li>
+						<li><a >О железе</a></li>
+						<li><a >О людях</a></li>
+					</ul>
+					-->
+				</li>
+				<li><a href="#/groups">Группы</a></li>
+			</ul>
+		</li>
+		<li ng-class="{act: current == 'articles'}">
+			<a href="#/articles">Статьи</a>
+			<!--
+			<ul class="submenu">
+				<li><a >Авторы</a></li>
+				<li><a >Лейблы</a></li>
+				<li>
+					<a >Подкасты</a>
+					<ul class="submenu2">
+						<li><a >О музыке</a></li>
+						<li><a >О железе</a></li>
+						<li><a >О людях</a></li>
+					</ul>
+				</li>
+				<li><a >Группы</a></li>
+			</ul>
+			-->
+		</li>
+		<li><a href="forum/">Форум</a></li>
+		<li><a href="http://cjradio.ru">CJ Radio</a></li>
+		<li><a href="#/about">О проекте</a></li>
+	</ul>
+	<div class="div search" ng-controller="SearchCtrl">
+		<form class="search">
+			<input type="submit" class="search_btn" />
+			<input type="text" class="search_txt" id="q" ng-model="request" value="Поиск" onfocus="if(this.value=='Поиск') this.value = '';" onblur="if(this.value == '') this.value = 'Поиск';" />
+		</form>
+	</div>
+</nav>
+
+<div ng-view></div>
+
+<!-- footer -->
+<footer class="width cf">
+	<div class="foot_in">
+		<div class="foot_l">
+			<div class="copy">2002–<?=date('Y')?> © CjClub.Ru</div>
+			<div class="spy">
+				<a ><img src="views/main/img/spy1.png" alt="" title="" /></a>
+				<a ><img src="views/main/img/spy2.png" alt="" title="" /></a>
+				<a ><img src="views/main/img/spy3.png" alt="" title="" /></a>
+				<a ><img src="views/main/img/spy4.png" alt="" title="" /></a>
+				<a ><img src="views/main/img/spy5.png" alt="" title="" /></a>
+			</div>
+		</div>
+		<div class="foot_c">
+			<ul class="foot_menu">
+				<li><a >Пользовательское соглашение</a></li>
+				<li><a >Реклама на сайте</a></li>
+				<li><a >О сайте</a></li>
+				<li><a >Пожаловаться</a></li>
+				<li><a >Платные услуги</a></li>
+			</ul>
+			<ul class="foot_menu">
+				<li><a >Радио</a></li>
+				<li><a >Музыкальные новинки</a></li>
+				<li><a >Друзья</a></li>
+				<li><a >VipLinks</a></li>
+			</ul>
+		</div>
+		<div class="foot_r">
+			<div class="dev">
+				Дизайн сайта:
+				<a ><img src="views/main/img/logo_bel.png" alt="" title="" /></a>
+			</div>
+		</div>
+	</div>
+</footer>
+</div>
+
+
+<!-- playlist item example -->
+<?if (0):?>
+<div class="playlist_item cf" style="position:absolute; top:550px; left:50%; margin-left:-240px;" draggable="true">
+	<ins class="draggable"></ins>
+	<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
+	<div class="playlist_item__data">
+		<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
+		<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
+	</div>
+	<div class="mini_player cf">
+		<div class="mini_player_btn mini_player_play"></div>
+		<div class="mini_player_btn mini_player_md"></div>
+		<div class="mini_player_btn mini_player_mu"></div>
+		<div class="mini_player_btn mini_player_re"></div>
+	</div>
+</div>
+<?endif?>
+
+<!-- to top link -->
+<span id="totop" class="totop"><a href="#top" class="totop_in"><span class="totop_text">Наверх</span></a></span>
+
+
+<div class="hide">
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script>window.jQuery || document.write('<script src="views/main/js/jquery.min.js"><\/script>')</script>
+	<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+	<script src="views/main/js/main.js"></script>
+</div>
+</body>
+</html>

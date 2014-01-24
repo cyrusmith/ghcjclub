@@ -1,0 +1,396 @@
+<div id="c">
+
+	<!-- main section -->
+	<section class="main">
+		<div class="width">
+
+			<!-- content -->
+			<section class="content cf">
+
+				<!-- right colum -->
+				<section class="left_aside">
+
+					<!-- control center page -->
+					<h1 class="page_title">Статьи</h1>
+
+					<div ng-if="0" class="articles_menus articles_menus__list">
+						<ul class="articles_menu">
+							<li class="am_item">
+								<a class="am_link">Здесь скрыто меню</a>
+								<ul class="am_submenu hide">  <!-- hidden menu -->
+									<li class="am_submenu_item"><a class="am_submenu_link">Название подраздела 1</a></li>
+									<li class="am_submenu_item"><a class="am_submenu_link am_submenu_link_active">Название подраздела 2</a></li> <!-- active -->
+									<li class="am_submenu_item"><a class="am_submenu_link">Название подраздела 3</a></li>
+								</ul>
+							</li>
+							<li class="am_item">
+								<a class="am_link">Название раздела статьи может быть длинным</a></li>
+							</li>
+							<li class="am_item">
+								<a class="am_link">Название раздела статьи может быть длинным</a></li>
+							</li>
+						</ul>
+
+						<ul class="articles_menu">
+							<li class="am_item">
+								<a class="am_link">Здесь открыто меню</a>
+								<ul class="am_submenu"> <!-- just open menu -->
+									<li class="am_submenu_item"><a class="am_submenu_link">Название подраздела 1</a></li>
+									<li class="am_submenu_item"><a class="am_submenu_link">Название подраздела 3</a></li>
+								</ul>
+							</li>
+							<li class="am_item">
+								<a class="am_link">Название раздела статьи может быть длинным</a></li>
+							</li>
+						</ul>
+					</div>
+
+
+					<form ng-if="0" class="search search_tags search_tags_full" action="#">
+						<input type="submit" value="найти" class="search_btn">
+						<input type="text" onblur="if(this.value == '') this.value = 'Поиск по тегам';" onfocus="if(this.value=='Поиск по тегам') this.value = '';" value="Поиск по тегам" name="qtags" class="search_txt">
+					</form>
+
+					<div ng-if="0" class="b searched_tags">
+						<i class="ico2 ico2_tags_toggle ico2_tags_toggle__open" onclick="$('#tags').slideToggle(300); $(this).toggleClass('ico2_tags_toggle__open');"></i>
+						<span class="searched_tags__title">Выбранный тэг:</span> <a class="link_g" >Andrew</a>
+					</div>
+
+					<article class="b hide" id="tags">
+						<div class="tags">
+							<ul class="tags_list tags_list__selector">
+								<li><a style="font-size:18px;" >Andrew</a></li>
+								<li><a style="font-size:14px;" >Lu auriga</a></li>
+								<li><a style="font-size:16px;" >beatport</a></li>
+								<li><a style="font-size:22px;" >breakbeat</a></li>
+								<li><a style="font-size:20px;" >breaks</a></li>
+								<li><a style="font-size:18px;" >chillout</a></li>
+								<li><a style="font-size:16px;" >cjclub</a></li>
+								<li><a style="font-size:12px;" >Club</a></li>
+								<li><a style="font-size:13px;" >Universe</a></li>
+								<li><a style="font-size:14px;" >Cubase</a></li>
+								<li><a style="font-size:14px;" >DAW</a></li>
+								<li><a style="font-size:15px;" >downtempo</a></li>
+								<li><a style="font-size:17px;" >drum and bass</a></li>
+								<li><a style="font-size:18px;" >Dubstep</a></li>
+								<li><a style="font-size:20px;" >electronic</a></li>
+								<li><a style="font-size:25px;" >experimental</a></li>
+								<li><a style="font-size:22px;" >FL Studio</a></li>
+								<li><a style="font-size:24px;" >freeware</a></li>
+								<li><a style="font-size:18px;" >House</a></li>
+								<li><a style="font-size:12px;" >idm</a></li>
+								<li><a style="font-size:30px;" >MIDI mix</a></li>
+								<li><a style="font-size:28px;" >mp3</a></li>
+								<li><a style="font-size:25px;" >music</a></li>
+								<li><a style="font-size:20px;" >new</a></li>
+								<li><a style="font-size:19px;" >podcast</a></li>
+								<li><a style="font-size:18px;" >progressive house</a></li>
+								<li><a style="font-size:17px;" >progressive trance</a></li>
+								<li><a style="font-size:16px;" >radioshow</a></li>
+								<li><a style="font-size:15px;" >Reason</a></li>
+								<li><a style="font-size:13px;" >ReMarQ</a></li>
+								<li><a style="font-size:14px;" >Remix</a></li>
+								<li><a style="font-size:18px;" >rock</a></li>
+								<li><a style="font-size:18px;" >techno</a></li>
+								<li><a style="font-size:22px;" >trance</a></li>
+								<li><a style="font-size:23px;" >video</a></li>
+								<li><a style="font-size:25px;" >VST</a></li>
+								<li><a style="font-size:16px;" >VSTi</a></li>
+								<li><a style="font-size:13px;" >Youtube</a></li>
+							</ul>
+						</div>
+					</article>
+
+
+					<div class="searched_data cf" ng-if="0">
+						<div class="searched_data__title">Найдено статей: 247</div>
+						<div class="searched_data__sort">
+							<span class="searched_data__sort__title">Сортировать</span>
+							<a class="search_sort">По дате</a>
+							<a class="search_sort search_sort__active">По полезности</a>
+						</div>
+					</div>
+
+
+					<section class="articles_list">
+
+						<!-- article 2 -->
+						<div ng-repeat="article in articles" class="gb">
+							<div class="gb_in cf">
+
+								<!-- article menu -->
+								<div class="gb_menu" ng-if="0">
+									<a class="ico2 ico2_set"></a>
+									<a class="ico2 ico2_del"></a>
+									<a class="ico2 ico2_warn"></a>
+								</div>
+
+								<!-- gray block data -->
+								<div class="gb_data"><div class="gb_data_in">{{article.public_date}}</div></div>
+
+								<!-- article data -->
+								<div class="author">Автор: <a class="link_gray">{{article.author}}</a></div>
+
+								<h3 class="col_title_s"><a href="#/news/{{article.id}}" class="black_link">{{article.subject}}</a></h3>
+								<div class="col_text_s">{{article.shorttext}}</div>
+
+								<!-- addition text to show -->
+								<div class="col_text_s col_text_s_add">1111111111111111 Независимый цифровой лейбл основан в 2012 году, расположение лейбла - Москва.  Музыкальные предпочтения лейбла, House и поджанры (progressive, tech, deep, minimal) Дистрибьюция: Beatport и многие другие Мы принимаем Demo. У нас есть несколько стандартных правил. Пожалуйста, прочитайте их, прежде чем отправлять  нам свое демо, если вам не впервой), вы мне читать это.</div>
+								<!-- // addition text to show -->
+
+								<div class="gb_tech cf">
+									<a ng-if="0" class="link_g gb_show fl">Показать полностью</a>
+
+									<div class="btns_orange fr">
+										<a class="btn_orange"><i class="ico2 ico2_star"></i></a>
+										<a class="btn_orange"><i class="ico2 ico2_tup"></i> 34</a>
+									</div>
+								</div>
+
+								<div class="gb_datas cf">
+									<div class="gb_datas_item link_grays fl">
+										Тэги: <a >Новости</a> <a >музыка</a> <a >информация</a> <a >акции</a> <a >cjclub</a>
+									</div>
+									<div class="gb_datas_item link_grays fr">
+										Раздел: <a >Новости</a> / <a >Новости музыки</a>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+
+
+					</section>
+
+					<div class="nav center" ng-if="0">
+						<a class="act" >1</a>
+						<a >2</a>
+						<a >3</a>
+						<a >4</a>
+						<a >5</a>
+						<a >6</a>
+						<a >...</a>
+						<a >187</a>
+					</div>
+
+
+					<!-- addition articles list -->
+					<section class="cols2 cf" ng-if="0">
+						<div class="col">
+							<h3 class="block_title">Самые посещаемые</h3>
+							<section class="articles_list">
+								<!-- article -->
+								<div class="gb">
+									<div class="gb_in cf">
+										<!-- gray block data -->
+										<div class="gb_data"><div class="gb_data_in">04 марта 2003</div></div>
+
+										<h3 class="col_title_s"><a class="black_link" >Take your weapons</a></h3>
+										<div class="col_text_s">Demo Музыкальные предпочтения лейбла, House и поджанры (prog-
+											ressive, tech, deep, minimal) Дистрибьюция: Beatport и многие
+											другие Мы принимаем .</div>
+
+										<div class="gb_tech cf">
+											<a class="link_g gb_show fl">Комментировать…</a>
+											<div class="btns_orange fr">
+												<a class="btn_orange"><i class="ico2 ico2_star"></i></a>
+												<a class="btn_orange"><i class="ico2 ico2_tup"></i> 34</a>
+											</div>
+										</div>
+
+									</div>
+								</div>
+								<!-- article -->
+								<div class="gb">
+									<div class="gb_in cf">
+										<!-- article menu -->
+										<div class="gb_menu">
+											<a class="ico2 ico2_set"></a>
+											<a class="ico2 ico2_del"></a>
+											<a class="ico2 ico2_warn"></a>
+										</div>
+										<!-- gray block data -->
+										<div class="gb_data"><div class="gb_data_in">04 марта 2003</div></div>
+
+										<h3 class="col_title_s"><a class="black_link" >Noise your weapons</a></h3>
+										<div class="col_text_s">Музыкальные предпочтения лейбла, House и поджанры (prog-
+											ressive, tech, deep, minimal) Дистрибьюция: Beatport и многие
+											другие Мы принимаем Demo.</div>
+
+										<div class="gb_tech cf">
+											<a class="link_g gb_show fl">Комментировать…</a>
+											<div class="btns_orange fr">
+												<a class="btn_orange"><i class="ico2 ico2_star"></i></a>
+												<a class="btn_orange"><i class="ico2 ico2_tup"></i> 34</a>
+											</div>
+										</div>
+
+									</div>
+								</div>
+								<!-- article -->
+								<div class="gb">
+									<div class="gb_in cf">
+										<!-- article menu -->
+										<div class="gb_menu">
+											<a class="ico2 ico2_set"></a>
+											<a class="ico2 ico2_del"></a>
+											<a class="ico2 ico2_warn"></a>
+										</div>
+										<!-- gray block data -->
+										<div class="gb_data"><div class="gb_data_in">04 марта 2003</div></div>
+
+										<h3 class="col_title_s"><a class="black_link" >your weapons</a></h3>
+										<div class="col_text_s">Музыкальные предпочтения лейбла, House и поджанры (prog-
+											ressive, tech, deep, minimal) Дистрибьюция: Beatport и многие
+											другие Мы принимаем Demo.</div>
+
+										<div class="gb_tech cf">
+											<a class="link_g gb_show fl">Комментировать…</a>
+											<div class="btns_orange fr">
+												<a class="btn_orange"><i class="ico2 ico2_star"></i></a>
+												<a class="btn_orange"><i class="ico2 ico2_tup"></i> 34</a>
+											</div>
+										</div>
+
+									</div>
+								</div>
+
+
+
+							</section>
+
+						</div>
+						<div class="col">
+							<h3 class="block_title">Самые комментируемые</h3>
+							<section class="articles_list">
+								<!-- article -->
+								<div class="gb">
+									<div class="gb_in cf">
+										<!-- article menu -->
+										<div class="gb_menu">
+											<a class="ico2 ico2_set"></a>
+											<a class="ico2 ico2_del"></a>
+											<a class="ico2 ico2_warn"></a>
+										</div>
+										<!-- gray block data -->
+										<div class="gb_data"><div class="gb_data_in">04 марта 2003</div></div>
+
+										<h3 class="col_title_s"><a class="black_link" >Noise - Take your weapons</a></h3>
+										<div class="col_text_s">Музыкальные предпочтения лейбла, House и поджанры (prog-
+											ressive, tech, deep, minimal) Дистрибьюция: Beatport и многие
+											другие Мы принимаем Demo.</div>
+
+										<div class="gb_tech cf">
+											<a class="link_g gb_show fl">Комментировать…</a>
+											<div class="btns_orange fr">
+												<a class="btn_orange"><i class="ico2 ico2_star"></i></a>
+												<a class="btn_orange"><i class="ico2 ico2_tup"></i> 34</a>
+											</div>
+										</div>
+
+									</div>
+								</div>
+								<!-- article -->
+								<div class="gb">
+									<div class="gb_in cf">
+										<!-- gray block data -->
+										<div class="gb_data"><div class="gb_data_in">04 марта 2003</div></div>
+
+										<h3 class="col_title_s"><a class="black_link" >Translator - Take your weapons</a></h3>
+										<div class="col_text_s">House и поджанры (prog-
+											ressive, tech, deep, minimal) Дистрибьюция: Beatport и многие
+											другие Мы принимаем Demo. Музыкальные предпочтения лейбла, </div>
+
+										<div class="gb_tech cf">
+											<a class="link_g gb_show fl">Комментировать…</a>
+											<div class="btns_orange fr">
+												<a class="btn_orange"><i class="ico2 ico2_star"></i></a>
+												<a class="btn_orange"><i class="ico2 ico2_tup"></i> 34</a>
+											</div>
+										</div>
+
+									</div>
+								</div>
+								<!-- article -->
+								<div class="gb">
+									<div class="gb_in cf">
+										<!-- article menu -->
+										<div class="gb_menu">
+											<a class="ico2 ico2_set"></a>
+											<a class="ico2 ico2_del"></a>
+											<a class="ico2 ico2_warn"></a>
+										</div>
+										<!-- gray block data -->
+										<div class="gb_data"><div class="gb_data_in">04 марта 2003</div></div>
+
+										<h3 class="col_title_s"><a class="black_link" >Noise Translator - Take your weapons</a></h3>
+										<div class="col_text_s">Дистрибьюция: Beatport и Музыкальные предпочтения лейбла, House и поджанры (prog-
+											ressive, tech, deep, minimal) многие
+											другие Мы принимаем Demo.</div>
+
+										<div class="gb_tech cf">
+											<a class="link_g gb_show fl">Комментировать…</a>
+											<div class="btns_orange fr">
+												<a class="btn_orange"><i class="ico2 ico2_star"></i></a>
+												<a class="btn_orange"><i class="ico2 ico2_tup"></i> 34</a>
+											</div>
+										</div>
+
+									</div>
+								</div>
+
+
+
+							</section>
+						</div>
+					</section>
+
+
+				</section>
+
+
+				<!-- ASIDE -->
+
+				<section class="right_aside">
+
+					<!-- aside block -->
+					<div class="aside">
+						<h3 class="aside_title">Новости</h3>
+						<ul class="aside_menu aside_menu_news">
+							<li>
+								<a class="aside_menu_link">Глобальное CjClub PARTY!</a>
+								Битва Сиджеев. Победителю путевка в жаркую страну!
+							</li>
+							<li>
+								<a class="aside_menu_link">Contours Reedition 005</a>
+								Продолжается Новогодний набор на Abstract Contours.
+							</li>
+							<li>
+								<a class="aside_menu_link">Новое на сайте!</a>
+								Система вложений и обмена файлами + новый редактор
+							</li>
+						</ul>
+						<div class="aside_more"><a >Больше новостей</a></div>
+					</div>
+
+					<div class="aside2">
+						<h3 class="aside_title">Активные пользователи</h3>
+						<ul class="faces cf">
+							<li class="faces_item"><a ><img src="./img/fa1.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="./img/fa3.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="./img/fa3.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="./img/fa1.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+		</div>
+
+	</section>
+</div>

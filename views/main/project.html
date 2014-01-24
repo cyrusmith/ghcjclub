@@ -1,0 +1,854 @@
+<div id="c">
+
+	<!-- main section -->
+	<section class="main">
+		<div class="width">
+
+			<!-- content -->
+			<section class="content cf">
+
+				<!-- right colum -->
+				<section class="left_aside">
+
+					<!-- PROJECT -->
+
+					<h1 class="page_title">{{project.name}}</h1>
+
+					<ul class="gray_menu">
+						<li class="gray_menu__item gray_menu__active"><a href="#/projects/{{project.id}}">Профиль</a></li>
+						<li class="gray_menu__item"><a href="#/projects/{{project.id}}/tracks">Треки</a></li>
+						<li class="gray_menu__item"><a href="#/projects/{{project.id}}/albums">Альбомы</a></li>
+						<li class="gray_menu__item"><a href="#/projects/{{project.id}}/blog">Блоги</a></li>
+						<li ng-if="0" class="gray_menu__item"><a href="#">Группы</a></li>
+						<li ng-if="0" class="gray_menu__item"><a href="#">Подписчики</a></li>
+					</ul>
+
+
+
+					<!-- COLLECTIV -->
+					<div class="gb gb_project">
+						<div class="gb_in cf">
+
+							<!-- menu -->
+							<div class="gb_menu" ng-if="isAccessGranted">
+								<a href="#" class="ico2 ico2_set"></a>
+								<a href="#" class="ico2 ico2_del"></a>
+								<a href="#" class="ico2 ico2_plus"></a>
+								<a href="#" class="ico2 ico2_eye"></a>
+								<a href="#" class="ico2 ico2_eye2"></a>
+								<a href="#" class="ico2 ico2_warn"></a>
+								<a href="#" class="ico2 ico2_warn2"></a>
+								<a href="#" class="ico2 ico2_link"></a>
+								<a href="#" class="ico2 ico2_ref"></a>
+								<a href="#" class="ico2 ico2_exit"></a>
+							</div>
+
+							<!-- gray block labels -->
+							<ul class="gb_labels">
+								<li class="gb_label"><div class="gb_label_in">Музыкальный коллектив</div></li>
+							</ul>
+
+							<!-- gray block data -->
+							<div class="gb_data"><div class="gb_data_in">Создан: {{project.createDate}}</div></div>
+
+							<!-- img -->
+							<div class="col_img" ng-if="isAccessGranted">
+								<img src="./img/col1.jpg" alt="" title="">
+								<span class="col_rating">35000</span>
+								<div class="col_img__contr">
+									<a href="#" class="col_img__contr_edit">
+										<i class="col_img__contr_edit_ico"></i>
+										редактировать
+									</a>
+									<a href="#" class="col_img__contr_change">
+										<i class="col_img__contr_change_ico"></i>
+										сменить
+									</a>
+								</div>
+							</div>
+
+							<!-- description -->
+							<div class="col_desc">
+								<div ng-if="0" class="last_visit online">Последнее посещение сайта: 04.03.2013</div> <!-- online -->
+								<div ng-if="0" class="last_visit">Последнее посещение сайта: 04.03.2013</div> <!-- !!! offline Example -->
+
+								<div class="col_title">{{project.name}}</div>
+								<div class="col_text">{{project.info}}</div>
+
+								<div class="col_data">
+									<div class="col_data_soc">
+										<a href="#" class="ico2 col_vk"></a>
+										<a href="#" class="ico2 col_tw"></a>
+										<a href="#" class="ico2 col_sk"></a>
+										<a href="#" class="ico2 col_icq"></a>
+									</div>
+									<div class="col_data_l">
+										Дислокация: {{project.country}}, {{project.city}} <br>
+										<span ng-if="project.config.phoneVisible">Телефон: <a onclick="this.innerHTML = '{{project.config.phone}}'; this.href = 'callto:{{project.config.phone}}'; this.onclick = null; return false;" class="link_g">показать...</a></span>
+									</div>
+									<div class="col_data_r">
+
+										E-mail: <a onclick="this.innerHTML = '123@asdasd.ru'; this.href = '{{project.email}}'; this.onclick = null; return false;" class="link_g">показать...</a> <br>
+										<span ng-if="project.config.siteVisible">Сайт: <a onclick="this.innerHTML = 'asdasd.ru'; this.href = '{{project.config.site}}'; this.onclick = null; return false;" class="link_g">показать...</a></span>
+									</div>
+								</div>
+
+								<div class="col_styles">
+									<!--div class="col_styles_line">Основной стиль: Trance, Acid Tance, Drumm and Bass</div-->
+									<div class="col_styles_line">Работает в стилях:
+										<span ng-repeat="style in project.styles">
+											<a>{{style.style}}</a>
+										</span>
+									</div>
+								</div>
+
+								<div class="col_btns" ng-if="0">
+									<a href="#" class="btn_orange"><i class="ico2 ico2_mess"></i> Написать сообщение</a>
+									<a href="#" class="btn_orange"><i class="ico2 ico2_friend"></i> В друзья</a>
+									<a href="#" class="btn_orange"><i class="ico2 ico2_ignore"></i> Игнорировать</a>
+									<a href="#" class="btn_orange"><i class="ico2 ico2_ban"></i> Забанить</a>
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+					<!-- BLOG -->
+					<div ng-if="blog.length > 0">
+						<h2 class="block_title">Блог <a ng-if="isAccessGranted" class="ico2 ico2_plus20"></a></h2>
+						<section class="articles_list">
+							<!-- NEEDS article -->
+							<div class="gb">
+								<div class="gb_in cf">
+
+									<!-- article menu -->
+									<div class="gb_menu" ng-if="isAccessGranted">
+										<a href="#" class="ico2 ico2_set"></a>
+										<a href="#" class="ico2 ico2_del"></a>
+										<a href="#" class="ico2 ico2_warn2"></a>
+									</div>
+
+									<!-- gray block data -->
+									<div class="gb_data"><div class="gb_data_in">{{blog[0].public_date}}</div></div>
+
+									<!-- article data -->
+									<div ng-if="0" class="author">Автор: <a href="#/blogs/{{blog[0].id}}" class="link_gray">Megatron</a></div>
+
+									<h3 class="col_title_s"><a href="#" class="black_link">{{blog[0].subject}}</a></h3>
+									<div class="col_text_s">{{blog[0].shorttext}}</div>
+
+									<div class="gb_tech cf" ng-if="0">
+										<a href="#" class="link_g gb_show fl">Показать полностью</a>
+
+										<div class="btns_orange fr">
+											<a href="#" class="btn_orange"><i class="ico2 ico2_star"></i></a>
+											<a href="#" class="btn_orange"><i class="ico2 ico2_tup"></i> 34</a>
+										</div>
+									</div>
+
+									<div class="gb_datas cf" ng-if="0">
+										<div class="gb_datas_item link_grays fl">
+											Тэги: <a href="#">Новости</a> <a href="#">музыка</a> <a href="#">информация</a> <a href="#">акции</a> <a href="#">cjclub</a>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</section>
+					</div>
+
+					<!-- ALBUMS -->
+					<div ng-if="albums.length > 0">
+						<h2 class="block_title">Альбомы <a ng-if="isAccessGranted" class="ico2 ico2_plus20"></a></h2>
+
+						<!-- albums sortable -->
+						<section class="proj_albums ui-sortable">
+							<!-- item 1 -->
+							<div class="gb_sortable cf" ng-repeat="ablum in albums">
+								<div class="gb">
+									<div class="gb_in cf">
+
+										<!-- menu -->
+										<div class="gb_menu" ng-if="isAccessGranted">
+											<a href="#" class="ico2 ico2_set"></a>
+											<a href="#" class="ico2 ico2_del"></a>
+											<a href="#" class="ico2 ico2_plus"></a>
+											<a href="#" class="ico2 ico2_eye"></a>
+											<a href="#" class="ico2 ico2_eye2"></a>
+										</div>
+
+										<!-- sortable -->
+										<ul class="gb_labels gb_labels_center sortable" ng-if="isAccessGranted">
+											<li class="gb_label sortable2"><div class="gb_label_in"><i class="ico2 ico2_drag"></i> Изменить порядок альбомов</div></li>
+										</ul>
+
+										<div class="gb_data"><div class="gb_data_in">{{ablum.date}}</div></div>
+
+										<div class="album_l">
+											<div class="album_img">
+												<img src="./img/100x100.jpg" alt="" title="" />
+											</div>
+											<a ng-if="0" href="#pl3" class="add_in green2 show_link"><i class="ico2 ico2_add_pl3"></i> <span class="tdu">В плейлист</span></a>
+
+
+											<!-- add to playlist form -->
+											<form action="#" id="pl3" class="baloon baloon_plus">
+												<div class="baloon_btns">
+													<input type="text" class="f_text f_baloon_text" value="" placeholder="Название">
+													<input type="submit" class="ico2 ico2_btn_check" value="Ok">
+													<input type="button" class="ico2 ico2_btn_reset" value="Clear">
+												</div>
+
+												<span class="ico2 ico2_plus_g fr"></span>
+
+												<div class="gbt_tr_lists">
+													<div><a href="#" class="black_link">Собственные треки</a> <b class="green2 fs18">+</b></div>
+													<div><a href="#" class="black_link">Избранное</a> <b class="green2 fs18">+</b></div>
+												</div>
+											</form>
+										</div>
+
+										<div class="album_r">
+											<div class="gbt__name"><a href="#">{{ablum.name}}</a></div>
+											<div class="gbt__desc2">{{ablum.descr}}</div>
+											<div class="col_styles" ng-if="album.styles.length">
+												<div class="col_styles_line">стили:
+													<div class="tooltip col_styles__tooltip hide" id="full_styles2a">
+														<a ng-repeat="style in album.styles" href="#">{{style.style}}</a>
+													</div>
+												</div>
+
+												<div class="album_btns" ng-if="0">
+													<a href="#" class="btn_orange"><i class="ico2 ico2_down"></i> Скачать альбом</a>
+													<a href="#" class="btn_orange"><i class="ico2 ico2_play"></i> Слушать альбом</a>
+												</div>
+
+												<div class="col_styles_line">Всего треков: {{ablum.tracks}} <span class="ccp__rzd">|</span> Длительность: {{ablum.timelengthStr}} <span class="ccp__rzd">|</span> Размер: {{ablum.filesizeStr}}</div>
+											</div>
+										</div>
+
+										<span class="gb_inactive"></span>
+										<span class="gbt_move"></span>
+										<span class="gbt_move_text gbt_move_text3">Вы можете менять последовательность альбомов.</span>
+									</div>
+								</div>
+							</div>
+
+						</section>
+						<!-- show all link -->
+						<div class="show_all"><a href="#/projects/{{project.id}}/albums" class="green2">Все альбомы</a></div>
+					</div>
+
+					<!-- ARTICLES -->
+					<h3 ng-if="0" class="block_title">Статьи <a href="#"><i class="ico2 ico2_plus20"></i></a></h3>
+					<section ng-if="0" class="articles_list">
+
+						<!-- article -->
+						<div class="gb">
+							<div class="gb_in cf">
+
+								<!-- article menu -->
+								<div class="gb_menu">
+									<a href="#" class="ico2 ico2_set"></a>
+									<a href="#" class="ico2 ico2_del"></a>
+									<a href="#" class="ico2 ico2_warn"></a>
+								</div>
+
+								<!-- gray block data -->
+								<div class="gb_data"><div class="gb_data_in">04 марта 2003</div></div>
+
+								<!-- article data -->
+								<div class="author">Автор: <a href="#" class="link_gray">Megatron</a></div>
+
+								<h3 class="col_title_s"><a href="#" class="black_link">Dj Hiro — Memory Константинова Карина Константиновна</a></h3>
+								<div class="col_text_s">Независимый цифровой лейбл основан в 2012 году, расположение лейбла - Москва.  Музыкальные предпочтения лейбла, House и поджанры (progressive, tech, deep, minimal) Дистрибьюция: Beatport и многие другие Мы принимаем Demo. У нас есть несколько стандартных правил. Пожалуйста, прочитайте их, прежде чем отправлять  нам свое демо, если вам не впервой), вы можете не читать это.</div>
+
+								<div class="gb_tech cf">
+									<a href="#" class="link_g gb_show fl">Показать полностью</a>
+
+									<div class="btns_orange fr">
+										<a href="#" class="btn_orange"><i class="ico2 ico2_star"></i></a>
+										<a href="#" class="btn_orange"><i class="ico2 ico2_tup"></i> 34</a>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- article -->
+						<div class="gb">
+							<div class="gb_in cf">
+
+								<!-- article menu -->
+								<div class="gb_menu">
+									<a href="#" class="ico2 ico2_set"></a>
+									<a href="#" class="ico2 ico2_del"></a>
+									<a href="#" class="ico2 ico2_warn"></a>
+								</div>
+
+								<!-- gray block data -->
+								<div class="gb_data"><div class="gb_data_in">14 марта 2005</div></div>
+
+								<!-- article data -->
+								<div class="author">Автор: <a href="#" class="link_gray">Megatron 23</a></div>
+
+								<h3 class="col_title_s"><a href="#" class="black_link">Карина Константиновна</a></h3>
+								<div class="col_text_s">Независимый цифровой лейбл основан в 2012 году, расположение лейбла - Москва.  Музыкальные предпочтения лейбла, House и поджанры (progressive, tech, deep, minimal) Дистрибьюция: Beatport и многие другие Мы принимаем Demo. У нас есть несколько стандартных правил. Пожалуйста, прочитайте их, прежде чем отправлять  нам свое демо, если вам не впервой), вы можете не читать это.</div>
+
+								<div class="gb_tech cf">
+									<a href="#" class="link_g gb_show fl">Показать полностью</a>
+
+									<div class="btns_orange fr">
+										<a href="#" class="btn_orange"><i class="ico2 ico2_star"></i></a>
+										<a href="#" class="btn_orange"><i class="ico2 ico2_tdown"></i> 3</a>
+									</div>
+								</div>
+
+								<div class="gb_datas cf">
+									<div class="gb_datas_item link_grays fl">
+										Тэги: <a href="#">Новости</a> <a href="#">музыка</a> <a href="#">информация</a> <a href="#">акции</a> <a href="#">cjclub</a>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+						<!-- article -->
+						<div class="gb">
+							<div class="gb_in cf">
+
+								<!-- article menu -->
+								<div class="gb_menu">
+									<a href="#" class="ico2 ico2_set"></a>
+									<a href="#" class="ico2 ico2_del"></a>
+									<a href="#" class="ico2 ico2_warn"></a>
+								</div>
+
+								<!-- gray block data -->
+								<div class="gb_data"><div class="gb_data_in">30 марта 2013</div></div>
+
+								<!-- article data -->
+								<div class="author">Автор: <a href="#" class="link_gray">Megatron</a></div>
+
+								<h3 class="col_title_s"><a href="#" class="black_link">Dj Hiro — Memory Константинова Карина Константиновна</a></h3>
+								<div class="col_text_s">Независимый цифровой лейбл основан в 2012 году, расположение лейбла - Москва.  Музыкальные предпочтения лейбла, House и поджанры (progressive, tech, deep, minimal) Дистрибьюция: Beatport и многие другие Мы принимаем Demo. У нас есть несколько стандартных правил. Пожалуйста, прочитайте их, прежде чем отправлять  нам свое демо, если вам не впервой), вы можете не читать это.</div>
+
+								<div class="gb_tech cf">
+									<a href="#" class="link_g gb_show fl">Показать полностью</a>
+
+									<div class="btns_orange fr">
+										<a href="#" class="btn_orange"><i class="ico2 ico2_star"></i></a>
+										<a href="#" class="btn_orange"><i class="ico2 ico2_tup"></i> 12</a>
+									</div>
+								</div>
+
+								<div class="gb_datas cf">
+									<div class="gb_datas_item link_grays fl">
+										Тэги: <a href="#">Новости</a> <a href="#">музыка</a> <a href="#">информация</a> <a href="#">акции</a> <a href="#">cjclub</a>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+					</section>
+					<!-- show all link -->
+					<div ng-if="0" class="show_all"><a href="#" class="green2">Все статьи</a></div>
+
+					<!-- TRACKS -->
+					<h2 class="block_title">Треки <a ng-if="isAccessGranted"><i class="ico2 ico2_plus20"></i></a></h2>
+					<section class="track_list ui-sortable">
+
+						<!-- item 1 -->
+						<div class="gb_sortable cf" ng-repeat="track in tracks | limitTo: 10">
+							<div class="gb">
+								<div class="gb_in">
+									<!-- labels -->
+									<ul class="gb_labels gb_labels_center sortable" ng-if="isAccessGranted">
+										<li class="gb_label sortable2"><div class="gb_label_in"><i class="ico2 ico2_drag"></i> Изменить порядок треков</div></li>
+									</ul>
+									<!-- article menu -->
+									<div class="gb_menu" ng-if="isAccessGranted">
+										<a class="ico2 ico2_set" href="#"></a>
+										<a class="ico2 ico2_ref" href="#"></a>
+											<span class="ico2 ico2_link opener">
+												<span class="baloon"><a href="#" class="baloon_link black_link">https://basecamp.com/1989266543_324</a></span>
+											</span>
+										<a class="ico2 ico2_del" href="#"></a>
+									</div>
+
+									<!-- gray block data -->
+									<div class="gb_data"><div class="gb_data_in">{{track.public_date}}</div></div>
+
+
+									<div class="new_track cf">
+
+										<!-- left side -->
+										<div class="track_image new_track__image gbt__l">
+											<img title="" alt="" src="./img/bt1.jpg">
+											<i class="ico_best"></i>
+											<i class="ico_mic"></i>
+											<span class="ico_rat ico_rat_min">123</span>
+										</div>
+
+										<!-- center -->
+										<div class="gbt__c">
+											<div class="gbt__name" ng-if="0"><a href="#">Dante and long long user name</a> <a class="user_stat user_stat_2" href="#"></a></div>
+											<div class="gbt__title"><a href="#/tracks/{{track.id}}" class="black_link">{{track.name}}</a></div>
+											<div class="gbt__data">Track | <span title="Dubstep-Exxxxxxperimental-Rocopops" class="gbt_gr">Dubstep-Exxxxxxperimental-Rocopops</span> | {{track.timelengthStr}} | {{track.filesizeStr}} <span class="quality quality_g">320</span></div>
+											<div class="gbt__data">Альбом: <a href="#" class="black_link">{{track.album}}</a></div>
+											<div ng-if="0" class="gbt__data">В топе: <a href="#" class="black_link">Trance</a></div>
+
+										</div>
+										<!-- right side -->
+										<div class="gbt__r">
+											<div class="gbt_btns cf">
+												<div class="gbt_i1">
+													<div class="gbt_play">
+														<div class="gbt_play__ico"></div>
+														{{track.count_listen}}
+													</div>
+													<div class="gbt_down">
+														<div class="gbt_down__ico"></div>
+														{{track.count_download}}
+													</div>
+												</div>
+
+												<div class="gbt_i2">
+													<div class="ico_bcs cf">
+														<a href="#" class="ico_bc ico_bc1"></a>
+														<a href="#" class="ico_bc ico_bc2"></a>
+														<a href="#" class="ico_bc ico_bc3"></a>
+													</div>
+													<a href="#" class="gbt_rating">PiT {{track.pit}}</a>
+												</div>
+
+												<div class="gbt_i3">
+													<div class="gbt_like">
+														<div class="ico2 gbt_like_ico opener">
+															<div class="baloon">
+																<a href="#" class="black_link">diego</a>
+																<a href="#" class="black_link">Monster_bit</a>
+																<a href="#" class="black_link">Kati2000</a>
+																<a href="#" class="black_link">_lucas_</a>
+															</div>
+														</div>
+														1870
+													</div>
+													<div class="gbt_plus">
+														<div class="ico2 gbt_plus_ico opener">
+															<form action="#" class="baloon baloon_plus">
+																<div class="baloon_btns">
+																	<input type="text" class="f_text f_baloon_text" value="" placeholder="Название" />
+																	<input type="submit" class="ico2 ico2_btn_check" value="Ok" />
+																	<input type="button" class="ico2 ico2_btn_reset" value="Clear" />
+																</div>
+
+																<span class="ico2 ico2_plus_g fr"></span>
+
+																<div class="gbt_tr_lists">
+																	<div><a href="#" class="black_link">Чужие и ворованные свои треки</a> <b class="green2 fs18">+</b></div>
+																	<div><a href="#" class="black_link">Избранное</a> <b class="green2 fs18">+</b></div>
+																</div>
+															</form>
+														</div>
+														1870
+													</div>
+													<div class="gbt_favo">
+														<div class="ico2 gbt_favo_ico"></div>
+														{{track.count_likes}}
+													</div>
+												</div>
+											</div>
+
+											<div class="gbt__desc">{{track.descr}}</div>
+
+										</div>
+									</div>
+
+								</div>
+							</div>
+							<span class="gbt_move"></span>
+							<span class="gbt_move_text gbt_move_text2">Вы можете менять последовательность треков.</span>
+						</div>
+						<!-- end item 1 -->
+
+					</section>
+					<!-- show all link -->
+					<div class="show_all"><a href="#/projects/{{project.id}}/tracks" class="green2">Все треки</a></div>
+
+					<!-- faces -->
+					<h2 class="block_title" ng-if="0">Тут побывали</h2>
+					<ul class="faces_big cf" ng-if="0">
+						<!-- line of 10 -->
+						<li class="faces_item"><a href="#"><img src="./img/fa1.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa3.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa3.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa1.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+						<!-- line of 10 -->
+						<li class="faces_item"><a href="#"><img src="./img/fa1.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa3.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa3.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa1.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+						<!-- line of 10 -->
+						<li class="faces_item"><a href="#"><img src="./img/fa1.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa2.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa3.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa3.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa1.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+						<li class="faces_item"><a href="#"><img src="./img/fa4.jpg" alt="" title="" /></a></li>
+					</ul>
+
+					<!-- wall -->
+					<h2 ng-if="0" class="block_title">Стена</h2>
+
+					<!-- comments form -->
+					<div ng-if="0" class="wys" id="wysiwyg">
+						<div class="wys_editor">
+							<textarea class="wiki_editor"></textarea>
+						</div>
+						<div class="btns_wys">
+							<input type="submit" value="Отправить (Ctrl+Enter)" class="btn_orange btn_orange_sm" />
+							<em class="btns_wys_text">Важно: не оскорблять, не флудить, не спамить. Иначе — тра-та-та!</em>
+						</div>
+					</div>
+
+					<!-- comments list -->
+					<div ng-if="0" id="comments" class="comments">
+
+						<!-- pager -->
+						<div class="nav comments_nav">
+							<a class="renew" href="#">Обновить</a>
+							<a class="act" href="#">1</a>
+							<a href="#">2</a>
+							<a href="#">3</a>
+							<a href="#">4</a>
+							<a href="#">5</a>
+							<a href="#">6</a>
+							<a href="#">...</a>
+							<a href="#">187</a>
+						</div>
+
+
+						<!-- 1 -->
+						<div class="com">
+							<div class="com_in">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="./img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr green">+1</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+										<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">Интересный трек. Приятно было его прослушать.</div>
+								<div class="com_menu">
+									<a href="#" class="ico2 ico2_come_edit"></a>
+									<a href="#" class="ico2 ico2_come_del"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 2 -->
+						<div class="com">
+							<div class="com_in">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="./img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr red2">-11</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">
+									<!-- cite -->
+									<div class="quote">классно! оч. понравилось!)</div>
+									Интересный трек. Приятно было его прослушать.
+								</div>
+							</div>
+						</div>
+
+						<!-- 3 -->
+						<div class="com">
+							<div class="com_img">
+								<div class="com_img_img">
+									<img src="./img/fa1.jpg" alt="" title="" />
+								</div>
+								<div class="com_rat">
+									<div class="hd"></div>
+									<div class="hu"></div>
+									<div class="hr green">0</div>
+								</div>
+							</div>
+							<div class="com_data">
+								<div class="fl">
+									<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+								</div>
+								<div class="fr">
+									<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+									<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
+									<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+									<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+									<a href="#"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+								</div>
+							</div>
+							<div class="com_mess">И снова на высоте !!! Приятная жизненная волна захватывает.... :) Ощутимое полное погружение в ваше творение...
+								Оч понравилось !!! без пианинки 0_o</div>
+							<div class="com_menu">
+								<a href="#" class="ico2 ico2_come_edit"></a>
+								<a href="#" class="ico2 ico2_come_del"></a>
+							</div>
+						</div>
+
+						<!-- 4 deleted comment closed -->
+						<div class="com com_deleted">
+							<div class="com_pre gray">Когда-то здесь был комментарий — <a href="#" class="link_g com_deleted">Оригинал</a></div>
+							<div class="com_in hide">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="./img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr red2">-11</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">Интересный трек. Приятно было его прослушать.</div>
+								<div class="com_menu">
+									<a href="#" class="link_g">Восстановить</a>
+									<a href="#" class="ico2 ico2_come_edit"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 5 -->
+						<div class="com">
+							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_appeal">Смотреть</a></div>
+							<div class="com_in hide">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="./img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr green">0</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+									</div>
+								</div>
+								<div class="com_mess">
+									без пианинки 0_o
+									<div class="appear">
+										<div class="bold">Жалоба от: <a href="#" class="link_g">Dj Mig</a></div>
+										<em>Ненормативная лексика и оскорбления!</em>
+									</div>
+								</div>
+								<div class="com_menu">
+									<a href="#" class="ico2 ico2_come_refresh"></a>
+									<a href="#" class="ico2 ico2_come_del"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 6 deleted comment open -->
+						<div class="com com_deleted_prev">
+							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_deleted">Оригинал</a></div>
+							<div class="com_in hide">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="./img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr red2">-13</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+									</div>
+								</div>
+								<div class="com_mess">без пианинки 0_o</div>
+								<div class="com_menu">
+									<a href="#" class="link_g">Восстановить</a>
+									<a href="#" class="ico2 ico2_come_edit"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 7 open appear comment open -->
+						<div class="com com_appeal_prev">
+							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_appeal">Скрыть</a></div>
+							<div class="com_in hide">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="./img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr green">0</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#" class="active_link"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">
+									<div class="appear">
+										<div class="bold">Жалоба от: <a href="#" class="link_g">Dj Mig</a></div>
+										<em>Ненормативная лексика и оскорбления!</em>
+									</div>
+									без пианинки 0_o вы все ****
+								</div>
+								<div class="com_menu">
+									<a href="#" class="ico2 ico2_come_refresh"></a>
+									<a href="#" class="ico2 ico2_come_edit"></a>
+								</div>
+							</div>
+						</div>
+
+						<!-- 8 with appear form -->
+						<div class="com">
+							<div class="com_in">
+								<div class="com_img">
+									<div class="com_img_img">
+										<img src="./img/fa1.jpg" alt="" title="" />
+									</div>
+									<div class="com_rat">
+										<div class="hd"></div>
+										<div class="hu"></div>
+										<div class="hr green">0</div>
+									</div>
+								</div>
+								<div class="com_data">
+									<div class="fl">
+										<a href="#"><span class="link_g tdu">Milky</span></a> — 24.05.2011 14:56
+									</div>
+									<div class="fr">
+										<a href="#"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+										<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
+										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+										<a href="#" class="active_link"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+									</div>
+								</div>
+								<div class="com_mess">
+									<div class="quote">Ненормативная лексика и оскорбления!</div>
+									И снова на высоте !!! Приятная жизненная волна захватывает.... :) Ощутимое полное погружение в ваше творение...
+									И снова на высоте !!! Приятная жизненная волна захватывает.... :) Ощутимое полное погружение в ваше творение...
+									Оч понравилось !!!
+								</div>
+								<div class="com_menu">
+									<a href="#" class="ico2 ico2_come_edit"></a>
+									<a href="#" class="ico2 ico2_come_del"></a>
+								</div>
+							</div>
+							<!-- appeal form -->
+							<form class="form_appeal" action="#">
+								<div class="form_appeal_title">Объясните причину жалобы:</div>
+								<div class="form_appeal_area"><textarea class="f_text2 f_area2"></textarea></div>
+								<input type="submit" value="Отправить (Ctrl+Enter)" class="btn_orange btn_orange_sm" />
+							</form>
+						</div>
+
+						<!-- end comments -->
+
+
+						<!-- pager -->
+						<div class="nav comments_nav">
+							<a class="renew" href="#">Обновить</a>
+							<a class="act" href="#">1</a>
+							<a href="#">2</a>
+							<a href="#">3</a>
+							<a href="#">4</a>
+							<a href="#">5</a>
+							<a href="#">6</a>
+							<a href="#">...</a>
+							<a href="#">187</a>
+						</div>
+					</div>
+				</section>
+
+
+				<section class="right_aside">
+
+					<!-- aside block -->
+					<news-block></news-block>
+					<users-online></users-online>
+				</section>
+			</section>
+		</div>
+
+	</section>
+</div>

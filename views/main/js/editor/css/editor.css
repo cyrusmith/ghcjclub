@@ -1,0 +1,292 @@
+.wiki_editor .bbcode {
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    border: 1px solid #b8b8b8;
+    overflow: hidden;
+    width: 460px;
+}
+
+.wiki_editor .bbcode_top {
+    background: url("../images/bbcode_top.png") repeat-x scroll right 0 transparent;
+    height: 68px;
+    width: 470px;
+}
+
+.wiki_editor textarea {
+    background: url("../images/bbcode_text.png") repeat-x scroll 0 bottom transparent;
+    color: #4a4a4a;
+    border: medium none;
+    min-height: 150px;
+    min-width: 470px;
+    max-width: 470px;
+}
+
+.wiki_editor .bbcode_top ul {
+    list-style: none;
+    padding: 0;
+    margin: 2px 0 0 2px;
+}
+
+.wiki_editor .bbcode_top ul li {
+    display: inline-block;
+    float: left;
+}
+
+.wiki_editor .bbcode_button_left {
+    background: url("../images/bbcode_button_bg.png") no-repeat scroll left 0 transparent;
+    height: 28px;
+    width: 7px;
+}
+
+.wiki_editor .bbcode_button_center {
+    background: url("../images/bbcode_button_bg.png") no-repeat scroll center 0 transparent;
+    height: 28px;
+}
+
+.wiki_editor .bbcode_button_right {
+    background: url("../images/bbcode_button_bg.png") no-repeat scroll right 0 transparent;
+    height: 28px;
+    width: 7px;
+}
+
+.wiki_editor .bbcode_button_seperator {
+    background: url("../images/bbcode_button_seperator.png") no-repeat scroll 0 2px transparent;
+    height: 28px;
+    width: 2px;
+}
+
+.wiki_editor .bbcode_top a {
+    display: block !important;
+    height: 25px;
+}
+
+.wiki_editor .bbcode_button_center:hover {
+    background: url("../images/bbcode_button_hover.png") repeat-x scroll 0px -1px transparent;
+}
+
+.wiki_editor a.bbcode_H1 {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -390px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_H2 {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -360px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_H3 {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -330px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_b {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -305px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_i {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -284px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_U {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -268px 3px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_S {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -250px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_align {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -232px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_hidden_text {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -209px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_picture {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -89px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_list_num {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -150px 2px transparent;
+    width: 24px;
+}
+
+.wiki_editor a.bbcode_list_num_sub {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -130px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_list {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -189px 2px transparent;
+    width: 24px;
+}
+
+.wiki_editor a.bbcode_list_sub {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -168px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_link {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -70px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_image {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -89px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_music {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -110px 3px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_box {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -3px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_dynamic {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -28px 2px transparent;
+    width: 25px;
+}
+
+.wiki_editor a.bbcode_video {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -48px 3px transparent;
+    width: 25px;
+}
+.wiki_editor a.custom_a {
+    color: #7F8A99;
+    padding-top: 6px;
+    text-decoration: none;
+    width: auto;
+    font-size: 12px;
+}
+.attach_form {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #7F8A99;
+    width: 200px;
+}
+.attach_form ul {
+    list-style: none outside none;
+    padding: 0;
+    margin: 0;
+}
+.attach_form ul li {
+    display: inline-block;
+    float: left;
+}
+.attach_form .form_input_left {
+    background: url("../images/form_input.png") no-repeat scroll left 0 transparent;
+    height: 28px;
+    width: 10px;
+}
+.attach_form .form_input_center {
+    background: url("../images/form_input.png") no-repeat scroll center 0 transparent;
+    height: 28px;
+    width: 57%;
+}
+
+.attach_form .top_file .form_input_center {
+    width: 25%;
+}
+
+.attach_form .form_input_right {
+    background: url("../images/form_input.png") no-repeat scroll right 0 transparent;
+    height: 28px;
+    width: 10px;
+}
+
+.attach_form .form_input_center input[type="text"] {
+    background-color: transparent;
+    border: medium none;
+    color: #4A4A4A;
+    padding: 5px 0;
+    width: 100%;
+}
+
+.attach_form .top_file .form_input_center input[type="text"] {
+    text-align: center;
+}
+
+.attach_form button {
+    background: url("../images/button_blue.png") no-repeat scroll 0 1px transparent;
+    border: medium none;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-family: arial;
+    font-size: 12px;
+    font-weight: bold;
+    height: 25px;
+    margin: 5px 0;
+    text-shadow: 0 -1px 0 #03410A;
+    width: 100px;
+}
+
+.attach_form .top_file {
+    background: url("../images/top_mail_bg.png") repeat-x scroll 0 0 transparent;
+    height: 49px;
+}
+
+.attach_form .top_file th {
+    height: 49px;
+    background-color: transparent;
+    color: #7F8A99;
+    cursor: pointer;
+    font-weight: normal;
+    text-decoration: none;
+}
+
+.attach_form .top_file tr:nth-child(even) {
+    background-color: #F1F1F1;
+}
+
+.attach_form .top_file a {
+    color: #7F8A99;
+    text-decoration: underline;
+}
+
+.attach_form .top_file a:hover {
+    text-decoration: none;
+}
+
+.attach_form .top_file .icon_type {
+    width: 25px;
+    display: block;
+    height: 25px;
+}
+
+.attach_form .top_file .icon_type.archive {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -3px 2px transparent;
+}
+
+.attach_form .top_file .icon_type.dynamic {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -28px 2px transparent;
+}
+
+.attach_form .top_file .icon_type.image {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -89px 2px transparent;
+}
+
+.attach_form .top_file .icon_type.music {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -110px 2px transparent;
+}
+
+.attach_form .top_file .icon_type.video {
+    background: url("../images/bbcode_icons.png") no-repeat scroll -48px 2px transparent;
+}
+
+.attach_form a.mail_arrows {
+    margin: 5px 0 0;
+    padding: 0 1px;
+    display: block;
+}

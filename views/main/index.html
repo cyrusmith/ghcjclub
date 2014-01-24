@@ -1,0 +1,318 @@
+<div id="c">
+
+<!-- branding link -->
+<!-- a  id="promo_link" class="promo_link" style="height:500px;"></a -->
+
+<!-- promo line -->
+<section id="promo" class="promo">
+	<ins class="promo_bg_l"></ins>
+	<ins class="promo_bg_r"></ins>
+	<ins class="promo_bg_c"></ins>
+
+	<a  class="promo_what">что это?</a>
+
+	<div class="promo_list cf" ng-controller="PromoTracksCtrl">
+		<div ng-if="!tracks.$resolved">Загрузка промо-треков...</div>
+		<div ng-cloak ng-repeat="track in tracks | limitTo: 5" class="promo_item">
+			<div class="promo_item__name"><a title="{{track.project}}">{{track.project}}</a> <a class="user_stat user_stat_1"></a></div>
+			<div class="promo_item__cover">
+				<div class="track_image">
+					<img src="views/main/img/pr1.jpg" alt="" title="" />
+					<div class="track_image__controls">
+						<a  class="cover_play"></a>
+						<a  class="cover_plus"></a>
+					</div>
+				</div>
+			</div>
+			<a href="#/tracks/{{track.id}}" class="promo_item__title" title="{{track.name}}">{{track.name}}</a>
+			<div class="promo_item__data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}} </div>
+			<div class="player cf">
+				<a class="player_ico player_start">{{track.count_listen}}</a>
+				<a class="player_ico player_dwnl">{{track.count_download}}</a>
+				<!--<a class="player_ico player_like">126</a>-->
+				<a class="player_ico player_plus">+</a>
+			</div>
+		</div>
+
+	</div>
+</section>
+
+<!-- main section -->
+<section class="main">
+<div class="width" ng-controller="PromoProjectsCtrl">
+<!-- slider -->
+<section class="slider" id="slider" carousel carousel-watch-for="projects.$resolved">
+	<div class="slider_in">
+		<div class="slider_holder viewport">
+			<div ng-if="!projects.$resolved" style="height:100px"><p style="text-align:center;padding-top:20px">Загружаю...</p></div>
+			<ul class="slider_line overview cf" ng-cloak>
+				<li ng-repeat="project in projects | limitTo: 10" class="slider_item">
+					<img class="man_photo" src="views/main/img/tf1.jpg" alt="" title="" />
+					<div class="man_text">
+						<div class="man_title">
+							<div class="man_name"><a href="#/projects/{{project.id}}">{{project.name}}</a> <a  class="user_stat user_stat_1"></a></div>
+							<div class="man_city">{{project.city}}</div>
+						</div>
+						<div class="man_desc">{{project.about}}</div>
+					</div>
+				</li>
+
+			</ul>
+		</div>
+		<div class="slider_arr buttons prev disable"></div>
+		<div class="slider_arr buttons next"></div>
+	</div>
+</section>
+
+<!-- banner -->
+<section class="cf" ng-controller="BannerCtrl">
+	<a ng-if="imgSrc != null"><img ng-src="{{imgSrc}}" alt="" title="" /></a>
+</section>
+
+<!-- content -->
+<section class="content cf">
+
+<!-- right colum -->
+<section class="right_side">
+
+<!-- ads -->
+<article class="ads" ng-if="0">
+
+	<a  class="ads_all">Все объявления</a>
+
+	<ul class="ads_tabs cf">
+		<li class="act"><a href="#ads_items1">Ищу</a></li>
+		<li><a href="#ads_items2">Куплю и пример</a></li>
+		<li><a href="#ads_items3">Продам</a></li>
+	</ul>
+
+	<div class="b">
+
+		<h2 class="ads_title">Объявления</h2>
+
+		<div class="ads_items cf" id="ads_items1">
+			<div class="ads_item">
+				<div class="ads_item__img"><a ><img src="views/main/img/ad1.jpg" alt="" title="" /></a></div>
+				<div class="ads_item__desc">
+					<h3 class="ads_item__desc_title"><a >МегаСуперПупернаушники VMX</a></h3>
+					<div class="ads_item__desc_text">Друзья, помогите найти пульт VMX-012. Состояние не важно, главное, чтобы  он был технически исправен и работал. Готов предложить за достойный вариант бутылку хорошего коньяка ;) </div>
+					<div class="ads_item__desc_data">
+						Автор: <a >Сергей_Бондерос</a><br />
+						13.01.2013 в 13:40
+					</div>
+				</div>
+			</div>
+			<div class="ads_item">
+				<div class="ads_item__img"><a ><img src="views/main/img/ad2.jpg" alt="" title="" /></a></div>
+				<div class="ads_item__desc">
+					<h3 class="ads_item__desc_title"><a >Пульт VMX</a></h3>
+					<div class="ads_item__desc_text">Друзья, помогите найти пульт VMX-012. Состояние не важно, главное, чтобы  он был технически исправен и работал. Готов предложить за достойный вариант бутылку хорошего коньяка ;) </div>
+					<div class="ads_item__desc_data">
+						Автор: <a >Сергей_Бондерос</a><br />
+						13.01.2013 в 13:40
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</article>
+
+<ng-include src="'views/main/includes/indexEventsFeed.html'"></ng-include>
+
+<!-- page navigator -->
+<div class="nav center" ng-if="0">
+	<a  class="act">1</a>
+	<a >2</a>
+	<a >3</a>
+	<a >4</a>
+	<a >5</a>
+	<a >6</a>
+	<a >...</a>
+	<a >187</a>
+</div>
+
+<!-- tags -->
+<article class="b">
+	<div class="tags" ng-controller="TagsSearchCtrl">
+		<!--<form action="#" class="search search_tags">
+			<input type="submit" class="search_btn" value="найти">
+			<input type="text" class="search_txt" name="qtags" value="Поиск по тегам" onfocus="if(this.value=='Поиск по тегам') this.value = '';" onblur="if(this.value == '') this.value = 'Поиск по тегам';">
+		</form>-->
+		<h3 class="tags_title">Популярные тэги</h3>
+		<ul class="tags_list">
+			<li><a href="#tracks?tag={{tag.tag}}" ng-repeat="tag in tags" style="font-size:{{tag.freq}}px;">{{tag.tag}}</a></li>
+		</ul>
+	</div>
+</article>
+
+<!-- bnn2 -->
+<article class="bnn">
+	<a ><img src="views/main/img/bnn2.jpg" alt="" title="" /></a>
+</article>
+
+<!-- tracks list -->
+<article class="b cf">
+
+	<!-- tracks colum -->
+	<div class="tracks" ng-controller="NewTracksCtrl">
+		<h3 class="tracks_title">Новые треки</h3>
+		<div ng-if="!tracks.$resolved">загружаю...</div>
+		<ul class="tracks_list">
+			<!-- item -->
+			<li ng-repeat="track in tracks | limitTo: 10" class="tracks_item cf">
+
+				<div class="track_image track_img">
+					<img src="views/main/img/tr2.jpg" alt="" title="" />
+					<div class="track_image__controls">
+						<a class="cover_play"></a>
+						<a class="cover_plus"></a>
+					</div>
+				</div>
+
+				<div class="track_left">
+					<h3 class="track_title"><a href="#projects/{{track.projectId}}">{{track.project}}</a> - <a href="#tracks/{{track.id}}" class="black_link">{{track.name}}</a></h3>
+					<div class="track_date">
+						<div class="track_data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}} MB</div>
+						<div class="player cf">
+							<a class="player_ico player_start">{{count_download}}</a>
+							<a class="player_ico player_dwnl">{{track.count_download}}</a>
+							<a class="player_ico player_like">126</a>
+							<a class="player_ico player_plus">+</a>
+						</div>
+					</div>
+				</div>
+				<div class="track_icos">
+					<a  class="track_ico track_ico_1"></a>
+					<a  class="track_ico track_ico_2"></a>
+				</div>
+			</li>
+		</ul>
+		<div class="tracks_more"><a href="#tracks">Больше треков</a></div>
+	</div>
+
+	<!-- tracks colum -->
+	<div class="tracks" ng-controller="BestTracksCtrl">
+		<h3 class="tracks_title">Лучшие треки</h3>
+		<div ng-if="!tracks.$resolved">загружаю...</div>
+		<ul class="tracks_list">
+			<!-- item -->
+			<li class="tracks_item cf" ng-repeat="track in tracks  | limitTo: 10">
+
+				<div class="track_image track_img">
+					<img src="views/main/img/tr1.jpg" alt="" title="" />
+					<div class="track_image__controls">
+						<a class="cover_play" href="#l1"></a>
+						<a class="cover_plus" href="#l2"></a>
+					</div>
+				</div>
+
+				<div class="track_left">
+					<h3 class="track_title"><a href="#projects/{{track.projectId}}">{{track.project}}</a> - <a href="#tracks/{{track.id}}" class="black_link">{{track.name}}</a></h3>
+					<div class="track_date">
+						<div class="track_data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}} MB</div>
+						<div class="player cf">
+							<a class="player_ico player_start">{{count_download}}</a>
+							<a class="player_ico player_dwnl">{{track.count_download}}</a>
+							<a class="player_ico player_like">126</a>
+							<a class="player_ico player_plus">+</a>
+						</div>
+					</div>
+				</div>
+
+				<!-- user info popup -->
+				<!--
+				<div class="user_info br22">
+					<div class="user_info_c"></div>
+					<div class="user_info_t brt22 cf">
+						<img src="views/main/img/ui1.jpg" alt="" title="" class="user_info__img" />
+						<div class="user_info__data">
+							<div class="user_info__data__nick">
+								<a  title="Dj Arssssssssseeeeeeennnnn">Dj Arssssssssseeeeeeennnnn</a>
+								<a  class="user_stat user_stat_1"></a>
+							</div>
+							<div class="user_info__data__name">(Арсен Погорелый) и пример длинной надписи</div>
+							<div class="user_info__data__text">
+								Рейтинг: <a >Ди-Джей (Trance)</a><br />
+								Дислокация: Украина, Киев<br />
+								Стаж: 4 года<br />
+								Популярность: 6066.54
+							</div>
+						</div>
+					</div>
+					<div class="user_info_b brb22 center">
+						<a  class="user_info_b__item">Музыка - 46</a>
+						<a  class="user_info_b__item">Фото - 4</a>
+						<a  class="user_info_b__item">Видео - 7</a>
+						<a  class="user_info_b__item">Афиша - 36</a>
+						<a  class="user_info_b__item">Блог - 3</a>
+						<a  class="user_info_b__item">Стена</a>
+					</div>
+				</div>
+				-->
+			</li>
+			<!-- item -->
+		</ul>
+		<div class="tracks_more"><a href="#tracks">Больше треков</a></div>
+	</div>
+</article>
+
+</section>
+
+
+<section class="left_side">
+
+	<!-- aside block -->
+	<news-block></news-block>
+
+	<!-- aside block -->
+	<div class="aside" ng-controller="ArticlesColumnCtrl">
+		<h3 class="aside_title">Статьи</h3>
+		<ul class="aside_menu aside_menu_articles">
+			<li ng-repeat="article in articles | limitTo: 5">
+				<a href="#articles/{{article.id}}" class="aside_menu_link">{{article.subject}}</a>
+			</li>
+		</ul>
+		<div class="aside_more"><a href="#articles">Больше статей</a></div>
+	</div>
+
+	<!-- aside block -->
+	<div class="aside" ng-controller="TracksDiscussedCtrl">
+		<h3 class="aside_title">Обсуждаемые треки</h3>
+		<ul class="aside_menu aside_menu_tracks">
+			<li ng-repeat="track in tracks | limitTo: 5"><a href="#tracks/{{track.id}}" class="aside_menu_link">{{track.name}}</a></li>
+		</ul>
+	</div>
+
+	<!-- aside block -->
+	<div class="aside" ng-controller="BlogsDiscussedCtrl">
+		<h3 class="aside_title">Обсуждаемые блоги</h3>
+		<ul class="aside_menu aside_menu_blogs">
+			<li ng-repeat="blog in blogs | limitTo: 5">
+				<a href="#blogs/{{blog.id}}" class="aside_menu_link">{{blog.subject}}</a>
+			</li>
+		</ul>
+	</div>
+
+	<!-- aside block -->
+	<div class="aside" ng-controller="BirthdaysCtrl" ng-show="users.length > 0">
+		<h3 class="aside_title">Дни Рождения сегодня</h3>
+		<ul class="aside_menu aside_menu_birthday">
+			<li ng-repeat="user in users"><a href="#users/{{user.id}}" class="aside_menu_link">{{user.name}}</a></li>
+
+		</ul>
+	</div>
+
+	<div class="aside2">
+		<h3 class="aside_title">Топ музыкантов</h3>
+		<ul class="faces cf" ng-controller="ProjectsTopCtrl">
+			<li ng-repeat="project in projects | limitTo: 9" class="faces_item"><a href="#projects/{{project.id}}"><img src="views/main/img/fa1.jpg" alt="{{project.name}}" title="{{project.name}}" /></a></li>
+		</ul>
+		<users-online></users-online>
+	</div>
+</section>
+</section>
+</div>
+
+</section>
+</div>

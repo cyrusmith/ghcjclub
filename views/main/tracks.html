@@ -1,0 +1,814 @@
+<div id="c">
+
+	<!-- main section -->
+	<section class="main">
+		<div class="width">
+
+			<!-- content -->
+			<section class="content cf">
+
+				<!-- right colum -->
+				<section class="left_aside">
+
+					<!-- tracks page -->
+					<h1 class="page_title">Треки</h1>
+
+					<article class="b hide" id="tags">
+						<div class="tags">
+							<ul class="tags_list tags_list__selector">
+								<li><a style="font-size:18px;" >Andrew</a></li>
+								<li><a style="font-size:14px;" >Lu auriga</a></li>
+								<li><a style="font-size:16px;" >beatport</a></li>
+								<li><a style="font-size:22px;" >breakbeat</a></li>
+								<li><a style="font-size:20px;" >breaks</a></li>
+								<li><a style="font-size:18px;" >chillout</a></li>
+								<li><a style="font-size:16px;" >cjclub</a></li>
+								<li><a style="font-size:12px;" >Club</a></li>
+								<li><a style="font-size:13px;" >Universe</a></li>
+								<li><a style="font-size:14px;" >Cubase</a></li>
+								<li><a style="font-size:14px;" >DAW</a></li>
+								<li><a style="font-size:15px;" >downtempo</a></li>
+								<li><a style="font-size:17px;" >drum and bass</a></li>
+								<li><a style="font-size:18px;" >Dubstep</a></li>
+								<li><a style="font-size:20px;" >electronic</a></li>
+								<li><a style="font-size:25px;" >experimental</a></li>
+								<li><a style="font-size:22px;" >FL Studio</a></li>
+								<li><a style="font-size:24px;" >freeware</a></li>
+								<li><a style="font-size:18px;" >House</a></li>
+								<li><a style="font-size:12px;" >idm</a></li>
+								<li><a style="font-size:30px;" >MIDI mix</a></li>
+								<li><a style="font-size:28px;" >mp3</a></li>
+								<li><a style="font-size:25px;" >music</a></li>
+								<li><a style="font-size:20px;" >new</a></li>
+								<li><a style="font-size:19px;" >podcast</a></li>
+								<li><a style="font-size:18px;" >progressive house</a></li>
+								<li><a style="font-size:17px;" >progressive trance</a></li>
+								<li><a style="font-size:16px;" >radioshow</a></li>
+								<li><a style="font-size:15px;" >Reason</a></li>
+								<li><a style="font-size:13px;" >ReMarQ</a></li>
+								<li><a style="font-size:14px;" >Remix</a></li>
+								<li><a style="font-size:18px;" >rock</a></li>
+								<li><a style="font-size:18px;" >techno</a></li>
+								<li><a style="font-size:22px;" >trance</a></li>
+								<li><a style="font-size:23px;" >video</a></li>
+								<li><a style="font-size:25px;" >VST</a></li>
+								<li><a style="font-size:16px;" >VSTi</a></li>
+								<li><a style="font-size:13px;" >Youtube</a></li>
+							</ul>
+						</div>
+					</article>
+
+					<div ng-if="0" class="b searched_tags">
+						<i class="ico2 ico2_tags_toggle ico2_tags_toggle__open" onclick="$('#tags').slideToggle(300); $(this).toggleClass('ico2_tags_toggle__open');"></i>
+						<span class="searched_tags__title">Выбранный тэг:</span> Dubstep
+					</div>
+
+					<form ng-if="0" class="search search_tags search_tags_full" action="#">
+						<input type="submit" value="найти" class="search_btn">
+						<input type="text" onblur="if(this.value == '') this.value = 'Поиск по тегам';" onfocus="if(this.value=='Поиск по тегам') this.value = '';" value="Поиск по тегам" name="qtags" class="search_txt">
+					</form>
+
+					<!-- sorting panel -->
+					<div class="searched_data cf">
+						<div class="searched_data__title">Найдено треков: {{tracks.length}}</div>
+						<div class="searched_data__sort" ng-if="0">
+							<span class="searched_data__sort__title">Сортировать</span>
+							<a class="search_sort">По дате</a>
+							<a class="search_sort search_sort__active">По полезности</a>
+							<span class="searched_data__sort__title">за</span>
+							<a class="search_sort">2 недели</a>
+							<a class="search_sort search_sort__active">Месяц</a>
+						</div>
+					</div>
+
+					<!-- tracks list -->
+					<section class="track_list ui-sortable">
+
+						<!-- item 1 -->
+						<div ng-if="0" class="gb_sortable cf">
+							<div class="gb">
+								<div class="gb_in">
+									<!-- labels -->
+									<ul class="gb_labels gb_labels_center sortable">
+										<li class="gb_label sortable2"><div class="gb_label_in"><i class="ico2 ico2_drag"></i> Изменить порядок треков</div></li>
+										<li class="gb_label sortable1"><div class="gb_label_in"><i class="ico2 ico2_drag"></i> Перетащите в личную промозону</div></li>
+									</ul>
+									<!-- article menu -->
+									<div class="gb_menu">
+										<a class="ico2 ico2_set" ></a>
+										<a class="ico2 ico2_ref" ></a>
+										<span class="ico2 ico2_link opener">
+											<span class="baloon"><a class="baloon_link black_link">https://basecamp.com/1989266543_324</a></span>
+										</span>
+										<a class="ico2 ico2_del" ></a>
+									</div>
+
+									<!-- gray block data -->
+									<div class="gb_data"><div class="gb_data_in">04 марта 2003</div></div>
+
+
+									<div class="new_track cf">
+
+										<!-- left side -->
+										<div class="track_image new_track__image gbt__l">
+											<img title="" alt="" src="views/main/img/bt1.jpg">
+											<i class="ico_best"></i>
+											<i class="ico_mic"></i>
+											<span class="ico_rat ico_rat_min">123</span>
+										</div>
+
+										<!-- center -->
+										<div class="gbt__c">
+											<div class="gbt__name"><a >Dante and long long user name</a> <a class="user_stat user_stat_2" ></a></div>
+											<div class="gbt__title"><a class="black_link">Моя Любовь Онлайн и очень длинное название</a></div>
+											<div class="gbt__data">Track | <span title="Dubstep-Exxxxxxperimental-Rocopops" class="gbt_gr">Dubstep-Exxxxxxperimental-Rocopops</span> | 07:34 | 18.9 MB <span class="quality quality_g">320</span></div>
+											<div class="gbt__data">Альбом: <a class="black_link">Fake</a></div>
+											<div class="gbt__data">В топе: <a class="black_link">Trance</a></div>
+
+										</div>
+										<!-- right side -->
+										<div class="gbt__r">
+											<div class="gbt_btns cf">
+												<div class="gbt_i1">
+													<div class="gbt_play">
+														<div class="gbt_play__ico"></div>
+														3780
+													</div>
+													<div class="gbt_down">
+														<div class="gbt_down__ico"></div>
+														3780
+													</div>
+												</div>
+
+												<div class="gbt_i2">
+													<div class="ico_bcs cf">
+														<a class="ico_bc ico_bc1"></a>
+														<a class="ico_bc ico_bc2"></a>
+														<a class="ico_bc ico_bc3"></a>
+													</div>
+													<a class="gbt_rating">PiT 21</a>
+												</div>
+
+												<div class="gbt_i3">
+													<div class="gbt_like">
+														<div class="ico2 gbt_like_ico opener">
+															<div class="baloon">
+																<a class="black_link">diego</a>
+																<a class="black_link">Monster_bit</a>
+																<a class="black_link">Kati2000</a>
+																<a class="black_link">_lucas_</a>
+															</div>
+														</div>
+														1870
+													</div>
+													<div class="gbt_plus">
+														<div class="ico2 gbt_plus_ico opener">
+															<form action="#" class="baloon baloon_plus">
+																<div class="baloon_btns">
+																	<input type="text" class="f_text f_baloon_text" value="" placeholder="Название" />
+																	<input type="submit" class="ico2 ico2_btn_check" value="Ok" />
+																	<input type="button" class="ico2 ico2_btn_reset" value="Clear" />
+																</div>
+
+																<span class="ico2 ico2_plus_g fr"></span>
+
+																<div class="gbt_tr_lists">
+																	<div><a class="black_link">Чужие и ворованные свои треки</a> <b class="green2 fs18">+</b></div>
+																	<div><a class="black_link">Избранное</a> <b class="green2 fs18">+</b></div>
+																</div>
+															</form>
+														</div>
+														1870
+													</div>
+													<div class="gbt_favo">
+														<div class="ico2 gbt_favo_ico"></div>
+														350
+													</div>
+												</div>
+											</div>
+
+											<div class="gbt__desc">Первая работа написанная в Cockos Reaper. Треку катастрофи чески не хватает вокала, возможно мужского, </div>
+
+										</div>
+									</div>
+
+								</div>
+							</div>
+							<span class="gbt_move"></span>
+							<span class="gbt_move_text gbt_move_text1">Перетащите трек в личную Промозону.</span>
+							<span class="gbt_move_text gbt_move_text2">Вы можете менять последовательность треков.</span>
+						</div>
+						<!-- end item 1 -->
+
+						<!-- item 2 -->
+						<div ng-if="0" class="gb_sortable cf">
+							<div class="gb">
+								<div class="gb_in">
+									<!-- labels -->
+									<ul class="gb_labels gb_labels_center sortable">
+										<li class="gb_label sortable2"><div class="gb_label_in"><i class="ico2 ico2_drag"></i> Изменить порядок треков</div></li>
+										<li class="gb_label sortable1"><div class="gb_label_in"><i class="ico2 ico2_drag"></i> Перетащите в личную промозону</div></li>
+									</ul>
+									<!-- article menu -->
+									<div class="gb_menu">
+										<a class="ico2 ico2_set" ></a>
+										<a class="ico2 ico2_ref" ></a>
+										<span class="ico2 ico2_link opener">
+											<span class="baloon"><a class="baloon_link black_link">https://basecamp.com/1989266543_324</a></span>
+										</span>
+										<a class="ico2 ico2_del" ></a>
+									</div>
+
+									<!-- gray block data -->
+									<div class="gb_data"><div class="gb_data_in">30 марта 2017</div></div>
+
+
+									<div class="new_track cf">
+
+										<!-- left side -->
+										<div class="track_image new_track__image gbt__l">
+											<img title="" alt="" src="views/main/img/bt1.jpg">
+											<i class="ico_top100"></i>
+											<i class="ico_mic"></i>
+											<span class="ico_rat ico_rat_max">123</span>
+										</div>
+
+										<!-- center -->
+										<div class="gbt__c">
+											<div class="gbt__name"><a >Danteme</a> <a class="user_stat user_stat_3" ></a></div>
+											<div class="gbt__title"><a class="black_link">Моя Любовь Онлайн</a></div>
+											<div class="gbt__data">Track | <span title="Dubstep-Exxxxxxperimental-Rocopops" class="gbt_gr">Dubstep-Rocopops</span> | 07:34 | 18.9 MB <span class="quality quality_r">320</span></div>
+											<div class="gbt__data">Альбом: <a class="black_link">Fake</a></div>
+											<div class="gbt__data">В топе: <a class="black_link">Trance</a></div>
+
+										</div>
+										<!-- right side -->
+										<div class="gbt__r">
+											<div class="gbt_btns cf">
+												<div class="gbt_i1">
+													<div class="gbt_play">
+														<div class="gbt_play__ico gbt_pause__ico"></div>
+														3780
+													</div>
+													<div class="gbt_down">
+														<div class="gbt_down__ico"></div>
+														3780
+													</div>
+												</div>
+
+												<div class="gbt_i2">
+													<a class="gbt_rating">PiT 304</a>
+												</div>
+
+												<div class="gbt_i3">
+													<div class="gbt_like">
+														<div class="ico2 gbt_like_ico gbt_like_ico_ok opener">
+															<div class="baloon">
+																<a class="black_link">diego</a>
+																<a class="black_link">Monster_bit</a>
+																<a class="black_link">Kati2000</a>
+																<a class="black_link">_lucas_</a>
+															</div>
+														</div>
+														1870
+													</div>
+													<div class="gbt_plus">
+														<div class="ico2 gbt_plus_ico opener">
+															<form action="#" class="baloon baloon_plus">
+																<div class="baloon_btns">
+																	<input type="text" class="f_text f_baloon_text" value="" placeholder="Название" />
+																	<input type="submit" class="ico2 ico2_btn_check" value="Ok" />
+																	<input type="button" class="ico2 ico2_btn_reset" value="Clear" />
+																</div>
+
+																<span class="ico2 ico2_plus_g fr"></span>
+
+																<div class="gbt_tr_lists">
+																	<div><a class="black_link">Собственные треки</a> <b class="green2 fs18">+</b></div>
+																	<div><a class="black_link">Избранное</a> <b class="green2 fs18">+</b></div>
+																</div>
+															</form>
+														</div>
+														1870
+													</div>
+													<div class="gbt_favo">
+														<div class="ico2 gbt_favo_ico gbt_favo_ico_ok"></div>
+														350
+													</div>
+												</div>
+											</div>
+
+											<div class="gbt__desc">Первая работа написанная в Cockos Reaper. Треку катастрофи чески не хватает вокала, возможно мужского, </div>
+
+										</div>
+									</div>
+
+								</div>
+							</div>
+							<span class="gbt_move"></span>
+							<span class="gbt_move_text gbt_move_text1">Перетащите трек в личную Промозону.</span>
+							<span class="gbt_move_text gbt_move_text2">Вы можете менять последовательность треков.</span>
+						</div>
+						<!-- end item 2 -->
+
+						<!-- item 3 -->
+						<div ng-if="0" class="gb_sortable cf">
+							<div class="gb">
+								<div class="gb_in">
+									<!-- labels -->
+									<ul class="gb_labels gb_labels_center sortable">
+										<li class="gb_label sortable2"><div class="gb_label_in"><i class="ico2 ico2_drag"></i> Изменить порядок треков</div></li>
+										<li class="gb_label sortable1"><div class="gb_label_in"><i class="ico2 ico2_drag"></i> Перетащите в личную промозону</div></li>
+									</ul>
+									<!-- article menu -->
+									<div class="gb_menu">
+										<a class="ico2 ico2_set" ></a>
+										<a class="ico2 ico2_ref" ></a>
+										<span class="ico2 ico2_link opener">
+											<span class="baloon"><a class="baloon_link black_link">https://basecamp.com/1989266543_324</a></span>
+										</span>
+										<a class="ico2 ico2_del" ></a>
+									</div>
+
+									<!-- gray block data -->
+									<div class="gb_data"><div class="gb_data_in">04 марта 2003</div></div>
+
+
+									<div class="new_track cf">
+
+										<!-- left side -->
+										<div class="track_image new_track__image gbt__l">
+											<img title="" alt="" src="views/main/img/bt1.jpg">
+											<i class="ico_best"></i>
+											<i class="ico_mic"></i>
+											<span class="ico_rat ico_rat_min">123</span>
+										</div>
+
+										<!-- center -->
+										<div class="gbt__c">
+											<div class="gbt__name"><a >Dante and long long user name</a> <a class="user_stat user_stat_1" ></a></div>
+											<div class="gbt__title"><a class="black_link">Моя Любовь Онлайн и очень длинное название</a></div>
+											<div class="gbt__data">Track | <span title="Dubstep-Exxxxxxperimental-Rocopops" class="gbt_gr">Dubstep</span> | 017:34 | 118.9 MB <span class="quality quality_g">320</span></div>
+											<div class="gbt__data">Альбом: <a class="black_link">Fake</a></div>
+											<div class="gbt__data">В топе: <a class="black_link">Trance</a></div>
+
+										</div>
+										<!-- right side -->
+										<div class="gbt__r">
+											<div class="gbt_btns cf">
+												<div class="gbt_i1">
+													<div class="gbt_play">
+														<div class="gbt_play__ico"></div>
+														3780
+													</div>
+													<div class="gbt_down">
+														<div class="gbt_down__ico"></div>
+														3780
+													</div>
+												</div>
+
+												<div class="gbt_i2">
+													<div class="ico_bcs cf">
+														<a class="ico_bc ico_bc1"></a>
+														<a class="ico_bc ico_bc2"></a>
+														<a class="ico_bc ico_bc3"></a>
+													</div>
+													<a class="gbt_rating">PiT 260</a>
+												</div>
+
+												<div class="gbt_i3">
+													<div class="gbt_like">
+														<div class="ico2 gbt_like_ico opener">
+															<div class="baloon">
+																<a class="black_link">diego</a>
+																<a class="black_link">Monster_bit</a>
+																<a class="black_link">Kati2000</a>
+																<a class="black_link">_lucas_</a>
+															</div>
+														</div>
+														1870
+													</div>
+													<div class="gbt_plus">
+														<div class="ico2 gbt_plus_ico opener">
+															<form action="#" class="baloon baloon_plus">
+																<div class="baloon_btns">
+																	<input type="text" class="f_text f_baloon_text" value="" placeholder="Название" />
+																	<input type="submit" class="ico2 ico2_btn_check" value="Ok" />
+																	<input type="button" class="ico2 ico2_btn_reset" value="Clear" />
+																</div>
+
+																<span class="ico2 ico2_plus_g fr"></span>
+
+																<div class="gbt_tr_lists">
+																	<div><a class="black_link">Собственные треки на простой основе</a> <b class="green2 fs18">+</b></div>
+																	<div><a class="black_link">Избранное</a> <b class="green2 fs18">+</b></div>
+																</div>
+															</form>
+														</div>
+														1870
+													</div>
+													<div class="gbt_favo">
+														<div class="ico2 gbt_favo_ico"></div>
+														350
+													</div>
+												</div>
+											</div>
+
+											<div class="gbt__desc">Первая работа написанная в Cockos Reaper. Треку катастрофи чески не хватает вокала, возможно мужского, </div>
+
+										</div>
+									</div>
+
+								</div>
+							</div>
+							<span class="gbt_move"></span>
+							<span class="gbt_move_text gbt_move_text1">Перетащите трек в личную Промозону.</span>
+							<span class="gbt_move_text gbt_move_text2">Вы можете менять последовательность треков.</span>
+						</div>
+						<!-- end item 3 -->
+
+
+
+						<!-- item 4 NO ADMIN AND DRAG DATA -->
+						<div class="gb" ng-repeat="track in tracks">
+							<div class="gb_in">
+
+								<!-- gray block data -->
+								<div class="gb_data"><div class="gb_data_in">{{track.public_date}}</div></div>
+
+
+								<div class="new_track cf">
+
+									<!-- left side -->
+									<div class="track_image new_track__image gbt__l">
+										<img title="" alt="" src="views/main/img/bt1.jpg">
+										<i class="ico_top100"></i>
+										<i class="ico_mic"></i>
+										<span class="ico_rat ico_rat_max">123</span>
+									</div>
+
+									<!-- center -->
+									<div class="gbt__c">
+										<div class="gbt__name"><a >{{track.project}}</a> <a class="user_stat user_stat_3" ></a></div>
+										<div class="gbt__title"><a href="#/tracks/{{track.id}}" class="black_link">{{track.name}}</a></div>
+										<div class="gbt__data">Track | <span title="Dubstep-Exxxxxxperimental-Rocopops" class="gbt_gr">{{track.style}}</span> | {{track.timelengthStr}} | {{track.filesizeStr}} <span ng-if="0" class="quality quality_r">320</span></div>
+										<div class="gbt__data">Альбом: <a class="black_link">{{track.album}}</a></div>
+										<div class="gbt__data">В топе: <a class="black_link">{{track.style}}</a></div>
+
+									</div>
+									<!-- right side -->
+									<div class="gbt__r">
+										<div class="gbt_btns cf">
+											<div class="gbt_i1">
+												<div class="gbt_play">
+													<div class="gbt_play__ico gbt_pause__ico"></div>
+													{{track.count_listen}}
+												</div>
+												<div class="gbt_down">
+													<div class="gbt_down__ico"></div>
+													{{track.count_download}}
+												</div>
+											</div>
+
+											<div class="gbt_i2">
+												<a class="gbt_rating">PiT {{track.pit}}</a>
+											</div>
+
+											<div class="gbt_i3" ng-if="0">
+												<div class="gbt_like">
+													<div class="ico2 gbt_like_ico gbt_like_ico_ok opener">
+														<div class="baloon">
+															<a class="black_link">diego</a>
+															<a class="black_link">Monster_bit</a>
+															<a class="black_link">Kati2000</a>
+															<a class="black_link">_lucas_</a>
+														</div>
+													</div>
+													1870
+												</div>
+												<div class="gbt_plus">
+													<div class="ico2 gbt_plus_ico opener">
+														<form action="#" class="baloon baloon_plus">
+															<div class="baloon_btns">
+																<input type="text" class="f_text f_baloon_text" value="" placeholder="Название" />
+																<input type="submit" class="ico2 ico2_btn_check" value="Ok" />
+																<input type="button" class="ico2 ico2_btn_reset" value="Clear" />
+															</div>
+
+															<span class="ico2 ico2_plus_g fr"></span>
+
+															<div class="gbt_tr_lists" >
+																<div><a class="black_link">Собственные треки</a> <b class="green2 fs18">+</b></div>
+																<div><a class="black_link">Избранное</a> <b class="green2 fs18">+</b></div>
+															</div>
+														</form>
+													</div>
+													1870
+												</div>
+												<div class="gbt_favo">
+													<div class="ico2 gbt_favo_ico gbt_favo_ico_ok"></div>
+													350
+												</div>
+											</div>
+										</div>
+
+										<div class="gbt__desc">{{track.descr}}</div>
+
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<!-- end item 4 -->
+					</section>
+
+					<div ng-if="0" class="nav center">
+						<a class="act" >1</a>
+						<a >2</a>
+						<a >3</a>
+						<a >4</a>
+						<a >5</a>
+						<a >6</a>
+						<a >...</a>
+						<a >187</a>
+					</div>
+
+
+
+					<article class="bnn">
+						<a ><img title="" alt="" src="views/main/img/bnn2.jpg"></a>
+					</article>
+
+
+					<article class="b cf">
+
+					<!-- tracks colum -->
+					<div class="tracks">
+						<h3 class="tracks_title">Новые треки</h3>
+						<ul class="tracks_list">
+							<!-- item -->
+							<li class="tracks_item cf">
+
+								<div class="track_image track_img">
+									<img title="" alt="" src="views/main/img/tr2.jpg">
+									<div class="track_image__controls">
+										<a href="#l1" class="cover_pause"></a>
+										<a href="#l2" class="cover_plus"></a>
+									</div>
+								</div>
+
+								<div class="track_left">
+									<h3 class="track_title"><a >BaRoN</a> - <a class="black_link" >Goginal_mix)</a></h3>
+									<div class="track_date">
+										<div class="track_data">Track | Pop | 03:30 | 8.04 MB</div>
+										<div class="player cf">
+											<a class="player_ico player_start">126</a>
+											<a class="player_ico player_dwnl">70</a>
+											<a class="player_ico player_like">126</a>
+											<a class="player_ico player_plus">+</a>
+										</div>
+									</div>
+								</div>
+								<div class="track_icos">
+									<a class="track_ico track_ico_1" ></a>
+									<a class="track_ico track_ico_2" ></a>
+								</div>
+							</li>
+							<!-- item -->
+							<li class="tracks_item cf">
+
+								<div class="track_image track_img">
+									<img title="" alt="" src="views/main/img/tr4.jpg">
+									<div class="track_image__controls">
+										<a href="#l1" class="cover_play"></a>
+										<a href="#l2" class="cover_plus"></a>
+									</div>
+								</div>
+
+								<div class="track_left">
+									<h3 class="track_title"><a >BaRoN</a> - <a class="black_link" >Good_mood (original_mix)</a></h3>
+									<div class="track_date">
+										<div class="track_data">Track | Pop | 03:30 | 8.04 MB</div>
+										<div class="player cf">
+											<a class="player_ico player_start">126</a>
+											<a class="player_ico player_dwnl">70</a>
+											<a class="player_ico player_like">126</a>
+											<a class="player_ico player_plus">+</a>
+										</div>
+									</div>
+								</div>
+							</li>
+							<!-- item -->
+							<li class="tracks_item cf">
+
+								<div class="track_image track_img">
+									<img title="" alt="" src="views/main/img/tr1.jpg">
+									<div class="track_image__controls">
+										<a href="#l1" class="cover_play"></a>
+										<a href="#l2" class="cover_plus"></a>
+									</div>
+								</div>
+
+								<div class="track_left">
+									<h3 class="track_title"><a >Victor Djazz &amp; Cosmopolitan Dust</a> - <a class="black_link" >Goginal_mix)</a></h3>
+									<div class="track_date">
+										<div class="track_data">Track | Pop | 03:30 | 8.04 MB</div>
+										<div class="player cf">
+											<a class="player_ico player_start">126</a>
+											<a class="player_ico player_dwnl">70</a>
+											<a class="player_ico player_like">126</a>
+											<a class="player_ico player_plus">+</a>
+										</div>
+									</div>
+								</div>
+							</li>
+							<!-- item -->
+							<li class="tracks_item cf">
+
+								<div class="track_image track_img">
+									<img title="" alt="" src="views/main/img/tr2.jpg">
+									<div class="track_image__controls">
+										<a href="#l1" class="cover_pause"></a>
+										<a href="#l2" class="cover_plus"></a>
+									</div>
+								</div>
+
+								<div class="track_left">
+									<h3 class="track_title"><a >BaRoN</a> - <a class="black_link" >Good_mood (original_mix)</a></h3>
+									<div class="track_date">
+										<div class="track_data">Track | Pop | 03:30 | 8.04 MB</div>
+										<div class="player cf">
+											<a class="player_ico player_start">126</a>
+											<a class="player_ico player_dwnl">70</a>
+											<a class="player_ico player_like">126</a>
+											<a class="player_ico player_plus">+</a>
+										</div>
+									</div>
+								</div>
+								<div class="track_icos">
+									<a class="track_ico track_ico_1" ></a>
+								</div>
+							</li>
+						</ul>
+						<div class="tracks_more"><a href="#/tracks">Больше треков</a></div>
+					</div>
+
+					<!-- tracks colum -->
+					<div class="tracks">
+						<h3 class="tracks_title">Лучшие треки</h3>
+						<ul class="tracks_list">
+							<!-- item -->
+							<li class="tracks_item cf">
+
+								<div class="track_image track_img">
+									<img title="" alt="" src="views/main/img/tr1.jpg">
+									<div class="track_image__controls">
+										<a href="#l1" class="cover_play"></a>
+										<a href="#l2" class="cover_plus"></a>
+									</div>
+								</div>
+
+								<div class="track_left">
+									<h3 class="track_title"><a >BaRoN</a> - <a class="black_link" >Good_mood (original_mix)d (original_mix)</a></h3>
+									<div class="track_date">
+										<div class="track_data">Track | Pop | 03:30 | 8.04 MB</div>
+										<div class="player cf">
+											<a class="player_ico player_start">126</a>
+											<a class="player_ico player_dwnl">70</a>
+											<a class="player_ico player_like">126</a>
+											<a class="player_ico player_plus">+</a>
+										</div>
+									</div>
+								</div>
+
+								<!-- user info popup -->
+
+							</li>
+							<!-- item -->
+							<li class="tracks_item cf">
+
+								<div class="track_image track_img">
+									<img title="" alt="" src="views/main/img/tr2.jpg">
+									<div class="track_image__controls">
+										<a href="#l1" class="cover_play"></a>
+										<a href="#l2" class="cover_plus"></a>
+									</div>
+								</div>
+
+								<div class="track_left">
+									<h3 class="track_title"><a >BaRoN</a> - <a class="black_link" >Good_mood (original_mix) Good_mood (original_mix)</a></h3>
+									<div class="track_date">
+										<div class="track_data">Track | Pop | 03:30 | 8.04 MB</div>
+										<div class="player cf">
+											<a class="player_ico player_start">126</a>
+											<a class="player_ico player_dwnl">70</a>
+											<a class="player_ico player_like">126</a>
+											<a class="player_ico player_plus">+</a>
+										</div>
+									</div>
+								</div>
+							</li>
+							<!-- item -->
+							<li class="tracks_item cf">
+
+								<div class="track_image track_img">
+									<img title="" alt="" src="views/main/img/tr4.jpg">
+									<div class="track_image__controls">
+										<a href="#l1" class="cover_pause"></a>
+										<a href="#l2" class="cover_plus"></a>
+									</div>
+								</div>
+
+								<div class="track_left">
+									<h3 class="track_title"><a >BaRoN</a> - <a class="black_link" >Good_mood (original_mix)d (original_mix)</a></h3>
+									<div class="track_date">
+										<div class="track_data">Track | Pop | 03:30 | 8.04 MB</div>
+										<div class="player cf">
+											<a class="player_ico player_start">126</a>
+											<a class="player_ico player_dwnl">70</a>
+											<a class="player_ico player_like">126</a>
+											<a class="player_ico player_plus">+</a>
+										</div>
+									</div>
+								</div>
+							</li>
+							<!-- item -->
+							<li class="tracks_item cf">
+
+								<div class="track_image track_img">
+									<img title="" alt="" src="views/main/img/tr3.jpg">
+									<div class="track_image__controls">
+										<a href="#l1" class="cover_pause"></a>
+										<a href="#l2" class="cover_plus"></a>
+									</div>
+								</div>
+
+								<div class="track_left">
+									<h3 class="track_title"><a >BaRoN</a> - <a class="black_link" >Good_mood (original_mix) Good_mood (original_mix)</a></h3>
+									<div class="track_date">
+										<div class="track_data">Track | Pop | 03:30 | 8.04 MB</div>
+										<div class="player cf">
+											<a class="player_ico player_start">126</a>
+											<a class="player_ico player_dwnl">70</a>
+											<a class="player_ico player_like">126</a>
+											<a class="player_ico player_plus">+</a>
+										</div>
+									</div>
+								</div>
+								<div class="track_icos">
+									<a class="track_ico track_ico_2" ></a>
+								</div>
+							</li>
+						</ul>
+						<div class="tracks_more"><a href="#/tracks">Больше треков</a></div>
+					</div>
+					</article>
+
+
+				</section>
+
+
+				<!-- ASIDE -->
+
+				<section class="right_aside">
+
+					<!-- aside block -->
+					<div class="aside">
+						<h3 class="aside_title">Новости</h3>
+						<ul class="aside_menu aside_menu_news">
+							<li>
+								<a class="aside_menu_link">Глобальное CjClub PARTY!</a>
+								Битва Сиджеев. Победителю путевка в жаркую страну!
+							</li>
+							<li>
+								<a class="aside_menu_link">Contours Reedition 005</a>
+								Продолжается Новогодний набор на Abstract Contours.
+							</li>
+							<li>
+								<a class="aside_menu_link">Новое на сайте!</a>
+								Система вложений и обмена файлами + новый редактор
+							</li>
+						</ul>
+						<div class="aside_more"><a >Больше новостей</a></div>
+					</div>
+
+					<div class="aside2">
+						<h3 class="aside_title">Активные пользователи</h3>
+						<ul class="faces cf">
+							<li class="faces_item"><a ><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
+							<li class="faces_item"><a ><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
+						</ul>
+					</div>
+				</section>
+			</section>
+		</div>
+
+	</section>
+</div>

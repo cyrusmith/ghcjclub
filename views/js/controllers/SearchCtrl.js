@@ -1,0 +1,3 @@
+App.controller('SearchCtrl', function() {
+
+});

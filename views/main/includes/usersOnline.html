@@ -1,0 +1,8 @@
+<div>
+	<h3 ng-show="users.length > 0" class="aside_title">Активные пользователи</h3>
+	<ul class="faces cf" >
+		<li ng-repeat="user in users | limitTo: 12" class="faces_item"><a href="#users/{{user.id}}">
+			<img src="views/main/img/fa1.jpg" alt="{{user.name}}" title="{{user.name}}" />
+		</a></li>
+	</ul>
+</div>
