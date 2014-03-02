@@ -1,3 +1,3 @@
-App.controller('TracksDiscussedCtrl', function($scope, Tracks) {
-	$scope.tracks = Tracks.query();
+App.controller('TracksDiscussedCtrl', function($scope, TracksResource) {
+	$scope.tracks = TracksResource.query();
 });

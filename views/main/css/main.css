@@ -829,7 +829,7 @@ a.btn_orange, span.btn_orange { display:inline-block;}
 .new_track__data { font-size:11px; color:#717171; margin:0 0 7px;}
 .new_track__vision { float:left; width:390px; height:75px; margin:14px 0 0;}
 .track_vision { position:relative; overflow:hidden; float:left;}
-.track_vision_in { position:absolute; left:0; top:0; bottom:0;}
+.track_vision_in { position:absolute; left:0; top:0; bottom:0;background-color:#bd612b;background-repeat: no-repeat; -webkit-transition: width 4s}
 .new_track__c { margin:0 15px 0 112px; float:left; width:180px;}
 .new_track .sound_control { float:right; width:7px; margin:17px 0 0;}
 

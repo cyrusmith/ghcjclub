@@ -225,6 +225,7 @@ function setUserRulesByType($type){
 			 * CjclubUser
 			 */
 			$RDS->add('access.UsersCtrl.lists');
+			$RDS->add('access.UsersCtrl.listsOnline');
 			$RDS->add('access.UsersCtrl.show');
 
             $RDS->add('access.CjclubUser.edit');
@@ -298,6 +299,8 @@ function setUserRulesByType($type){
 			$RDS->add('access.TracksCtrl.lists');
 			$RDS->add('access.TracksCtrl.listsFiltered');
 			$RDS->add('access.TracksCtrl.listsPromo');
+			$RDS->add('access.TracksCtrl.listsBest');
+			$RDS->add('access.TracksCtrl.listsLatest');
 			$RDS->add('access.TracksCtrl.show');
             $RDS->add('access.Track.actionPlus');
             $RDS->add('access.Track.getPluses');

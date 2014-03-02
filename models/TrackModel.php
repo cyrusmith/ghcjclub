@@ -50,10 +50,13 @@ class TrackModel extends DModelValidated {
             ->addProperty('projectId', 'int', "11", '0')
 			->addProperty('album_id', 'int', "11")
 			->addProperty('style_id', 'int', "11")
+			->addProperty('style', 'string')
 			->addProperty('name', 'varchar', "255", null)
 			->addProperty('permanentName', 'varchar', "255", null)
 			->addProperty('filesize', 'int', "11", null)
+			->addProperty('filesizeStr', 'string')
 			->addProperty('timelength', 'int', "11", null)
+			->addProperty('timelengthStr', 'string')
 			->addProperty('format', 'enum', "'mp3','ogg','wma'", 'mp3')
 			->addProperty('type', 'enum', "'intop','demo','outtop'", 'intop')
 			->addProperty('descr', 'text', "", null)
@@ -76,6 +79,7 @@ class TrackModel extends DModelValidated {
 			->addProperty('userOrder', 'int', "11")
 			->addProperty('lastCommentDate', 'datetime', "")
 			->addProperty('pit', 'float unsigned', "", '0')
+			->addProperty('pitStr', 'string')
 			->addProperty('track_sharing', 'enum', "'false','true'", 'true')
 			->addProperty('comments_blocked', 'enum', "'false','true'", 'false')
 			->addProperty('license', 'enum', "'none','by','by-sa','by-nd','by-nc','by-nc-sa','by-nc-nd'", 'none')
@@ -84,7 +88,13 @@ class TrackModel extends DModelValidated {
 			->addProperty('points', 'int', "11", '0')
 		;
 		$this->proxy = new DModelProxyDatabase('tracks');
+		$fields = 'id,top_id,projectId,album_id,style_id,name,permanentName,filesize,timelength,format,type,descr,uploaddate,public_date,published,link,link_lowfi';
+		$fields .= ',placeintop,topincrement,placeoverall,count_download,count_listen,label,albumOrder,inrelease,userOrder,lastCommentDate,pit,track_sharing';
+		$fields .= ',comments_blocked,license,ban_high_quality,newVersionId,points';
+		$this->proxy->setFieldsRead($fields)->setFieldsWrite($fields);
+		$this->db = ObjectsPool::get('DataBase');
 	}
+	protected $db;
 	function getterConversions($field, $value) {
 		$value = parent::getterConversions($field, $value);
 		switch ($field) {
@@ -121,7 +131,10 @@ class TrackModel extends DModelValidated {
                 }
 				break;
             */
-			case 'name':
+			case 'style':
+				if ($value == null) {
+					$value = $this->db->select('musicstyles', 'value', "id = $this->style_id", DB_SELECT_ONE);
+				}
 				break;
 			case 'permanentName':
 //                if (empty($value)) {
@@ -131,11 +144,21 @@ class TrackModel extends DModelValidated {
 				break;
 			case 'filesize':
 				break;
-			case 'timelength':
-				break;
-			case 'format':
-				break;
-			case 'type':
+			case 'timelengthStr':
+				$seconds = $this->timelength;
+				$hours = floor($seconds / 3600);
+				$mins = floor(($seconds - ($hours*3600)) / 60);
+				$secs = floor($seconds % 60);
+				if ($hours) {
+					$str = '%02s:%02s:%02s';
+					$value = sprintf($str, $hours, $mins, $secs);
+				} else if ($mins) {
+					$str = '%02s:%02s';
+					$value = sprintf($str, $mins, $secs);
+				} else {
+					$str = '%02s';
+					$value = sprintf($str, $secs);
+				}
 				break;
 			case 'descr':
                 if (!isset($_REQUEST['edit']))
@@ -180,6 +203,9 @@ class TrackModel extends DModelValidated {
 			case 'lastCommentDate':
 				break;
 			case 'pit':
+				break;
+			case 'pitStr':
+				$value = floor($this->pit);
 				break;
 			case 'track_sharing':
 				break;

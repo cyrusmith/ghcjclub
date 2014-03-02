@@ -1,0 +1,26 @@
+<div>
+	<div class="track_image track_img">
+		<img ng-src="http://cjclub.ru/_files/trackpics/{{track.id}}_55" alt="" title="" />
+		<div class="track_image__controls">
+			<a ng-click="player.playIdOrPause(track.id)" ng-class="{cover_pause: player.isIdbeingPlayed(track.id), cover_play: !player.isIdbeingPlayed(track.id)}"></a>
+			<a class="cover_plus"></a>
+		</div>
+	</div>
+
+	<div class="track_left">
+		<h3 class="track_title"><a href="#projects/{{track.projectId}}">{{track.project}}</a> - <a href="#tracks/{{track.id}}" class="black_link">{{track.name}}</a></h3>
+		<div class="track_date">
+			<div class="track_data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}} MB</div>
+			<div class="player cf">
+				<a class="player_ico player_start" ng-click="player.playIdOrPause(track.id)">{{track.count_listen}}</a>
+				<a class="player_ico player_dwnl">{{track.count_download}}</a>
+				<a class="player_ico player_like">126</a>
+				<a class="player_ico player_plus">+</a>
+			</div>
+		</div>
+	</div>
+	<div class="track_icos">
+		<a  class="track_ico track_ico_1"></a>
+		<a  class="track_ico track_ico_2"></a>
+	</div>
+</div>

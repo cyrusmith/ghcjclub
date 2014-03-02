@@ -1,0 +1,88 @@
+<div class="gb_in">
+
+	<!-- gray block data -->
+	<div class="gb_data"><div class="gb_data_in">{{track.public_date | date: 'yyyy'}}</div></div>
+
+
+	<div class="new_track cf">
+
+		<!-- left side -->
+		<div class="track_image new_track__image gbt__l">
+			<img title="" alt="" src="http://cjclub.ru/_files/trackpics/{{track.id}}_100">
+			<i ng-if="0" class="ico_top100"></i>
+			<i ng-if="0" class="ico_mic"></i>
+			<span ng-if="0" class="ico_rat ico_rat_max">123</span>
+		</div>
+
+		<!-- center -->
+		<div class="gbt__c">
+			<div class="gbt__name"><a >{{track.project}}</a> <a ng-if="0" class="user_stat user_stat_3" ></a></div>
+			<div class="gbt__title"><a href="#/tracks/{{track.id}}" class="black_link">{{track.name}}</a></div>
+			<div class="gbt__data">Track | <span title="Dubstep-Exxxxxxperimental-Rocopops" class="gbt_gr">{{track.style}}</span> | {{track.timelengthStr}} | {{track.filesizeStr}} <span ng-if="0" class="quality quality_r">320</span></div>
+			<div class="gbt__data">Альбом: <a class="black_link">{{track.album}}</a></div>
+			<div class="gbt__data">В топе: <a class="black_link">{{track.style}}</a></div>
+
+		</div>
+		<!-- right side -->
+		<div class="gbt__r">
+			<div class="gbt_btns cf">
+				<div class="gbt_i1">
+					<div class="gbt_play">
+						<div ng-click="player.playIdOrPause(track.id)" class="gbt_play__ico" ng-class="{gbt_pause__ico: player.isIdbeingPlayed(track.id)}"></div>
+
+						{{track.count_listen}}
+					</div>
+					<div class="gbt_down">
+						<div class="gbt_down__ico"></div>
+						{{track.count_download}}
+					</div>
+				</div>
+
+				<div class="gbt_i2">
+					<a class="gbt_rating">PiT {{track.pitStr}}</a>
+				</div>
+
+				<div class="gbt_i3" ng-if="0">
+					<div class="gbt_like">
+						<div class="ico2 gbt_like_ico gbt_like_ico_ok opener">
+							<div class="baloon">
+								<a class="black_link">diego</a>
+								<a class="black_link">Monster_bit</a>
+								<a class="black_link">Kati2000</a>
+								<a class="black_link">_lucas_</a>
+							</div>
+						</div>
+						1870
+					</div>
+					<div class="gbt_plus">
+						<div class="ico2 gbt_plus_ico opener">
+							<form action="#" class="baloon baloon_plus">
+								<div class="baloon_btns">
+									<input type="text" class="f_text f_baloon_text" value="" placeholder="Название" />
+									<input type="submit" class="ico2 ico2_btn_check" value="Ok" />
+									<input type="button" class="ico2 ico2_btn_reset" value="Clear" />
+								</div>
+
+								<span class="ico2 ico2_plus_g fr"></span>
+
+								<div class="gbt_tr_lists" >
+									<div><a class="black_link">Собственные треки</a> <b class="green2 fs18">+</b></div>
+									<div><a class="black_link">Избранное</a> <b class="green2 fs18">+</b></div>
+								</div>
+							</form>
+						</div>
+						1870
+					</div>
+					<div class="gbt_favo">
+						<div class="ico2 gbt_favo_ico gbt_favo_ico_ok"></div>
+						350
+					</div>
+				</div>
+			</div>
+
+			<div class="gbt__desc">{{track.descr}}</div>
+
+		</div>
+	</div>
+
+</div>

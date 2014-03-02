@@ -1,3 +1,3 @@
-App.controller('PromoTracksCtrl', function($scope, Tracks) {
-	$scope.tracks = Tracks.query(function() {});
+App.controller('PromoTracksCtrl', function($scope, TracksResource) {
+	$scope.tracks = TracksResource.queryPromo();
 });

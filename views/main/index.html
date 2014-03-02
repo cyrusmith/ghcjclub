@@ -14,12 +14,12 @@
 	<div class="promo_list cf" ng-controller="PromoTracksCtrl">
 		<div ng-if="!tracks.$resolved">Загрузка промо-треков...</div>
 		<div ng-cloak ng-repeat="track in tracks | limitTo: 5" class="promo_item">
-			<div class="promo_item__name"><a title="{{track.project}}">{{track.project}}</a> <a class="user_stat user_stat_1"></a></div>
+			<div class="promo_item__name"><a title="{{track.project}}">{{track.project}}</a> <a ng-if="0" class="user_stat user_stat_1"></a></div>
 			<div class="promo_item__cover">
 				<div class="track_image">
-					<img src="views/main/img/pr1.jpg" alt="" title="" />
+					<img ng-src="http://cjclub.ru/_files/trackpics/{{track.id}}_68" alt="" title="" />
 					<div class="track_image__controls">
-						<a  class="cover_play"></a>
+						<a ng-click="player.playIdOrPause(track.id)" ng-class="{cover_pause: player.isIdbeingPlayed(track.id), cover_play: !player.isIdbeingPlayed(track.id)}"></a>
 						<a  class="cover_plus"></a>
 					</div>
 				</div>
@@ -27,7 +27,7 @@
 			<a href="#/tracks/{{track.id}}" class="promo_item__title" title="{{track.name}}">{{track.name}}</a>
 			<div class="promo_item__data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}} </div>
 			<div class="player cf">
-				<a class="player_ico player_start">{{track.count_listen}}</a>
+				<a class="player_ico player_start" ng-click="player.playIdOrPause(track.id)">{{track.count_listen}}</a>
 				<a class="player_ico player_dwnl">{{track.count_download}}</a>
 				<!--<a class="player_ico player_like">126</a>-->
 				<a class="player_ico player_plus">+</a>
@@ -47,7 +47,7 @@
 			<div ng-if="!projects.$resolved" style="height:100px"><p style="text-align:center;padding-top:20px">Загружаю...</p></div>
 			<ul class="slider_line overview cf" ng-cloak>
 				<li ng-repeat="project in projects | limitTo: 10" class="slider_item">
-					<img class="man_photo" src="views/main/img/tf1.jpg" alt="" title="" />
+					<img class="man_photo" ng-src="http://cjclub.ru/_files/avatars/{{project.id}}" alt="" title="" />
 					<div class="man_text">
 						<div class="man_title">
 							<div class="man_name"><a href="#/projects/{{project.id}}">{{project.name}}</a> <a  class="user_stat user_stat_1"></a></div>
@@ -155,70 +155,26 @@
 <article class="b cf">
 
 	<!-- tracks colum -->
-	<div class="tracks" ng-controller="NewTracksCtrl">
+	<div class="tracks" new-tracks-block>
 		<h3 class="tracks_title">Новые треки</h3>
 		<div ng-if="!tracks.$resolved">загружаю...</div>
 		<ul class="tracks_list">
 			<!-- item -->
 			<li ng-repeat="track in tracks | limitTo: 10" class="tracks_item cf">
-
-				<div class="track_image track_img">
-					<img src="views/main/img/tr2.jpg" alt="" title="" />
-					<div class="track_image__controls">
-						<a class="cover_play"></a>
-						<a class="cover_plus"></a>
-					</div>
-				</div>
-
-				<div class="track_left">
-					<h3 class="track_title"><a href="#projects/{{track.projectId}}">{{track.project}}</a> - <a href="#tracks/{{track.id}}" class="black_link">{{track.name}}</a></h3>
-					<div class="track_date">
-						<div class="track_data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}} MB</div>
-						<div class="player cf">
-							<a class="player_ico player_start">{{count_download}}</a>
-							<a class="player_ico player_dwnl">{{track.count_download}}</a>
-							<a class="player_ico player_like">126</a>
-							<a class="player_ico player_plus">+</a>
-						</div>
-					</div>
-				</div>
-				<div class="track_icos">
-					<a  class="track_ico track_ico_1"></a>
-					<a  class="track_ico track_ico_2"></a>
-				</div>
+				<track-mini></track-mini>
 			</li>
 		</ul>
 		<div class="tracks_more"><a href="#tracks">Больше треков</a></div>
 	</div>
 
 	<!-- tracks colum -->
-	<div class="tracks" ng-controller="BestTracksCtrl">
+	<div class="tracks" best-tracks-block>
 		<h3 class="tracks_title">Лучшие треки</h3>
 		<div ng-if="!tracks.$resolved">загружаю...</div>
 		<ul class="tracks_list">
 			<!-- item -->
 			<li class="tracks_item cf" ng-repeat="track in tracks  | limitTo: 10">
-
-				<div class="track_image track_img">
-					<img src="views/main/img/tr1.jpg" alt="" title="" />
-					<div class="track_image__controls">
-						<a class="cover_play" href="#l1"></a>
-						<a class="cover_plus" href="#l2"></a>
-					</div>
-				</div>
-
-				<div class="track_left">
-					<h3 class="track_title"><a href="#projects/{{track.projectId}}">{{track.project}}</a> - <a href="#tracks/{{track.id}}" class="black_link">{{track.name}}</a></h3>
-					<div class="track_date">
-						<div class="track_data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}} MB</div>
-						<div class="player cf">
-							<a class="player_ico player_start">{{count_download}}</a>
-							<a class="player_ico player_dwnl">{{track.count_download}}</a>
-							<a class="player_ico player_like">126</a>
-							<a class="player_ico player_plus">+</a>
-						</div>
-					</div>
-				</div>
+				<track-mini></track-mini>
 
 				<!-- user info popup -->
 				<!--
@@ -306,7 +262,7 @@
 	<div class="aside2">
 		<h3 class="aside_title">Топ музыкантов</h3>
 		<ul class="faces cf" ng-controller="ProjectsTopCtrl">
-			<li ng-repeat="project in projects | limitTo: 9" class="faces_item"><a href="#projects/{{project.id}}"><img src="views/main/img/fa1.jpg" alt="{{project.name}}" title="{{project.name}}" /></a></li>
+			<li ng-repeat="project in projects | limitTo: 9" class="faces_item"><a href="#projects/{{project.id}}"><img src="http://cjclub.ru/_files/avatars/{{project.id}}_55" alt="{{project.name}}" title="{{project.name}}" /></a></li>
 		</ul>
 		<users-online></users-online>
 	</div>

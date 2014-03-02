@@ -467,25 +467,6 @@ $(function(){
 
 	CJ.galery("#gal", "#gal_carousel", "#galery_overlay");
 
-	$.each($('.sound_control_slider'), function(count, item){
-		//console.log(count);
-		$(item).slider({
-			animate:true,
-			orientation: "vertical",
-			range: "min",
-			min:0,
-			max:100,
-			value:75,
-			slide: function( event, ui ) {
-				$.each($('.sound_control_slider:not(:eq(' + count + '))'), function(c, i){
-					$(i).slider('value', ui.value);
-				});
-			}
-		});
-	});
-
-
-
 	$('.dot1').on('click', function(){
 		$('#playlist1').slideToggle(300, function(){
 			CJ.slide();

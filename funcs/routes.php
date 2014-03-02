@@ -21,6 +21,8 @@ function setRoutes() {
 	Router::get()->connect(Router::$GET, '^tracks$', 'TracksCtrl/lists');
 	Router::get()->connect(Router::$GET, '^tracks/(?<id>\d+)$', 'TracksCtrl/show');
 	Router::get()->connect(Router::$GET, '^tracks/promo$', 'TracksCtrl/listsPromo');
+	Router::get()->connect(Router::$GET, '^tracks/best$', 'TracksCtrl/listsBest');
+	Router::get()->connect(Router::$GET, '^tracks/latest$', 'TracksCtrl/listsLatest');
 
 	Router::get()->connect(Router::$GET, '^projects$', 'ProjectsCtrl/lists');
 	Router::get()->connect(Router::$GET, '^projects/(?<id>\d+)$', 'ProjectsCtrl/show');
@@ -35,6 +37,7 @@ function setRoutes() {
 	Router::get()->connect(Router::$GET, '^top/(?<topId>\d+)$', 'TracksCtrl/listsFiltered');
 
 	Router::get()->connect(Router::$GET, '^users$', 'UsersCtrl/lists');
+	Router::get()->connect(Router::$GET, '^users/online$', 'UsersCtrl/listsOnline');
 	Router::get()->connect(Router::$GET, '^users/(?<id>\d+)$', 'UsersCtrl/show');
 
 	Router::get()->connect(Router::$GET, '^blogs$', 'BlogsCtrl/lists');

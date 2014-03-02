@@ -27,17 +27,15 @@ App.config(function($routeProvider) {
 				$scope.tracks = Tracks;
 			}],
 			resolve: {
-				Tracks: function(Tracks) {return Tracks.query(); }
+				Tracks: function(TracksResource) {return TracksResource.query(); }
 			}
 		}).
 		when('/tracks/:id', {
 			templateUrl: 'views/main/track.html',
-			controller: ['$scope', 'Track', function($scope, Track) {
-				$scope.track = Track;
-			}],
+			controller: 'TrackCtrl',
 			resolve: {
-				Track: function(Tracks, $route) {
-					return Tracks.get({id: $route.current.params.id});
+				Track: function(TracksResource, $route, $q) {
+					return TracksResource.get({id: $route.current.params.id}).$promise;
 				}
 			}
 		}).
@@ -92,8 +90,8 @@ App.config(function($routeProvider) {
 				Albums: function(Albums, $route) {
 					return Albums.query({projectId: $route.current.params.id});
 				},
-				Tracks: function(Tracks, $route) {
-					return Tracks.query({projectId: $route.current.params.id});
+				Tracks: function(TracksResource, $route) {
+					return TracksResource.query({projectId: $route.current.params.id});
 				},
 				Blogs: function(Blogs, $route) {
 					return Blogs.query({projectId: $route.current.params.id});

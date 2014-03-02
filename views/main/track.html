@@ -16,78 +16,63 @@
 						<li class="gray_menu__item gray_menu__active"><a href="#/projects/{{track.projectId}}/tracks">Треки</a></li>
 						<li class="gray_menu__item"><a href="#/projects/{{track.projectId}}/albums">Альбомы</a></li>
 						<li class="gray_menu__item"><a href="#/projects/{{track.projectId}}/blogs">Блоги</a></li>
-						<li class="gray_menu__item"><a href="#" ng-if="0">Группы</a></li>
-						<li class="gray_menu__item"><a href="#" ng-if="0">Подписчики</a></li>
+						<li class="gray_menu__item"><a ng-if="0">Группы</a></li>
+						<li class="gray_menu__item"><a ng-if="0">Подписчики</a></li>
 					</ul>
 
 					<div class="vb">
 						<div class="tr_data">
 							<a title="{{track.project}}" class="gbt_gr gbt_gr2">{{track.project}}</a>
-							<span class="ccp__rzd">|</span>
-							Альбом: <a title="{{track.album}}" class="gbt_gr gbt_gr2">{{track.album}}</a>
-							<span class="ccp__rzd">|</span>
-							В топе: <a href="#">{{track.style}}</a>
-							<span class="ico_rat ico_rat_max">123</span>
-							<span class="ico_rat ico_rat_min">- 123</span>
+							<span ng-if="track.album_id != null">
+								<span class="ccp__rzd">|</span>
+								Альбом: <a title="{{track.album}}" class="gbt_gr gbt_gr2">{{track.album}}</a>
+							</span>
+
+							<span ng-if="track.top_id != null">
+								<span class="ccp__rzd">|</span>В топе: <a href="#/tops/{{track.top_id}}">{{track.top_id}}</a>
+							</span>
+							<span ng-if="track.topincrement > 0" class="ico_rat ico_rat_max">{{track.topincrement}}</span>
+							<span ng-if="track.topincrement < 0" class="ico_rat ico_rat_min">{{track.topincrement}}</span>
 						</div>
 
-						<div class="gb_data"><div class="gb_data_in">Опубликован: 18 ноября 1988</div></div>
+						<div class="gb_data"><div class="gb_data_in">Опубликован: {{track.public_date}}</div></div>
 
 						<div class="tr_head cf">
 							<div class="ico_bcs fr">
-								<a href="#" class="ico_bc ico_bc1"></a>
-								<!--a href="#" class="ico_bc ico_bc2"></a-->
-								<a href="#" class="ico_bc ico_bc3"></a>
-								<a href="#" class="ico_bc ico_bc4"></a>
+								<a class="ico_bc ico_bc1"></a>
+								<!--a class="ico_bc ico_bc2"></a-->
+								<a class="ico_bc ico_bc3"></a>
+								<a class="ico_bc ico_bc4"></a>
 							</div>
 
 							<div class="tr_name">
 								<div class="tr_controls">
-									<div class="gbt_play__ico gbt_pause__ico"></div>
+									<div class="gbt_play__ico" ng-class="{gbt_pause__ico: isPlaying()}" ng-click="togglePlay()"></div>
 									<div class="gbt_down__ico"></div>
 								</div>
 								<div class="tr_name__text">
 									{{track.name}}
 								</div>
-								<i class="ico_top100"></i>
+								<i class="ico_top100" ng-if="track.placeoverall > 0 && track.placeoverall < 100"></i>
 								<div class="cb"></div>
 							</div>
 						</div>
 
-						<div class="track_vision full_track_vision" style="background:url(views/main/img/track_pic_big.png) repeat-x 0 0;">
-							<div class="track_vision_in" style="background:url(views/main/img/track_pic_big.png) repeat-x 0 -140px; width:75%;"></div>
-							<div class="track_vision_in" style="background:url(views/main/img/track_pic_big.png) repeat-x 0 -280px; width:35%;">
-								<span class="tr_time tr_pos_curr">14:48</span>
+						<div ng-click="seekAndPlay($event)" class="track_vision full_track_vision" style="background:url(views/main/img/track_pic_big.png) repeat-x 0 0;">
+							<div style="width: 970px; height: 140px; position:absolute;background:#6b6b6c url(http://www.cjclub.ru/_files/waves/{{track.id}}.png) no-repeat 0 0">
+								<div class="track_vision_in" ng-if="0" style="background:#444444 url(http://www.cjclub.ru/_files/waves/{{track.id}}.png) no-repeat 0 0; width:75%;"></div>
+								<div class="track_vision_in" style="background:#bd612b url(http://www.cjclub.ru/_files/waves/{{track.id}}.png) no-repeat 0 0; width:{{playInfo.playprogress}}%;">
+									<span ng-if="0" class="tr_time tr_pos_curr">14:48</span>
+								</div>
 							</div>
 
-							<span class="tr_time tr_full_len">48:24</span>
+							<span class="tr_time tr_full_len">{{track.timelengthStr}}</span>
 
 							<ul class="tr_coms">
-								<li class="tr_com" style="left:20%">
+								<li ng-repeat="comment in commentsOnTrack" class="tr_com" style="left:20%">
 									<img class="tr_com__face" src="views/main/img/ava.jpg" alt="" title="" />
 									<div class="tr_com__comm" >
-										<a href="#" class="tr_com__link">Nonameuser123123123123123123123</a>
-										<span class="tr_com__text">Это очень крутой момент!!!</span>
-									</div>
-								</li>
-								<li class="tr_com tr_com__open" style="left:80%">
-									<img class="tr_com__face" src="views/main/img/ava1.png" alt="" title="" />
-									<div class="tr_com__comm" >
-										<a href="#" class="tr_com__link">Nonameuser2</a>
-										<span class="tr_com__text">Это очень крутой момент!!!</span>
-									</div>
-								</li>
-								<li class="tr_com" style="left:50%">
-									<img class="tr_com__face" src="views/main/img/ava_empty.png" alt="" title="" />
-									<div class="tr_com__comm">
-										<a href="#" class="tr_com__link">Nonameuser3</a>
-										<span class="tr_com__text">Это очень крутой момент!!!</span>
-									</div>
-								</li>
-								<li class="tr_com" style="left:36%">
-									<img class="tr_com__face" src="views/main/img/ava1.png" alt="" title="" />
-									<div class="tr_com__comm" >
-										<a href="#" class="tr_com__link">Nonameuser4</a>
+										<a class="tr_com__link">Nonameuser123123123123123123123</a>
 										<span class="tr_com__text">Это очень крутой момент!!!</span>
 									</div>
 								</li>
@@ -100,35 +85,35 @@
 
 						<div class="tr_btns cf">
 							<div class="col_btns fl">
-								<a href="#" class="btn_orange"><i class="ico2 ico2_like"></i> Нравиться</a>
-								<a href="#" class="btn_orange"><i class="ico2 ico2_star"></i> В избранное</a>
-								<a href="#" class="btn_orange"><i class="ico2 ico2_topl"></i> В плейлист</a>
-								<a href="#" class="btn_orange"><i class="ico2 ico2_share"></i> Поделиться</a>
+								<a class="btn_orange"><i class="ico2 ico2_like"></i> Нравится</a>
+								<a class="btn_orange"><i class="ico2 ico2_star"></i> В избранное</a>
+								<a class="btn_orange"><i class="ico2 ico2_topl"></i> В плейлист</a>
+								<a class="btn_orange"><i class="ico2 ico2_share"></i> Поделиться</a>
 							</div>
 
 							<div class="player tr_data fr cf">
-								<a href="#" class="ico_mic"></a>
+								<a class="ico_mic"></a>
 								<span class="ccp__rzd">|</span>
-								<a href="#" class="player_ico player_pit">PiT 235</a>
+								<a class="player_ico player_pit">PiT {{track.pitStr}}</a>
 								<span class="ccp__rzd">|</span>
-								<span class="player_ico player_size">135.6 Mb</span>
+								<span class="player_ico player_size">{{track.filesizeStr}}</span>
 								<span class="ccp__rzd">|</span>
-								<span class="player_ico player_start">126</span>
+								<span class="player_ico player_start">{{track.count_listen}}</span>
 								<span class="ccp__rzd">|</span>
-								<span class="player_ico player_dwnl">70</span>
+								<span class="player_ico player_dwnl">{{track.count_download}}</span>
 								<span class="ccp__rzd">|</span>
-								<span class="player_ico player_like">126</span>
+								<span class="player_ico player_like">{{track.count_liked}}</span>
 							</div>
 						</div>
 					</div>
 
 
-					<div class="tr_buy">
+					<div class="tr_buy" ng-if="0">
 						Купить трек:
-						<a href="#" class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
-						<a href="#" class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
-						<a href="#" class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
-						<a href="#" class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
+						<a class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
+						<a class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
+						<a class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
+						<a class="tr_buy__link"><img src="views/main/img/tr_buy__img.jpg" alt="" title="" /></a>
 					</div>
 				</section>
 
@@ -138,31 +123,14 @@
 				<section class="left_side_s track-left">
 
 					<div class="aside2 center">
-						<div class="tr_cover"><img src="views/main/img/vinyl.jpg" alt="" title="" /></div>
-						<a href="#" class="rights_link"><i class="ico2 ico2_rights"></i> <span class="tdu">Нарушение авторских прав!</span></a>
+						<div class="tr_cover"><img src="http://www.cjclub.ru/_files/trackpics/{{track.id}}_55" alt="" title="" /></div>
+						<a class="rights_link"><i class="ico2 ico2_rights"></i> <span class="tdu">Нарушение авторских прав!</span></a>
 					</div>
 
-					<div class="aside2">
+					<div class="aside2" ng-if="visitors.length">
 						<h3 class="aside_title">Тут побывали</h3>
 						<ul class="faces cf">
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa2.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa3.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa1.jpg" alt="" title="" /></a></li>
-							<li class="faces_item"><a href="#"><img src="views/main/img/fa4.jpg" alt="" title="" /></a></li>
+							<li ng-repeat="user in visitors" class="faces_item"><a href="#"><img src="http://cjclub.ru/_files/avatars/{{user.id}}_68" alt="" title="" /></a></li>
 						</ul>
 					</div>
 
@@ -175,7 +143,7 @@
 					<section class="tr_side_r cf">
 
 						<div class="tr_aside">
-							<div class="tr_likes">
+							<div class="tr_likes" ng-if="likers.length">
 								<h3 class="block_title block_title_nm">Трек понравился:</h3>
 								<ul class="fa_tabs tabs cf">
 									<li class="fa_tab fa_tab__active tab" data-rel="tab0"><span class="user_stat user_stat_1"></span> 34</li> <!-- fa_tab__active -->
@@ -828,42 +796,28 @@
 								<li class="ae_tag">Vocal</li>
 							</ul>
 
-							<div class="tr_desc">
-								В число новых работ вошла переработанная версия «Let U Go» с голосом бывшего гитариста-
-								рокера, а ныне немецкого транс-деятеля Яна Лёээля (нем. Jan Löehel), который спел в «Believe
-								In Me», также вошедшем в «Seven years». Появилась вторая часть «Трилогии» — «Trilogie Part 2»;
-								композиция с вокалом Николь Кенна (англ. Nicole McKenna) — «Take Me Over», инструменталь-
-								ная работа «Far Beyond» и «Humanity», записанный с Тифф Лейси (англ. Tiff Lacey).
-
-								<div id="tr_more" class="hide">
-									Пример больше всего  years». Появилась вторая часть «Трилогии» — «Trilogie Part 2»;
-									композиция с вокалом Николь Кенна (англ. Nicole McKenna) — «Take Me Over», инструменталь-
-									ная работа «Far Beyond» и «Humanity», записанный с Тифф Лейси (англ. Tiff Lacey)
-								</div>
-
-								<div class="tr_desc_more show_more"><a href="#tr_more" class="show_link green2">Показать полную информацию</a></div>
-							</div>
+							<div class="tr_desc">{{track.descr}}</div>
 
 							<!-- code of track -->
 							<div class="tr_bnn">
 								<div class="tr_bnn__bl">
-									<a href="#tr_bnn" class="dashed tr_bnn__link show_link">Получить код баннера трека</a>
+									<a ng-click="showBannerCode()" class="dashed tr_bnn__link show_link">Получить код баннера трека</a>
 								</div>
 
-								<div class="tr_bnn_content hide" id="tr_bnn">
-									<a href="#" class="tr_bnn__pr">
-										<b>Dash Berlin & Emma Hewitt</b> <br/>
-										Waiting (Vocal Mix)
+								<div class="tr_bnn_content" ng-class="{hide: !isBannerCodeShown}" id="tr_bnn">
+									<a class="tr_bnn__pr">
+										<b>{{track.projectName}}</b> <br/>
+										{{track.name}}
 									</a>
 
 									<div class="tr_code">
 										<h3 class="f_title">HTML-код для вставки</h3>
-										<textarea rows="2" size="2" class="tr_code__area" onfocus="this.select();"><a href="http://www.cjclub.ru/tracks/20966"><img src="http://www.cjclub.ru/skins/cjclub2/images/banners/banner_20966.jpg" alt="CjClub.ru: Electrical Suite - In a new life"/></a></textarea>
+										<textarea rows="2" size="2" class="tr_code__area" onfocus="this.select();"><a href="http://www.cjclub.ru/tracks/{{track.id}}"><img src="http://www.cjclub.ru/skins/cjclub2/images/banners/banner_{{track.id}}.jpg" alt="CjClub.ru: {{track.projectName}} - {{track.name}}"/></a></textarea>
 									</div>
 
 									<div class="tr_code">
 										<h3 class="f_title">BB-код для вставки</h3>
-										<textarea rows="2" class="tr_code__area tr_code__area2" onfocus="this.select();">[url="http://www.cjclub.ru/tracks/20966"][img]http://www.cjclub.ru/skins/cjclub2/images/banners/banner_20966.jpg [/img][/url] </textarea>
+										<textarea rows="2" class="tr_code__area tr_code__area2" onfocus="this.select();">[url="http://www.cjclub.ru/tracks/{{track.id}}"][img]http://www.cjclub.ru/skins/cjclub2/images/banners/banner_{{track.id}}.jpg [/img][/url] </textarea>
 									</div>
 
 								</div>
@@ -932,8 +886,8 @@
 								</div>
 								<div class="com_mess">Интересный трек. Приятно было его прослушать.</div>
 								<div class="com_menu">
-									<a href="#" class="ico2 ico2_come_edit"></a>
-									<a href="#" class="ico2 ico2_come_del"></a>
+									<a class="ico2 ico2_come_edit"></a>
+									<a class="ico2 ico2_come_del"></a>
 								</div>
 							</div>
 						</div>
@@ -996,14 +950,14 @@
 							<div class="com_mess">И снова на высоте !!! Приятная жизненная волна захватывает.... :) Ощутимое полное погружение в ваше творение...
 								Оч понравилось !!! без пианинки 0_o</div>
 							<div class="com_menu">
-								<a href="#" class="ico2 ico2_come_edit"></a>
-								<a href="#" class="ico2 ico2_come_del"></a>
+								<a class="ico2 ico2_come_edit"></a>
+								<a class="ico2 ico2_come_del"></a>
 							</div>
 						</div>
 
 						<!-- 4 deleted comment closed -->
 						<div class="com com_deleted">
-							<div class="com_pre gray">Когда-то здесь был комментарий — <a href="#" class="link_g com_deleted">Оригинал</a></div>
+							<div class="com_pre gray">Когда-то здесь был комментарий — <a class="link_g com_deleted">Оригинал</a></div>
 							<div class="com_in hide">
 								<div class="com_img">
 									<div class="com_img_img">
@@ -1027,15 +981,15 @@
 								</div>
 								<div class="com_mess">Интересный трек. Приятно было его прослушать.</div>
 								<div class="com_menu">
-									<a href="#" class="link_g">Восстановить</a>
-									<a href="#" class="ico2 ico2_come_edit"></a>
+									<a class="link_g">Восстановить</a>
+									<a class="ico2 ico2_come_edit"></a>
 								</div>
 							</div>
 						</div>
 
 						<!-- 5 -->
 						<div class="com">
-							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_appeal">Смотреть</a></div>
+							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a class="link_g com_appeal">Смотреть</a></div>
 							<div class="com_in hide">
 								<div class="com_img">
 									<div class="com_img_img">
@@ -1058,20 +1012,20 @@
 								<div class="com_mess">
 									без пианинки 0_o
 									<div class="appear">
-										<div class="bold">Жалоба от: <a href="#" class="link_g">Dj Mig</a></div>
+										<div class="bold">Жалоба от: <a class="link_g">Dj Mig</a></div>
 										<em>Ненормативная лексика и оскорбления!</em>
 									</div>
 								</div>
 								<div class="com_menu">
-									<a href="#" class="ico2 ico2_come_refresh"></a>
-									<a href="#" class="ico2 ico2_come_del"></a>
+									<a class="ico2 ico2_come_refresh"></a>
+									<a class="ico2 ico2_come_del"></a>
 								</div>
 							</div>
 						</div>
 
 						<!-- 6 deleted comment open -->
 						<div class="com com_deleted_prev">
-							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_deleted">Оригинал</a></div>
+							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a class="link_g com_deleted">Оригинал</a></div>
 							<div class="com_in hide">
 								<div class="com_img">
 									<div class="com_img_img">
@@ -1093,15 +1047,15 @@
 								</div>
 								<div class="com_mess">без пианинки 0_o</div>
 								<div class="com_menu">
-									<a href="#" class="link_g">Восстановить</a>
-									<a href="#" class="ico2 ico2_come_edit"></a>
+									<a class="link_g">Восстановить</a>
+									<a class="ico2 ico2_come_edit"></a>
 								</div>
 							</div>
 						</div>
 
 						<!-- 7 open appear comment open -->
 						<div class="com com_appeal_prev">
-							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_appeal">Скрыть</a></div>
+							<div class="com_pre red2">Комментарий скрыт по причине жалобы — <a class="link_g com_appeal">Скрыть</a></div>
 							<div class="com_in hide">
 								<div class="com_img">
 									<div class="com_img_img">
@@ -1121,19 +1075,19 @@
 										<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
 										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
 										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
-										<a href="#" class="active_link"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+										<a class="active_link"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
 									</div>
 								</div>
 								<div class="com_mess">
 									<div class="appear">
-										<div class="bold">Жалоба от: <a href="#" class="link_g">Dj Mig</a></div>
+										<div class="bold">Жалоба от: <a class="link_g">Dj Mig</a></div>
 										<em>Ненормативная лексика и оскорбления!</em>
 									</div>
 									без пианинки 0_o вы все ****
 								</div>
 								<div class="com_menu">
-									<a href="#" class="ico2 ico2_come_refresh"></a>
-									<a href="#" class="ico2 ico2_come_edit"></a>
+									<a class="ico2 ico2_come_refresh"></a>
+									<a class="ico2 ico2_come_edit"></a>
 								</div>
 							</div>
 						</div>
@@ -1160,7 +1114,7 @@
 										<a href="#"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
 										<a href="#"><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
 										<a href="#"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
-										<a href="#" class="active_link"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+										<a class="active_link"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
 									</div>
 								</div>
 								<div class="com_mess">
@@ -1170,8 +1124,8 @@
 									Оч понравилось !!!
 								</div>
 								<div class="com_menu">
-									<a href="#" class="ico2 ico2_come_edit"></a>
-									<a href="#" class="ico2 ico2_come_del"></a>
+									<a class="ico2 ico2_come_edit"></a>
+									<a class="ico2 ico2_come_del"></a>
 								</div>
 							</div>
 							<!-- appeal form -->

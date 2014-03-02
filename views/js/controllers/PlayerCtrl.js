@@ -1,13 +1,40 @@
-App.controller('PlayerCtrl', function($scope) {
-	$scope.track = {
-		id: 1,
-		name: 'test track',
-		project: 'Wally',
-		style: 'Trance',
-		timelengthStr: '5:45',
-		filesizeStr: '12 Mb',
-		count_listen: 12,
-		count_download: 34,
-		count_liked: 223
+App.controller('PlayerCtrl', function($scope, jplayerInterface, TracksResource) {
+	$scope.track = null;
+	/*
+	 * при запуске трека, загрузить его и показать в плеере
+	 */
+	$scope.$watch(
+		function() {
+			return jplayerInterface.getTrackId();
+		},
+		function(v) {
+			if (angular.isNumber(v)) {
+				$scope.track = TracksResource.get({id: v});
+			}
+		}
+	);
+
+	$scope.playInfo = jplayerInterface.info;
+
+	$scope.isTrackSet = function() {
+		return $scope.track != null;
+	};
+	$scope.toggleMute = function() {
+		jplayerInterface.toggleMute();
+	};
+	$scope.togglePlay = function() {
+		jplayerInterface.togglePlay();
+	};
+	$scope.togglePlay = function() {
+		jplayerInterface.togglePlay();
+	};
+	$scope.isPlaying = function() {
+		return jplayerInterface.isPlaying();
+	};
+	$scope.seekAndPlay = function(e) {
+		var x = e.offsetX;
+		var width = 260;
+		var percents = x / width;
+		jplayerInterface.play(Math.round($scope.track.timelength * percents));
 	}
 });

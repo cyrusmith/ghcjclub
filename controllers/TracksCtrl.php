@@ -37,8 +37,20 @@ class TracksCtrl extends DController {
 		return $collection;
 	}
 	function listsPromo() {
+		//todo выдача промо-треков
 		$collection = new DModelsCollection('TrackModel');
 		$collection->load('1 limit 0,5');
+		return $collection;
+	}
+	function listsBest() {
+		//todo выдача лучших треков
+		$collection = new DModelsCollection('TrackModel');
+		$collection->load('1 order by pit desc limit 0,5');
+		return $collection;
+	}
+	function listsLatest() {
+		$collection = new DModelsCollection('TrackModel');
+		$collection->load('1 order by public_date DESC limit 0,5');
 		return $collection;
 	}
 	function show($id) {
