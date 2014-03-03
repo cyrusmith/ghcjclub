@@ -115,7 +115,17 @@ class DemoCtrl extends DController {
 		if (!$this->model->id) {
 			throw new Exception('No data found!');
 		}
+		/*
+		 * установка нового значения свойства
+		 */
 		$this->model->name = 'new name';
+		/*
+		 * установка нескольких свойств через массив (также можно через объект)
+		 */
+		$this->model->sets([
+			'name' => 'new name',
+			'type' => 'yes'
+		]);
 		/*
 		 * сохраняем модель
 		 */
