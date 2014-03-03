@@ -279,7 +279,7 @@ class WikiParser {
      * @return string  преобразованный токен
      */
     function handle_smile($matches){
-        if(!isset($smilemapIncluded)) require_once CONFIG::$PATH_ABS.'/'.CONFIG::$PATH_THEME.'/includes/smileMap.php';
+        if(!isset($smilemapIncluded)) require_once CONFIG::$PATH_ABS.'/funcs/smileMap.php';
         $smileMapObj = new SmileMap();
         $smileMap    = $smileMapObj->Map;
 
