@@ -9235,7 +9235,7 @@ class DModelProxyDatabase extends DModelProxy {
 	protected $tableName;
 	protected $fieldsToRead;
 	protected $db;
-	function __construct($tableName) {
+	function __construct($tableName = null) {
 		parent::__construct();
 		$this->setTableName($tableName);
 		$this->db = ObjectsPool::get('DataBase');
