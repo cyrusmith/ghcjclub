@@ -49,11 +49,16 @@ input{margin:0;padding: 0;line-height: 0;}
 
 
 /* header */
-header { background:#000; height:150px; position:fixed; z-index:103; width:100%; background:url(../img/header_bg.jpg) repeat-x 50% 0; top:0;}
+header { background:#000; /* height:113px; */position:fixed; z-index:104; width:100%; background:url(../img/header_bg.jpg) repeat-x 50% 0; top:0;}
 
-header.fixed { z-index:101;}
+header.fixed { z-index:104;}
 .header_shadow { height:0; position:absolute; top:100%; width:100%; left:0; background:url(../img/header_shadow.png) repeat-x 100% 100%;}
-header .width { position:relative;}
+header .width { position:relative; height: 150px;}
+.my-head, .my-head .width {
+	height: 113px;
+}
+
+
 .top { height:113px;}
 .top_l { float:left; width:147px; margin:0 28px 0 10px; padding:8px 0;}
 .top_c { float:left; width:609px; padding:13px 0 8px; position:relative; z-index:101;}
@@ -72,7 +77,7 @@ header .width { position:relative;}
 #topmini .user_messages { float:left;}
 #topmini .playlist { left:240px; width:520px; height: 270px;}
 #topmini.user_name { padding-bottom:2px;}
-.mini_header_page #c { margin-top:45px;}
+/* .mini_header_page #c { margin-top:45px;} */
 
 .pl_c { float:left; width:135px; font-size:11px; line-height:12px;}
 .pleer_changer { color:#999; cursor:pointer; float:left; user-select:none; margin:2px 0 5px;}
@@ -120,13 +125,13 @@ header .width { position:relative;}
 .user_name__text, .user_name__text1 { color:#fff; padding:0 12px 0 0; background:url(../img/name_arr.png) no-repeat 100% 50%; text-decoration:underline; max-width:59px; white-space:nowrap; overflow:hidden; cursor:pointer; font-weight:bold; display:inline-block;}
 .user_name__text:hover, .user_name__text1:hover { color:#ccc;}
 
-.user_right { float:right; width:57px;}
+.user_right { float:right; width:57px; position: relative;}
 .user_img { float:left; margin:0 8px 0 0;}
 .user_menu { height:19px; background:#000; border-radius:8px; margin:0 0 6px;}
 .user_menu_item, .user_menu_item1 { float:left; height:19px; background-image:url(../img/ico_pk_menu.png); background-repeat:no-repeat; cursor:pointer;}
 .user_sett { width:31px; background-position:0 0;}
 .user_exit { width:26px; background-position:-31px 0;}
-.user_line { margin:0 0 6px;}
+.user_line { margin:0 0 6px; position: relative;}
 .user_btns { font-size:10px; line-height:15px;}
 .user_btns a { font-size:11px; line-height:15px; background:#000; color:#fff; float:right; padding:0 4px;}
 .user_btns a:first-child { float:left;}
@@ -1761,7 +1766,7 @@ footer { background:#4f4f4f; font-size:12px; position:relative;}
 .dev { color:#e3f7ff; padding:28px 0 0;}
 .dev img { margin:4px 0 0;}
 
-.totop, .totop_in { position:fixed; left:0; top:0; right:50%; margin-right:500px; bottom:0; cursor:pointer; z-index:102;}
+.totop, .totop_in { position:fixed; left:0; top:0; right:50%; margin-right:500px; bottom:0; cursor:pointer; z-index:104;}
 .onTop .totop { z-index:999;}
 .totop_in { width:78px; padding:15px 35px 0; color:#fff; font-size:14px; background:url(../img/to_top_bg.png); background:rgba(255,204,153,.4); text-align:center; text-decoration:none; opacity:.4; margin-right:0; z-index:999;}
 .totop:hover .totop_in { color:#fff; opacity:1; transition:opacity .3s ease;}
