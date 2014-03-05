@@ -164,11 +164,23 @@ CJ = {
 		var top = document.documentElement.scrollTop || document.body.scrollTop;
 		if (top) {
 			$('#header').addClass('fixed');
-			$('.promo_what').hide();
+
+			
+			console.log(top);
 		} else {
-			$('#header').removeClass('fixed');
+			$('#header').removeClass('fixed');			
+		}
+
+		var offset = $('.promo_list').offset();
+			offsetTop = offset.top-top;
+		console.log(offset.top-top);
+		if(offsetTop<150) {
+			$('.promo_what').hide();
+		}
+		else {
 			$('.promo_what').show();
 		}
+
         var d = document.body,
             header = document.getElementById('header'),
             headerShadow = document.getElementById('header_shadow'),
