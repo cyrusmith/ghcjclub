@@ -175,7 +175,6 @@ CJ = {
 		else {
 			$('.promo_what').show();
 		}
-
         var d = document.body,
             header = document.getElementById('header'),
             headerShadow = document.getElementById('header_shadow'),
