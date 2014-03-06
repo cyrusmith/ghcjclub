@@ -164,16 +164,11 @@ CJ = {
 		var top = document.documentElement.scrollTop || document.body.scrollTop;
 		if (top) {
 			$('#header').addClass('fixed');
-
-			
-			console.log(top);
 		} else {
 			$('#header').removeClass('fixed');			
 		}
-
 		var offset = $('.promo_list').offset();
-			offsetTop = offset.top-top;
-		console.log(offset.top-top);
+		var offsetTop = offset.top-top;
 		if(offsetTop<150) {
 			$('.promo_what').hide();
 		}
