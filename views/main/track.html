@@ -47,7 +47,7 @@
 
 							<div class="tr_name">
 								<div class="tr_controls">
-									<div class="gbt_play__ico" ng-class="{gbt_pause__ico: isPlaying()}" ng-click="togglePlay()"></div>
+									<div class="gbt_play__ico" ng-class="{gbt_pause__ico: player.isIdbeingPlayed(track.id)}" ng-click="player.playIdOrPause(track.id)"></div>
 									<div class="gbt_down__ico"></div>
 								</div>
 								<div class="tr_name__text">
@@ -61,7 +61,7 @@
 						<div ng-click="seekAndPlay($event)" class="track_vision full_track_vision" style="background:url(views/main/img/track_pic_big.png) repeat-x 0 0;">
 							<div style="width: 970px; height: 140px; position:absolute;background:#6b6b6c url(http://www.cjclub.ru/_files/waves/{{track.id}}.png) no-repeat 0 0">
 								<div class="track_vision_in" ng-if="0" style="background:#444444 url(http://www.cjclub.ru/_files/waves/{{track.id}}.png) no-repeat 0 0; width:75%;"></div>
-								<div class="track_vision_in" style="background:#bd612b url(http://www.cjclub.ru/_files/waves/{{track.id}}.png) no-repeat 0 0; width:{{playInfo.playprogress}}%;">
+								<div class="track_vision_in" style="background:#bd612b url(http://www.cjclub.ru/_files/waves/{{track.id}}.png) no-repeat 0 0; width:{{getPlayProgress()}}%;">
 									<span ng-if="0" class="tr_time tr_pos_curr">14:48</span>
 								</div>
 							</div>

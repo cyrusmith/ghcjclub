@@ -28,6 +28,9 @@ App.factory('jplayerInterface', function($rootScope) {
 			var url = '_tracks/' + trackId + '.mp3';
 			service.setMedia(url);
 		},
+		getId: function() {
+			return currentTrackId;
+		},
 		play: function(time) {
 			el.jPlayer("play", time);
 			isPlayingState = true;
