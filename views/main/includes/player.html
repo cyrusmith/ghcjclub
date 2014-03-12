@@ -150,7 +150,7 @@
 	<!-- right small btns -->
 	<div class="player_changer_right">
 		<div class="player cf">
-			<div class="player_changer__item brr7"><a class="player_ico player_pause">{{track.count_listen}}</a></div>
+			<div class="player_changer__item brr7"><a class="player_ico" ng-click="togglePlay()" ng-class="{player_play: !isPlaying(), player_pause: isPlaying()}">{{track.count_listen}}</a></div>
 			<div class="player_changer__item brr7"><a class="player_ico player_dwnl">{{track.count_download}}</a></div>
 			<div class="player_changer__item brr7"><a class="player_ico player_like">{{track.count_liked}}</a></div>
 		</div>
