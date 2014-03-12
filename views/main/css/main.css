@@ -840,6 +840,7 @@ a.btn_orange, span.btn_orange { display:inline-block;}
 
 /* track cover controls */
 .track_image { float:left; position:relative;}
+.track_image_p { float:left; position:relative;width:100px;height:100px;background:white;}
 .track_image__controls { position:absolute; height:100%; width:100%; top:0; left:0; background:url(../img/hover_bg.png); background:rgba(0,0,0,.6); opacity:0;}
 .track_image:hover .track_image__controls { opacity:1;}
 .cover_plus, .cover_play, .cover_pause { width:50%; height:100%; position:absolute; right:0; background:url(../img/ico_plus.png) no-repeat center;}
