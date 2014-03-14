@@ -1,14 +1,14 @@
 <div class="gb_in">
 
 	<!-- gray block data -->
-	<div class="gb_data"><div class="gb_data_in">{{track.public_date | date: 'yyyy'}}</div></div>
+	<div class="gb_data"><div class="gb_data_in">{{track.public_date | date: 'd MMM yyyy'}}</div></div>
 
 
 	<div class="new_track cf">
 
 		<!-- left side -->
 		<div class="track_image new_track__image gbt__l">
-			<img title="" alt="" src="http://cjclub.ru/_files/trackpics/{{track.id}}_100">
+			<img title="" alt="" ng-src="http://cjclub.ru/_files/trackpics/{{track.id}}_100">
 			<i ng-if="0" class="ico_top100"></i>
 			<i ng-if="0" class="ico_mic"></i>
 			<span ng-if="0" class="ico_rat ico_rat_max">123</span>
