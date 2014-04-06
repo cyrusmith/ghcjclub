@@ -1,5 +1,6 @@
-App.controller('RootCtrl', function($rootScope, jplayerInterface) {
+App.controller('RootCtrl', function($rootScope, jplayerInterface, playlist) {
 	$rootScope.player = jplayerInterface;
+  $rootScope.playlist = playlist;
 });
 /*
  * установкой свойств этого сервиса выставляются статусные и ошибочные сообщения

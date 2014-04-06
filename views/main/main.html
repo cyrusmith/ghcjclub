@@ -14,15 +14,16 @@
 	<link href="views/main/css/ie.css" rel="stylesheet" />
 	<![endif]-->
 	<script src="views/main/js/prefixfree.min.js"></script>
+    <script src="views/libs/jquery.min.js"></script>
+    <script src="views/libs/jplayer/jquery.jplayer.min.js"></script>
 	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular.min.js"></script>
 	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-cookies.min.js"></script>
+	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-local-storage.min.js"></script>
 	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-route.min.js"></script>
 	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-resource.min.js"></script>
 	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-animate.min.js"></script>
 	<script src="<?=CONFIG::$PATH_URL?>/views/libs/underscore-min.js"></script>
 	<script src="<?=CONFIG::$PATH_URL?>/views/js/apps/userApp.js"></script>
-	<script src="views/libs/jquery.min.js"></script>
-	<script src="views/libs/jplayer/jquery.jplayer.min.js"></script>
 	<?
 	$files = scandir(CONFIG::$PATH_ABS.'/views/js/resources');
 	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
@@ -43,13 +44,6 @@
 	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
 	<script src="<?=CONFIG::$PATH_URL?>/views/js/controllers/<?=$file?>"></script>
 	<?endforeach?>
-	<?if (ObjectsPool::get('RDS')->isLogged):?>
-	<script>
-		var preloadedDataStorage = {
-			signedUser: <?=json_encode(ObjectsPool::get('RDS')->userInfo)?>
-		};
-	</script>
-	<?endif?>
 </head>
 <body ng-app="CjClubUserApp" ng-controller="RootCtrl">
 <div id="p"> <!-- style="background:#000 url(./img/branding.jpg) no-repeat 50% 0;" -->   <!-- branding -->
@@ -58,25 +52,50 @@
 <header class="my-head" id="header">
 <div class="width">
 <div id="top" class="top cf">
-	<div class="top_l" ng-controller="StatInfoCtrl">
-		<a href="#" class="logo"><img src="views/main/img/logo.png" alt="CJCLUB.ru" title="CJCLUB.ru" width="147" height="79" /></a>
-		<div class="t_counts cf" ng-cloak>
-			<div class="t_counts__item t_counts_item_3">{{stat.users}}</div>
-			<div class="t_counts__item t_counts_item_1">{{stat.tracks}}</div>
-			<a  class="t_counts__item t_counts_item_2">{{stat.projects}}</a>
-		</div>
+<div class="top_l" ng-controller="StatInfoCtrl">
+	<a href="#" class="logo"><img src="views/main/img/logo.png" alt="CJCLUB.ru" title="CJCLUB.ru" width="147" height="79" /></a>
+	<div class="t_counts cf" ng-cloak>
+		<div class="t_counts__item t_counts_item_3">{{stat.users}}</div>
+		<div class="t_counts__item t_counts_item_1">{{stat.tracks}}</div>
+		<a  class="t_counts__item t_counts_item_2">{{stat.projects}}</a>
 	</div>
-	<div jplayer></div>
-	<div class="top_c">
-		<player-ui></player-ui>
+</div>
+<div jplayer data-auto-next="true"></div>
+<div class="top_c">
+	<player-ui></player-ui>
+</div>
+
+<!-- user section -->
+<div class="top_r">
+
+	<!-- enter reg (no logined) -->
+
+	<div class="enter_reg hide">
+		<div id="btn_enter" class="f_btn enter_reg_btn">Регистрация</div>
+		<div id="btn_reg" class="f_btn enter_reg_btn" onclick="$('#popup_auth').fadeToggle();">Войти</div>
 	</div>
 
+	<form class="popup popup_auth center hide" id="popup_auth">
+		<input type="text" value="" placeholder="Логин" class="f_text" />
+		<input type="password" value="" placeholder="Пароль" class="f_text" />
+		<input type="submit" value="Войти" class="f_btn" />
+
+		<div class="save_me"><input type="checkbox" name="save" id="save" value="1" /><label for="save">Запомнить меня</label> </div>
+		<div class="f_links">
+			<a >Забыли пароль?</a>
+			<a >Регистрация</a>
+		</div>
+	</form>
+
 	<ng-include src="'views/main/includes/userCorner.html'"></ng-include>
+
+</div>
 
 </div>
 <div id="topmini" class="top cf">
 <div class="header_opener"></div>
 <a class="logo_mini" href="./"><img src="views/main/img/logo_mini.png" alt="CJCLUB.ru" title="CJCLUB.ru" width="146" height="45" /></a>
+
 
 <div class="top_c" ng-controller="PlayerCtrl">
 	<div class="pl_c">
@@ -124,95 +143,96 @@
 		<div class="playlist_content" id="playlist_content">
 
 			<ul class="playlist_list" id="playlist_list">
-				<li class="playlist_item cf">
-					<ins class="draggable"></ins>
-					<img src="views/main/img/pl1.png" alt="" title="" class="playlist_item__cover" />
-					<div class="playlist_item__data">
-						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
-						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
-					</div>
-					<div class="mini_player cf">
-						<div class="mini_player_btn mini_player_play"></div>
-						<div class="mini_player_btn mini_player_md"></div>
-						<div class="mini_player_btn mini_player_mu"></div>
-						<div class="mini_player_btn mini_player_re"></div>
-					</div>
-				</li>
+                <li data-ng-repeat="track in playlist.list track by $index">{{track}}</li>
+				<!--<li class="playlist_item cf">-->
+					<!--<ins class="draggable"></ins>-->
+					<!--<img src="views/main/img/pl1.png" alt="" title="" class="playlist_item__cover" />-->
+					<!--<div class="playlist_item__data">-->
+						<!--<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>-->
+						<!--<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>-->
+					<!--</div>-->
+					<!--<div class="mini_player cf">-->
+						<!--<div class="mini_player_btn mini_player_play"></div>-->
+						<!--<div class="mini_player_btn mini_player_md"></div>-->
+						<!--<div class="mini_player_btn mini_player_mu"></div>-->
+						<!--<div class="mini_player_btn mini_player_re"></div>-->
+					<!--</div>-->
+				<!--</li>-->
 
-				<li class="playlist_item cf">
-					<ins class="draggable"></ins>
-					<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
-					<div class="playlist_item__data">
-						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
-						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
-					</div>
-					<div class="mini_player cf">
-						<div class="mini_player_btn mini_player_play"></div>
-						<div class="mini_player_btn mini_player_md"></div>
-						<div class="mini_player_btn mini_player_mu"></div>
-						<div class="mini_player_btn mini_player_re"></div>
-					</div>
-				</li>
+				<!--<li class="playlist_item cf">-->
+					<!--<ins class="draggable"></ins>-->
+					<!--<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />-->
+					<!--<div class="playlist_item__data">-->
+						<!--<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>-->
+						<!--<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>-->
+					<!--</div>-->
+					<!--<div class="mini_player cf">-->
+						<!--<div class="mini_player_btn mini_player_play"></div>-->
+						<!--<div class="mini_player_btn mini_player_md"></div>-->
+						<!--<div class="mini_player_btn mini_player_mu"></div>-->
+						<!--<div class="mini_player_btn mini_player_re"></div>-->
+					<!--</div>-->
+				<!--</li>-->
 
-				<li class="playlist_item cf">
-					<ins class="draggable"></ins>
-					<img src="views/main/img/pl1.png" alt="" title="" class="playlist_item__cover" />
-					<div class="playlist_item__data">
-						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
-						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
-					</div>
-					<div class="mini_player cf">
-						<div class="mini_player_btn mini_player_play"></div>
-						<div class="mini_player_btn mini_player_md"></div>
-						<div class="mini_player_btn mini_player_mu"></div>
-						<div class="mini_player_btn mini_player_re"></div>
-					</div>
-				</li>
+				<!--<li class="playlist_item cf">-->
+					<!--<ins class="draggable"></ins>-->
+					<!--<img src="views/main/img/pl1.png" alt="" title="" class="playlist_item__cover" />-->
+					<!--<div class="playlist_item__data">-->
+						<!--<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>-->
+						<!--<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>-->
+					<!--</div>-->
+					<!--<div class="mini_player cf">-->
+						<!--<div class="mini_player_btn mini_player_play"></div>-->
+						<!--<div class="mini_player_btn mini_player_md"></div>-->
+						<!--<div class="mini_player_btn mini_player_mu"></div>-->
+						<!--<div class="mini_player_btn mini_player_re"></div>-->
+					<!--</div>-->
+				<!--</li>-->
 
-				<li class="playlist_item cf">
-					<ins class="draggable"></ins>
-					<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
-					<div class="playlist_item__data">
-						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
-						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
-					</div>
-					<div class="mini_player cf">
-						<div class="mini_player_btn mini_player_play"></div>
-						<div class="mini_player_btn mini_player_md"></div>
-						<div class="mini_player_btn mini_player_mu"></div>
-						<div class="mini_player_btn mini_player_re"></div>
-					</div>
-				</li>
+				<!--<li class="playlist_item cf">-->
+					<!--<ins class="draggable"></ins>-->
+					<!--<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />-->
+					<!--<div class="playlist_item__data">-->
+						<!--<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>-->
+						<!--<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>-->
+					<!--</div>-->
+					<!--<div class="mini_player cf">-->
+						<!--<div class="mini_player_btn mini_player_play"></div>-->
+						<!--<div class="mini_player_btn mini_player_md"></div>-->
+						<!--<div class="mini_player_btn mini_player_mu"></div>-->
+						<!--<div class="mini_player_btn mini_player_re"></div>-->
+					<!--</div>-->
+				<!--</li>-->
 
-				<li class="playlist_item cf">
-					<ins class="draggable"></ins>
-					<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
-					<div class="playlist_item__data">
-						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
-						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
-					</div>
-					<div class="mini_player cf">
-						<div class="mini_player_btn mini_player_play"></div>
-						<div class="mini_player_btn mini_player_md"></div>
-						<div class="mini_player_btn mini_player_mu"></div>
-						<div class="mini_player_btn mini_player_re"></div>
-					</div>
-				</li>
+				<!--<li class="playlist_item cf">-->
+					<!--<ins class="draggable"></ins>-->
+					<!--<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />-->
+					<!--<div class="playlist_item__data">-->
+						<!--<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>-->
+						<!--<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>-->
+					<!--</div>-->
+					<!--<div class="mini_player cf">-->
+						<!--<div class="mini_player_btn mini_player_play"></div>-->
+						<!--<div class="mini_player_btn mini_player_md"></div>-->
+						<!--<div class="mini_player_btn mini_player_mu"></div>-->
+						<!--<div class="mini_player_btn mini_player_re"></div>-->
+					<!--</div>-->
+				<!--</li>-->
 
-				<li class="playlist_item cf">
-					<ins class="draggable"></ins>
-					<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />
-					<div class="playlist_item__data">
-						<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>
-						<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>
-					</div>
-					<div class="mini_player cf">
-						<div class="mini_player_btn mini_player_play"></div>
-						<div class="mini_player_btn mini_player_md"></div>
-						<div class="mini_player_btn mini_player_mu"></div>
-						<div class="mini_player_btn mini_player_re"></div>
-					</div>
-				</li>
+				<!--<li class="playlist_item cf">-->
+					<!--<ins class="draggable"></ins>-->
+					<!--<img src="views/main/img/pl2.png" alt="" title="" class="playlist_item__cover" />-->
+					<!--<div class="playlist_item__data">-->
+						<!--<a  class="playlist_item__data__link">DJ M.E.G. - Sock-holm</a>-->
+						<!--<div class="playlist_item__data__data">Track | Progressive | 05:30 | 9.44 MB</div>-->
+					<!--</div>-->
+					<!--<div class="mini_player cf">-->
+						<!--<div class="mini_player_btn mini_player_play"></div>-->
+						<!--<div class="mini_player_btn mini_player_md"></div>-->
+						<!--<div class="mini_player_btn mini_player_mu"></div>-->
+						<!--<div class="mini_player_btn mini_player_re"></div>-->
+					<!--</div>-->
+				<!--</li>-->
 			</ul>
 		</div>
 

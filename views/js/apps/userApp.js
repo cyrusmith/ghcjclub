@@ -1,4 +1,4 @@
-var App = angular.module('CjClubUserApp', ['ngResource', 'ngRoute']);
+var App = angular.module('CjClubUserApp', ['ngResource', 'ngRoute', 'LocalStorageModule']);
 App.config(function($routeProvider) {
 	$routeProvider.
 		when('/news', {

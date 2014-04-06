@@ -1,4 +1,6 @@
-App.factory('jplayerInterface', function($rootScope) {
+App.factory('jplayerInterface', function($rootScope, playlist) {
+  'use strict';
+
 	var volume = 1;
 	var volumeMutted;
 	var el;
@@ -8,7 +10,8 @@ App.factory('jplayerInterface', function($rootScope) {
 		info: {
 			playprogress: 0
 		},
-		init: function(e) {
+		init: function(e, options) {
+      var self = this;
 			el = e;
 			el.jPlayer({
 				swfPath: 'views/libs/jplayer',
@@ -19,7 +22,21 @@ App.factory('jplayerInterface', function($rootScope) {
 					$rootScope.$$phase || $rootScope.$apply();
 				}
 			});
+
+      if(options.autoNext) {
+        el.bind($.jPlayer.event.ended, function(){
+          var next = playlist.getNext(currentTrackId);
+          if(next) {
+            self.setId(next);
+          }
+        });
+      }
 		},
+    destroy: function(el, options) {
+      if(options.autoNext) {
+        el.unbind($.jPlayer.event.ended);
+      }
+    },
 		setMedia: function(url) {
 			el.jPlayer("setMedia", {mp3: url});
 		},
@@ -61,10 +78,10 @@ App.factory('jplayerInterface', function($rootScope) {
 			return isPlayingState;
 		},
 		isIdbeingPlayed: function(trackId) {
-			return (currentTrackId == trackId) && service.isPlaying();
+			return (currentTrackId === trackId) && service.isPlaying();
 		},
 		toggleMute: function() {
-			if (volume == 0) {
+			if (volume === 0) {
 				service.setVolume(volumeMutted);
 			} else {
 				volumeMutted = volume;
@@ -82,5 +99,6 @@ App.factory('jplayerInterface', function($rootScope) {
 			return currentTrackId;
 		}
 	};
+
 	return service;
 });
