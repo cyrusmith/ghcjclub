@@ -1,6 +1,7 @@
 <?php
 class TracksCtrl extends DController {
 	function lists() {
+		return $this->listsFiltered();
 		$collection = new DModelsCollection('TrackModel');
 		$collection->load('1 limit 0,100');
 		return $collection;
@@ -11,7 +12,7 @@ class TracksCtrl extends DController {
 			return "$name IN ($values)";
 		}
 	}
-	function listsFiltered($projectId = null, $albumId = null, $topId = null) {
+	function listsFiltered($projectId = null, $albumId = null, $topId = null, $id = null) {
 		$collection = new DModelsCollection('TrackModel');
 		/*
 		 * сформировать SQL запрос на основании переданных условий фильтра
@@ -23,7 +24,7 @@ class TracksCtrl extends DController {
 		if ($t = $this->getSQLForParam('projectId', $projectId)) $sql[] = $t;
 		if ($t = $this->getSQLForParam('album_id', $albumId)) $sql[] = $t;
 		if ($t = $this->getSQLForParam('top_id', $topId)) $sql[] = $t;
-
+		if ($t = $this->getSQLForParam('id', $id)) $sql[] = $t;
 		$sql = implode(' AND ', $sql);
 		/*
 		 * order by
