@@ -1,18 +1,34 @@
 (function () {
   'use strict';
-  angular.module('CjClubUserApp').factory('playlist', function ($q, localStorageService) {
+  angular.module('CjClubUserApp').factory('playlist', function ($q, $http, localStorageService) {
     var
       _trackIds,
       deferred = $q.defer(),
       promise = deferred.promise,
       tracks = [],
       PLAYLIST_KEY = 'cjclub_playlist',
+      init = function () {
+        _trackIds = localStorageService.get(PLAYLIST_KEY) || [];
+        if (_trackIds.length > 0) {
+          $http({
+            method: 'GET',
+            url: 'tracks?id=' + _trackIds.toString()
+          }).success( function (data) {
+            if (data) {
+              data.forEach(function (track) {
+                tracks.push(track);
+              })
+            }
+            deferred.resolve();
+          });
+        }
+      },
     //TODO добавить возможность добавлять в плейлист с определенным именем
       addToPlaylist = function (track) {
         if (track && _trackIds.indexOf(track.id) === -1) {
           _trackIds.push(track.id);
           localStorageService.set(PLAYLIST_KEY, _trackIds);
-          promise.then(function(){
+          promise.then(function () {
             tracks.push(track);
           });
         }
@@ -44,10 +60,7 @@
         localStorageService.remove(PLAYLIST_KEY);
       };
 
-    _trackIds = localStorageService.get(PLAYLIST_KEY) || [];
-
-    //TODO переделать на получение через ресурсы
-    deferred.resolve();
+    init();
 
     return {
       add: addToPlaylist,
