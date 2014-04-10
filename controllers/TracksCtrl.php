@@ -12,7 +12,7 @@ class TracksCtrl extends DController {
 			return "$name IN ($values)";
 		}
 	}
-	function listsFiltered($projectId = null, $albumId = null, $topId = null, $id = null, $sort = null, $date = null) {
+	function listsFiltered($projectId = null, $albumId = null, $topId = null, $id = null, $sort = null, $date = null, $style = null) {
 		$collection = new DModelsCollection('TrackModel');
 		/*
 		 * сформировать SQL запрос на основании переданных условий фильтра
@@ -25,6 +25,7 @@ class TracksCtrl extends DController {
 		if ($t = $this->getSQLForParam('album_id', $albumId)) $sql[] = $t;
 		if ($t = $this->getSQLForParam('top_id', $topId)) $sql[] = $t;
 		if ($t = $this->getSQLForParam('id', $id)) $sql[] = $t;
+		if ($t = $this->getSQLForParam('style_id', $style)) $sql[] = $t;
 		$sql = implode(' AND ', $sql);
 
 		if($date == "2week")
@@ -33,12 +34,21 @@ class TracksCtrl extends DController {
 		/*
 		 * order by
 		 */
-		if($sort == "date")
-			$sql .= ' order by public_date desc';	
-		else if($sort == "pit")
-			$sql .= ' order by pit desc';
-		else
-			$sql .= ' order by name';
+		switch ($sort)
+		{
+			case 'date':
+				$sql .= ' order by public_date desc';	
+				break;
+
+			case 'pit':
+				$sql .= ' order by pit desc';
+				break;
+			
+			default:
+				$sql .= ' order by name';
+				break;
+		}
+
 		/*
 		 * limit
 		 */
