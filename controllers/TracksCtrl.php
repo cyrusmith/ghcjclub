@@ -12,7 +12,7 @@ class TracksCtrl extends DController {
 			return "$name IN ($values)";
 		}
 	}
-	function listsFiltered($projectId = null, $albumId = null, $topId = null, $id = null) {
+	function listsFiltered($projectId = null, $albumId = null, $topId = null, $id = null, $sort = null, $date = null) {
 		$collection = new DModelsCollection('TrackModel');
 		/*
 		 * сформировать SQL запрос на основании переданных условий фильтра
@@ -26,10 +26,19 @@ class TracksCtrl extends DController {
 		if ($t = $this->getSQLForParam('top_id', $topId)) $sql[] = $t;
 		if ($t = $this->getSQLForParam('id', $id)) $sql[] = $t;
 		$sql = implode(' AND ', $sql);
+
+		if($date == "2week")
+			$sql .= " and public_date between '" . date('Y-m-d', time() - 86400*14) . "' and '" . date('Y-m-d') . "'";
+
 		/*
 		 * order by
 		 */
-		$sql .= ' order by name';
+		if($sort == "date")
+			$sql .= ' order by public_date desc';	
+		else if($sort == "pit")
+			$sql .= ' order by pit desc';
+		else
+			$sql .= ' order by name';
 		/*
 		 * limit
 		 */
