@@ -607,25 +607,25 @@ $('#openDialong').click(function(){
 	}
 });
 
-$('.header_closer').on('click', function(){	
-		$('#top').slideUp(300);
-		setTimeout($('#topmini').slideDown(), 700);
-		setTimeout($('#header').animate({'height': '45'}, 300), 700);
-		setTimeout($('.header-bg').animate({'height': '45'}, 300), 700);
-		setTimeout($('#c').animate({'margin-top': '82'}, 300), 700);
-		$(this).hide();	
-		$('nav.cf').css('position', 'absolute').animate({'top': '45px'},700);
-});
-
-$('.header_opener').on('click', function(){
-	$('#topmini').slideUp(300);
-	setTimeout($('#top').slideDown(), 700);
-	setTimeout($('#header').animate({'height': '113'}, 300), 700);
-	setTimeout($('.header-bg').animate({'height': '150'}, 300), 700);
-	setTimeout($('#c').animate({'margin-top': '150'}, 300), 700);	
-	$('.header_closer').show();
-	$('nav.cf').css('position', 'fixed').animate({'top': '113px'},700);
-});
+// Перенес в директиву
+//$('.header_closer').on('click', function(){
+//		$('#top').slideUp(300);
+//		setTimeout($('#topmini').slideDown(), 700);
+//		setTimeout($('#header').animate({'height': '45'}, 300), 700);
+//		setTimeout($('.header-bg').animate({'height': '45'}, 300), 700);
+//		setTimeout($('#c').animate({'margin-top': '82'}, 300), 700);
+//		$(this).hide();
+//		$('nav.cf').css('position', 'absolute').animate({'top': '45px'},700);
+//});
+//$('.header_opener').on('click', function(){
+//	$('#topmini').slideUp(300);
+//	setTimeout($('#top').slideDown(), 700);
+//	setTimeout($('#header').animate({'height': '113'}, 300), 700);
+//	setTimeout($('.header-bg').animate({'height': '150'}, 300), 700);
+//	setTimeout($('#c').animate({'margin-top': '150'}, 300), 700);
+//	$('.header_closer').show();
+//	$('nav.cf').css('position', 'fixed').animate({'top': '113px'},700);
+//});
 
 
 

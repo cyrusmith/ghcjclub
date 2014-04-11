@@ -13,7 +13,7 @@
     };
 
     return {
-      strict: 'A',
+      restrict: 'A',
       scope: {
         track: '=addToPlaylist'
       },

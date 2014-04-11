@@ -14,42 +14,12 @@
 	<link href="views/main/css/ie.css" rel="stylesheet" />
 	<![endif]-->
 	<script src="views/main/js/prefixfree.min.js"></script>
-    <script src="views/libs/jquery.min.js"></script>
-    <script src="views/libs/jplayer/jquery.jplayer.min.js"></script>
-	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular.min.js"></script>
-	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-loader.min.js"></script>
-	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-cookies.min.js"></script>
-	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-local-storage.min.js"></script>
-	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-route.min.js"></script>
-	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-resource.min.js"></script>
-	<script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-animate.min.js"></script>
-	<script src="<?=CONFIG::$PATH_URL?>/views/libs/underscore-min.js"></script>
-	<script src="<?=CONFIG::$PATH_URL?>/views/js/apps/userApp.js"></script>
-	<?
-	$files = scandir(CONFIG::$PATH_ABS.'/views/js/resources');
-	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
-	<script src="<?=CONFIG::$PATH_URL?>/views/js/resources/<?=$file?>"></script>
-	<?endforeach?>
-	<?
-	$files = scandir(CONFIG::$PATH_ABS.'/views/js/directives');
-	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
-	<script src="<?=CONFIG::$PATH_URL?>/views/js/directives/<?=$file?>"></script>
-	<?endforeach?>
-	<?
-	$files = scandir(CONFIG::$PATH_ABS.'/views/js/services');
-	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
-	<script src="<?=CONFIG::$PATH_URL?>/views/js/services/<?=$file?>"></script>
-	<?endforeach?>
-	<?
-	$files = scandir(CONFIG::$PATH_ABS.'/views/js/controllers');
-	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
-	<script src="<?=CONFIG::$PATH_URL?>/views/js/controllers/<?=$file?>"></script>
-	<?endforeach?>
 </head>
 <body ng-app="CjClubUserApp" ng-controller="RootCtrl">
 <div id="p"> <!-- style="background:#000 url(./img/branding.jpg) no-repeat 50% 0;" -->   <!-- branding -->
 <!-- header -->
 <div class="header-bg"><ins class="header_shadow" id="header_shadow"></ins></div>
+<main-header></main-header>
 <header class="my-head" id="header">
 <div class="width">
 <div id="top" class="top cf">
@@ -93,8 +63,9 @@
 </div>
 
 </div>
+
 <div id="topmini" class="top cf">
-<div class="header_opener"></div>
+<header-opener></header-opener>
 <a class="logo_mini" href="./"><img src="views/main/img/logo_mini.png" alt="CJCLUB.ru" title="CJCLUB.ru" width="146" height="45" /></a>
 
 
@@ -275,7 +246,8 @@
 </header>
 <nav class="cf" ng-controller="NavCtrl">
 	<a  class="error_link">Сообщить об ошибке</a>
-	<div class="header_closer"></div>
+    <header-closer></header-closer>
+	<!--<div class="header_closer"></div>-->
 	<ul class="menu">
 		<li><a href="#tracks">Треки</a></li>
 		<li><a href="#tops">Топы</a></li>
@@ -389,10 +361,40 @@
 <!-- to top link -->
 <span id="totop" class="totop"><a href="#top" class="totop_in"><span class="totop_text">Наверх</span></a></span>
 
+    <script src="views/libs/jquery.min.js"></script>
+    <script src="views/libs/jplayer/jquery.jplayer.min.js"></script>
 
-<div class="hide">
+    <script src="<?=CONFIG::$PATH_URL?>/views/libs/angular.min.js"></script>
+    <script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-loader.min.js"></script>
+    <script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-cookies.min.js"></script>
+    <script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-local-storage.min.js"></script>
+    <script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-route.min.js"></script>
+    <script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-resource.min.js"></script>
+    <script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-animate.min.js"></script>
+    <script src="<?=CONFIG::$PATH_URL?>/views/libs/underscore-min.js"></script>
+    <script src="<?=CONFIG::$PATH_URL?>/views/js/apps/userApp.js"></script>
+    <?
+	$files = scandir(CONFIG::$PATH_ABS.'/views/js/resources');
+	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
+    <script src="<?=CONFIG::$PATH_URL?>/views/js/resources/<?=$file?>"></script>
+    <?endforeach?>
+    <?
+	$files = scandir(CONFIG::$PATH_ABS.'/views/js/services');
+	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
+    <script src="<?=CONFIG::$PATH_URL?>/views/js/services/<?=$file?>"></script>
+    <?endforeach?>
+    <?
+	$files = scandir(CONFIG::$PATH_ABS.'/views/js/controllers');
+	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
+    <script src="<?=CONFIG::$PATH_URL?>/views/js/controllers/<?=$file?>"></script>
+    <?endforeach?>
+    <?
+	$files = scandir(CONFIG::$PATH_ABS.'/views/js/directives');
+	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>
+    <script src="<?=CONFIG::$PATH_URL?>/views/js/directives/<?=$file?>"></script>
+    <?endforeach?>
+
 	<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
 	<script src="views/main/js/main.js"></script>
-</div>
 </body>
 </html>

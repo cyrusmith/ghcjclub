@@ -5,7 +5,7 @@ App.directive('jplayer', function(jplayerInterface) {
   };
 
 	return {
-		strict: 'EA',
+    restrict: 'EA',
 		template: '<div id="jplayercontainer">Player is here</div>',
 		link: function(scope, element, attrs) {
       var options = angular.extend({}, defaultOptions, attrs);
