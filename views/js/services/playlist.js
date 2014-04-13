@@ -1,8 +1,9 @@
 (function () {
   'use strict';
-  angular.module('CjClubUserApp').factory('playlist', function ($q, $http, localStorageService) {
+  angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootScope, localStorageService) {
     var
       _trackIds,
+      _isOpen = false,
       deferred = $q.defer(),
       promise = deferred.promise,
       tracks = [],
@@ -13,14 +14,17 @@
           $http({
             method: 'GET',
             url: 'tracks?id=' + _trackIds.toString()
-          }).success( function (data) {
-            if (data) {
-              data.forEach(function (track) {
-                tracks.push(track);
-              })
-            }
-            deferred.resolve();
-          });
+          })
+            .success(function (data) {
+              if (data) {
+                data.forEach(function (track) {
+                  tracks.push(track);
+                });
+              }
+              deferred.resolve();
+            });
+        } else {
+          deferred.resolve();
         }
       },
     //TODO добавить возможность добавлять в плейлист с определенным именем
@@ -58,6 +62,15 @@
       clearPlaylist = function () {
         _trackIds.length = 0;
         localStorageService.remove(PLAYLIST_KEY);
+      },
+      togglePlaylist = function () {
+        $rootScope.$broadcast('playlist.toggle');
+        _isOpen = !_isOpen;
+      },
+      close = function () {
+        if (_isOpen) {
+          togglePlaylist();
+        }
       };
 
     init();
@@ -66,7 +79,9 @@
       add: addToPlaylist,
       clearPlaylist: clearPlaylist,
       getNext: getNext,
-      tracks: tracks
+      tracks: tracks,
+      togglePlaylist: togglePlaylist,
+      close: close
     };
   });
 })();

@@ -44,7 +44,7 @@ input{margin:0;padding: 0;line-height: 0;}
 
 /* grid */
 #p { margin:0 auto; min-height:100%; min-width:1000px; overflow:hidden; background:#f67a18 url(../img/bg_patt.png);}
-#c { margin-top:150px;}
+/*#c { margin-top:150px;}*/
 .width { width:1000px; margin:0 auto;}
 
 
@@ -53,16 +53,16 @@ header { background:#000; /* height:113px; */position:fixed; z-index:104; width:
 
 header.fixed { z-index:104;}
 .header_shadow { height:0; position:absolute; top:100%; width:100%; left:0; background:url(../img/header_shadow.png) repeat-x 100% 100%;}
-header .width { position:relative; height: 150px;}
-.my-head, .my-head .width {
-	height: 113px;
-}
+header .width { position:relative; /*height: 150px;*/}
+/*.my-head, .my-head .width {*/
+	/*height: 113px;*/
+/*}*/
 
 
 .top { height:113px;}
 .top_l { float:left; width:147px; margin:0 28px 0 10px; padding:8px 0;}
 .top_c { float:left; width:609px; padding:13px 0 8px; position:relative; z-index:101;}
-.top_r { float:right; width:180px; padding:13px 0 8px; height:70px; position:relative;}
+.top_r { float:right; width:180px; padding:13px 0 8px; /*height:70px;*/ position:relative;} /*убрал height - перекрывает поиск*/
 /* mini header */
 .mini_header { height:45px;}
 .header_opener, .header_closer { width:15px; height:45px; position:absolute; left:0; top:0; z-index:10; background:url(../img/header_oc.png) no-repeat 0 0; cursor:pointer;}
@@ -362,7 +362,7 @@ right: 0;}
 .playlist_chart:hover { color:#ccc;}
 
 .playlist_holder { position:relative; margin:12px 0 10px;}
-.playlist_content { max-height:204px; overflow:hidden; position:relative;}
+.playlist_content { min-height:204px; max-height:204px; overflow:hidden; position:relative;}
 .playlist_list { width:480px;}
 .playlist_item { padding:5px 0 8px 37px;}
 .playlist_item__cover { float:left; margin:3px 12px 0 0;}
@@ -843,7 +843,7 @@ a.btn_orange, span.btn_orange { display:inline-block;}
 .track_image_p { float:left; position:relative;width:100px;height:100px;background:white;}
 .track_image__controls { position:absolute; height:100%; width:100%; top:0; left:0; background:url(../img/hover_bg.png); background:rgba(0,0,0,.6); opacity:0;}
 .track_image:hover .track_image__controls { opacity:1;}
-.cover_plus, .cover_play, .cover_pause { width:50%; height:100%; position:absolute; right:0; background:url(../img/ico_plus.png) no-repeat center;}
+.cover_plus, .cover_play, .cover_pause { width:50%; height:100%; position:absolute; right:0; background:url(../img/ico_plus.png) no-repeat center; cursor: pointer;}
 .cover_play { left:0; background:url(../img/ico_play.png) no-repeat center;}
 .cover_pause { left:0; background:url(../img/ico_pause.png) no-repeat center;}
 .cover_btns { border-top:1px solid #fff; padding:10px 0;}

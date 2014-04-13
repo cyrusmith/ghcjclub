@@ -1,3 +1,4 @@
+//TODO перенсти в директиву плеера
 App.controller('PlayerCtrl', function($scope, jplayerInterface, TracksResource) {
 	$scope.track = null;
 	/*

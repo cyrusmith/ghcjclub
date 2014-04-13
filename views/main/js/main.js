@@ -98,6 +98,7 @@ window.CJ = window.CJ || {};
 
 // count
 CJ = {
+  //TODO приделать scrollpane к плейлисту
 	slide: function(){
 		var scrollContainer = $('#playlist_content'),
 			scrollList = $('#playlist_list'),
@@ -160,32 +161,33 @@ CJ = {
 		e.preventDefault();
 		$("body,html").animate( {scrollTop: 0}, 800);
 	},
-	scroller: function(){
-		var top = document.documentElement.scrollTop || document.body.scrollTop;
-		if (top) {
-			$('#header').addClass('fixed');
-		} else {
-			$('#header').removeClass('fixed');			
-		}
-		var offset = $('.promo_list').offset();
-		var offsetTop = offset.top-top;
-		if(offsetTop<150) {
-			$('.promo_what').hide();
-		}
-		else {
-			$('.promo_what').show();
-		}
-        var d = document.body,
-            header = document.getElementById('header'),
-            headerShadow = document.getElementById('header_shadow'),
-            maxScroll = 250;
-
-        headerShadowHeight = top ? ((top > maxScroll) ? 20 : 20 * top/maxScroll ) : 0;
-
-        headerShadow.style.height = headerShadowHeight + "px";
-        d.className = top === 0 ? 'onTop' : '';
-        //header.className = top ? 'fixed' : '';
-	},
+  // вынес в main-header
+//	scroller: function(){
+//		var top = document.documentElement.scrollTop || document.body.scrollTop;
+//		if (top) {
+//			$('#header').addClass('fixed');
+//		} else {
+//			$('#header').removeClass('fixed');
+//		}
+//		var offset = $('.promo_list').offset();
+//		var offsetTop = offset.top-top;
+//		if(offsetTop<150) {
+//			$('.promo_what').hide();
+//		}
+//		else {
+//			$('.promo_what').show();
+//		}
+//        var d = document.body,
+//            header = document.getElementById('header'),
+//            headerShadow = document.getElementById('header_shadow'),
+//            maxScroll = 250;
+//
+//        headerShadowHeight = top ? ((top > maxScroll) ? 20 : 20 * top/maxScroll ) : 0;
+//
+//        headerShadow.style.height = headerShadowHeight + "px";
+//        d.className = top === 0 ? 'onTop' : '';
+//        //header.className = top ? 'fixed' : '';
+//	},
 	toggleDeletedComment: function(){
 		$(this).parents('.com').toggleClass('com_deleted_prev');
 		return false;
@@ -538,9 +540,9 @@ $(function(){
 });
 
 	
-
-window.onload = CJ.scroller;
-window.onscroll = CJ.scroller;
+// вынес в main-header
+//window.onload = CJ.scroller;
+//window.onscroll = CJ.scroller;
 
 $('.mc_i_checkbox').on('change',function(){
 	if($(this).prop('checked')){
