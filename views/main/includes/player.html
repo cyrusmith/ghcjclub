@@ -31,7 +31,7 @@
 
 			<div ng-click="seekAndPlay($event)" class="track_vision player_visio" data-ng-style="{background: 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png) no-repeat'}">
 				<div ng-if="0" class="track_vision_in" style="background-image:url(views/main/img/new_track_vision_g.png); width:75%;"></div>
-				<div class="track_vision_in" data-ng-style="{background: 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png) no-repeat', width: playInfo.playprogress}"></div>
+				<div class="track_vision_in" data-ng-style="{'background-image': 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png)', width: playInfo.playprogress + '%'}"></div>
 			</div>
 
 		</div>
