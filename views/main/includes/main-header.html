@@ -53,42 +53,9 @@
     <header-opener></header-opener>
     <a class="logo_mini" href="./"><img src="views/main/img/logo_mini.png" alt="CJCLUB.ru" title="CJCLUB.ru" width="146"
                                         height="45"/></a>
-    <div class="top_c" ng-controller="PlayerCtrl">
-        <div class="pl_c">
-            <div class="pleer_changer pl_act cf">  <!-- rd_act -->
-                <div class="pleer">Плеер</div>
-                <div class="radio">Радио</div>
-            </div>
-            <div id="playlist_opener" class="playlist_opener_mini" data-ng-click="togglePlaylist()"><span class="dot1">Плейлист Избранное</span> (103)
-            </div>
-        </div>
-
-        <div class="pl_player">
-            <div class="ico5 ico5_prev"></div>
-            <div class="ico5 ico5_play"></div>
-            <div class="ico5 ico5_next"></div>
-            <div class="ico5 ico5_down"></div>
-        </div>
-
-        <div class="track_vision player_visio player_visio_sm"
-             style="background:url(views/main/img/mini_voice.png) no-repeat 0 0;">
-            <div class="track_vision_in"
-                 style="background:url(views/main/img/mini_voice.png) no-repeat 0 -30px; width:75%;"></div>
-            <div class="track_vision_in"
-                 style="background:url(views/main/img/mini_voice.png) no-repeat 0 -60px; width:25%;"></div>
-        </div>
-
-
-        <div class="pl_name fl">
-            <a class="pl_name1">Cuberpank</a>
-            <a class="pl_name2">Широко закрытые глаза</a>
-        </div>
-
-        <div class="vol">
-            <div class="vol_in" style="width:50%;"></div>
-        </div>
+    <div class="top_c">
+        <player-ui data-tpl="player-mini.html"></player-ui>
     </div>
-
     <header-playlist></header-playlist>
 
     <!-- user section -->
