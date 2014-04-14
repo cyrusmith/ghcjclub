@@ -475,16 +475,16 @@ $(function(){
 
 	CJ.galery("#gal", "#gal_carousel", "#galery_overlay");
 
-	$('.dot1').on('click', function(){
-		$('#playlist1').slideToggle(300, function(){
-			CJ.slide();
-		});
-	});
-	$('#playlist_opener').on('click', function(){
-		$('#playlist').slideToggle(300, function(){
-			CJ.slide();
-		});
-	});
+//	$('.dot1').on('click', function(){
+//		$('#playlist1').slideToggle(300, function(){
+//			CJ.slide();
+//		});
+//	});
+//	$('#playlist_opener').on('click', function(){
+//		$('#playlist').slideToggle(300, function(){
+//			CJ.slide();
+//		});
+//	});
 
 
 
