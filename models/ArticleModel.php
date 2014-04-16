@@ -16,9 +16,13 @@
  * @property datetime $lastCommentDate 
  * @property enum $comments_blocked 
  * @property text $tags_cached 
+ * @property int $authorId 
  */
 class ArticleModel extends DModelValidated {
-	function setup() {
+
+	public function setup()
+	{
+		
 		$this->keyName = 'id';
 		/*
 		 * структура таблицы
@@ -41,8 +45,15 @@ class ArticleModel extends DModelValidated {
 			->addProperty('lastCommentDate', 'datetime', "")
 			->addProperty('comments_blocked', 'enum', "'false','true'", 'false')
 			->addProperty('tags_cached', 'text', "")
+			->addProperty('authorId', 'int', "11", '0')
 		;
-		$this->proxy = $this->createProxy();
+
+	}
+
+	public function __constructor($proxy = null)
+	{
+		$this->setup();
+		$this->proxy = $proxy ? $proxy : new DModelProxyDatabase('articles');
 	}
 	/**
 	 * связываем с таблицей БД
