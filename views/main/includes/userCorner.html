@@ -1,34 +1,32 @@
-<div ng-controller="SignedUserCtrl">
-
+<div ng-controller="SignedUserCtrl" class="top_r">
 	<!-- user section -->
-	<div ng-if="!isSigned" class="top_r">
+	<div ng-if="!isSigned()">
 		<div class="enter_reg">
 			<div id="btn_enter" class="f_btn enter_reg_btn"><a href="#/signup">Регистрация</a></div>
 			<div id="btn_reg" class="f_btn enter_reg_btn" onclick="$('#popup_auth').fadeToggle();">Войти</div>
 		</div>
 
-		<form class="popup popup_auth center hide" id="popup_auth">
-			<input type="text" value="" placeholder="Логин" class="f_text" />
-			<input type="password" value="" placeholder="Пароль" class="f_text" />
+		<form class="popup popup_auth center hide" id="popup_auth" ng-submit="sendForm()">
+			<input type="text" ng-model="model.login" placeholder="Логин" class="f_text" />
+			<input type="password" ng-model="model.password" value="" placeholder="Пароль" class="f_text" />
 			<input type="submit" value="Войти" class="f_btn" />
 
-			<div class="save_me"><input type="checkbox" name="save" id="save" value="1" /><label for="save">Запомнить меня</label> </div>
+			<div class="save_me"><input type="checkbox" ng-model="model.remember" id="save" value="1" /><label for="save">Запомнить меня</label> </div>
 			<div class="f_links">
-				<a href="#/resetPassword">Забыли пароль?</a>
-				<a ng-if="0">Регистрация</a>
+				<a >Забыли пароль?</a>
+				<a >Регистрация</a>
 			</div>
 		</form>
 	</div>
-
-	<div ng-if="isSigned" class="user">
+	<div ng-if="isSigned()" class="user">
 		<div class="user_line cf">
-			<img class="user_img" src="views/main/img/ava.jpg" alt="" title="" />
+			<img class="user_img" src="http://cjclub.ru/_files/avatars/{{user.id}}" width="40" height="40" alt="" title="" />
 
 			<div class="user_right">
 				<!-- user menu -->
 				<div class="user_menu cf">
 					<span  class="user_menu_item user_sett" onclick="$('#popup_user_menu').fadeToggle(300);"></span>
-					<a  class="user_menu_item user_exit"></a>
+					<a  class="user_menu_item user_exit" ng-click="logout()"></a>
 				</div>
 
 				<ul id="popup_user_menu" class="popup popup_user_menu hide">
@@ -84,30 +82,13 @@
 				</div>
 			</div>
 
-			<div class="user_name"><span class="user_name__text" onclick="$('#popup_user').fadeToggle();">Dj Kazak</span></div>
+			<div class="user_name"><span class="user_name__text" onclick="$('#popup_user').fadeToggle();">{{user.name}}</span></div>
 
-			<!-- popup messages -->
-			<div class="popup popup_user hide" id="popup_user">
-				<ul class="popup_user_list">
-					<li>
-						<a  class="popup_user_list__img"><img src="views/main/img/popup_user_1.png" alt="" title="" /></a>
-						<a  class="popup_user_list__name" title="fadeToggle">fadeToggle</a>
-						<a  class="user_stat user_stat_1">pro</a>
-					</li>
-					<li>
-						<a  class="popup_user_list__img"><img src="views/main/img/popup_user_2.png" alt="" title="" /></a>
-						<a  class="popup_user_list__name" title="LastLife">LastLife</a>
-						<a  class="user_stat user_stat_1">pro</a>
-					</li>
-					<li>
-						<a  class="popup_user_list__img"><img src="views/main/img/popup_user_1.png" alt="" title="" /></a>
-						<a  class="popup_user_list__name" title="Dj Kazzzazzzzk">Dj Kazzzzzzazzzzk</a>
-						<a  class="user_stat user_stat_1">pro</a>
-					</li>
-				</ul>
-			</div>
+			<!-- СПИСОК ПРОЕКТОВ -->
+			<user-projects tpl="includes/userProjectsPopup.html"></user-projects>
 
-			<a  class="user_stat user_stat_1">pro</a>
+
+			<a ng-if="0" class="user_stat user_stat_1">pro</a>
 
 		</div>
 
@@ -130,5 +111,4 @@
 		</div>
 
 	</div>
-
 </div>

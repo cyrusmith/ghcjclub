@@ -47,6 +47,12 @@
 class UserModel extends DModelValidated {
 	protected $rds;
 	protected $db;
+
+	function __construct($proxy = null) {
+		$this->setup();
+		$this->proxy = $proxy ? $proxy : $this->createProxy();
+	}
+
 	function setup() {
 		$this->keyName = 'id';
 		/*
@@ -96,7 +102,6 @@ class UserModel extends DModelValidated {
 			->addProperty('config', 'blob', "")
 			->addProperty('gtype', 'enum', "'male','female'", 'male')
 		;
-		$this->proxy = $this->createProxy();
 	}
 	/**
 	 * связываем с таблицей БД

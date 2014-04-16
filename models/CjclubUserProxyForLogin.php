@@ -3,7 +3,13 @@
  * Прокси для авторизации
  */
 class CjclubUserProxyForLogin extends DModelProxyHTTPRequest {
-    function create() {
+	private $db;
+
+	function __construct() {
+		$this->db = ObjectsPool::get('DataBase');
+	}
+
+	function create() {
         if (session_status() == 1)
             session_start();
     }
@@ -12,7 +18,7 @@ class CjclubUserProxyForLogin extends DModelProxyHTTPRequest {
             session_start();
         $login = filter_var($this->model->login, FILTER_SANITIZE_MAGIC_QUOTES);
         $pswd  = filter_var($this->model->password, FILTER_SANITIZE_MAGIC_QUOTES);
-        $user = dbSelect('rds_users', 'id,type_id,login,password,name', "login = '$login' AND password = MD5('$pswd')", DB_SELECT_OBJ);
+        $user = $this->db->select('rds_users', 'id,type_id,login,password,name', "login = '$login' AND password = MD5('$pswd')", DB_SELECT_OBJ);
         if (empty($user))
             throw new Exception('Неправильный логин и/или пароль!');
         $_SESSION = [
@@ -20,7 +26,7 @@ class CjclubUserProxyForLogin extends DModelProxyHTTPRequest {
             'session_id' => session_id(),
             'ip'         => getIP()
         ];
-        dbUpdate('rds_users', array('isOnline' => 'true', 'previouslogindate' => new SQLvar('lastdateuse'), 'lastdateuse' => new SQLvar('NOW()')), "id = {$user->id}");
+		$this->db->update('rds_users', array('isOnline' => 'true', 'previouslogindate' => new SQLvar('lastdateuse'), 'lastdateuse' => new SQLvar('NOW()')), "id = {$user->id}");
         return $user;
     }
     function delete($params = null) {

@@ -1,19 +1,25 @@
 <?function setUserRules(){
 	AuthController::setModelName('UserDefaultModel');
-	$RDS = ObjectsPool::get('RDS')->init(new UserDefaultModel);//(new UserDefaultModel)->load());
 
-    // Авторизация
-    if (isset($RDS->userId)) {
-        AuthController::setModelName('CjclubUserModel');
-        $user = DI::create('CjclubUserModel');
-        $user->maskPropertyList('id,name,email,type_id,rating_place,balance,config,quality_play');
+	$authUser = new UserDefaultModel;
+	$authUser->load();
+	$RDS = ObjectsPool::get('RDS')->init($authUser);
+	if (isset($RDS->userId)) {
+		// todo переделать, запутано все
 
-        $RDS = ObjectsPool::get('RDS')->init($user->load($RDS->userId));
-        if (empty($RDS->config))
-            $RDS->config = $user->config;
-        $config = $RDS->config;
-
-        $RDS->type = [$RDS->userInfo->type_id->value];
+		$RDS->userInfo = (new UserModel)->load($RDS->userId);//->getAsStdObject();
+		$RDS->userInfo = $RDS->userInfo->getAsStdObject();
+//		AuthController::setModelName('CjclubUserModel');
+//		$user = DI::create('CjclubUserModel');
+//		$user->maskPropertyList('id,name,email,type_id,rating_place,balance,config,quality_play');
+//        $RDS = ObjectsPool::get('RDS')->init($user->load($RDS->userId));
+//		dump($RDS);
+//        if (empty($RDS->config))
+//            $RDS->config = $user->config;
+//        $config = $RDS->config;
+//
+//        $RDS->type = [$RDS->userInfo->type_id->value];
+		$RDS->type = ['user'];
     }
 	if (!$RDS->isLogged) {
 		$RDS->type = array('guest');
@@ -228,10 +234,9 @@ function setUserRulesByType($type){
 			$RDS->add('access.UsersCtrl.listsOnline');
 			$RDS->add('access.UsersCtrl.show');
 
-            $RDS->add('access.CjclubUser.edit');
-            $RDS->add('access.CjclubUser.doLogin');
-            $RDS->add('access.CjclubUser.checkLogin');
-            $RDS->add('access.CjclubUser.findForMigration');
+			$RDS->add('access.AuthCtrl.login');
+			$RDS->add('access.AuthCtrl.logout');
+			$RDS->add('access.CjclubUser.findForMigration');
             /*
              * EventType
              */

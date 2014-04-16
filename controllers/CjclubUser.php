@@ -479,49 +479,6 @@ class CjclubUser extends CRUD {
             }
         return $styles;
     }
-
-    /**
-     * Авторизация на сайте
-     * @param $model модель для авторизации
-     * @return HandlingResult сообщение об успешной и не очень авторизации
-     */
-    function doLogin($model = '') {
-        $flag = !empty($model);
-        $model = ($flag) ? $model : $this->getModelInstance();
-	    $_REQUEST['login']    = (!empty($_REQUEST['login'])) ? $_REQUEST['login'] : $model->login;
-	    $_REQUEST['password'] = (!empty($_REQUEST['password'])) ? $_REQUEST['password'] : $model->password;
-        $model->maskPropertyList('id,type_id,login,password,name')
-            ->setProxy(new CjclubUserProxyForLogin)
-	        ->sets($_REQUEST);
-        $user = $model->load();
-        if (isset($_REQUEST['return_user']))
-            return $user;
-
-        setcookie('cjclubauth', md5($user->login.$user->password), time() + 43200, '/', '.cjclub.ru');
-        $res = new HandlingResult('Добро пожаловать');
-
-        if ($flag) {
-            header('Location: '.CONFIG::$PATH_URL.'/migrate');
-            exit;
-        }
-        return $res;
-    }
-
-    /**
-     * Выход из учётной записи
-     * @return mixed либо сообщение об успешном выходе, либо ничего
-     */
-    function doLogout() {
-        $RDS = RDS::get();
-        if (!$RDS->isLogged)
-            return;
-        if (CONFIG::$USE_COOKIE_FOR_AUTH)
-            dbUpdate('rds_users', array('autologin' => new SQLvar('NULL')), "id = {$RDS->userId}");
-        setcookie(session_name(), '', time()-3600);
-        session_destroy();
-        return (new HandlingResult)->setRedirect("./");
-    }
-
     /**
      * Посылка письма для подтверждения email
      * @param null $user объект данных юзера
