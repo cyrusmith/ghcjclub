@@ -1,27 +1,29 @@
-App.controller('RootCtrl', function($rootScope, jplayerInterface, playlist) {
+angular.module('CjClubUserApp').controller('RootCtrl', function($rootScope, jplayerInterface, playlist) {
+	'use strict';
 	$rootScope.player = jplayerInterface;
-  $rootScope.playlist = playlist;
+	$rootScope.playlist = playlist;
 });
 /*
  * установкой свойств этого сервиса выставляются статусные и ошибочные сообщения
  */
-App.constant('Notifications', {
-    error:  '',
-    status: ''
+angular.module('CjClubUserApp').constant('Notifications', {
+	error:  '',
+	status: ''
 });
 /*
  * контроллер создает $scope где видны свойства сервиса Notifications
  */
-App.controller('NotificationCtrl', function($scope, Notifications, $timeout) {
-    $scope.Notifications = Notifications;
-    $scope.$watch('Notifications.status', function() {
-        $timeout(function() {
-            $scope.Notifications.status = '';
-        }, 3000);
-    });
-    $scope.$watch('Notifications.error', function() {
-        $timeout(function() {
-            $scope.Notifications.error = '';
-        }, 3000);
-    });
+angular.module('CjClubUserApp').controller('NotificationCtrl', function ($scope, Notifications, $timeout) {
+	'use strict';
+	$scope.Notifications = Notifications;
+	$scope.$watch('Notifications.status', function () {
+		$timeout(function () {
+			$scope.Notifications.status = '';
+		}, 3000);
+	});
+	$scope.$watch('Notifications.error', function () {
+		$timeout(function () {
+			$scope.Notifications.error = '';
+		}, 3000);
+	});
 });

@@ -5,9 +5,7 @@
             <div class="pleer">Плеер</div>
             <div class="radio">Радио</div>
         </div>
-        <div id="playlist_opener" class="playlist_opener_mini" data-ng-click="togglePlaylist()"><span class="dot1">Плейлист Избранное</span>
-            (103)
-        </div>
+        <div id="playlist_opener" class="playlist_opener_mini" data-ng-click="playlist.togglePlaylist()"><span class="dot1">Плейлист Избранное</span> ({{playlist.tracks.length}})</div>
     </div>
 
     <div class="pl_player">

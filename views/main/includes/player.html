@@ -35,9 +35,8 @@
 			</div>
 
 		</div>
-        <!--TODO вставить директиву playlist-->
-		<div id="playlist_opener" class="playlist_opener" data-ng-click="togglePlaylist()"><span class="dot">Плейлист Избранное</span> (103)</div>
-        <header-playlist></header-playlist>
+		<div id="playlist_opener" class="playlist_opener" data-ng-click="playlist.togglePlaylist()"><span class="dot">Плейлист Избранное</span> ({{playlist.tracks.length}})</div>
+		<playlist-ui></playlist-ui>
 	</div>
 	<!-- right small btns -->
 	<div class="player_changer_right">

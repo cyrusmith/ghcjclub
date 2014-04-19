@@ -1,5 +1,5 @@
-//TODO перенсти в директиву плеера
-App.controller('PlayerCtrl', function($scope, jplayerInterface, TracksResource) {
+angular.module('CjClubUserApp').controller('PlayerCtrl', function($scope, jplayerInterface, TracksResource) {
+	'use strict';
 	$scope.track = null;
 	/*
 	 * при запуске трека, загрузить его и показать в плеере
@@ -18,7 +18,7 @@ App.controller('PlayerCtrl', function($scope, jplayerInterface, TracksResource) 
 	$scope.playInfo = jplayerInterface.info;
 
 	$scope.isTrackSet = function() {
-		return $scope.track != null;
+		return $scope.track !== null && $scope.track !== undefined;
 	};
 	$scope.toggleMute = function() {
 		jplayerInterface.toggleMute();
@@ -37,5 +37,5 @@ App.controller('PlayerCtrl', function($scope, jplayerInterface, TracksResource) 
 		var width = 260;
 		var percents = x / width;
 		jplayerInterface.play(Math.round($scope.track.timelength * percents));
-	}
+	};
 });

@@ -99,51 +99,51 @@ window.CJ = window.CJ || {};
 // count
 CJ = {
   //TODO приделать scrollpane к плейлисту
-	slide: function(){
-		var scrollContainer = $('#playlist_content'),
-			scrollList = $('#playlist_list'),
-			scrollSlider = $('#playlist_scroll'),
-			delta = scrollList.height() - scrollContainer.height(),
-			wheel = true,
-			itemHeight = 51,
-			dH = 100 / (delta/itemHeight);
-
-
-		function slideHandle( e, ui ) {
-			scrollContainer.stop(true, true).animate({"scrollTop": (1 - ui.value / 100) * delta });
-		}
-
-		if ( delta > 0 ) {
-			scrollSlider.show().slider({
-				animate:true,
-				orientation: "vertical",
-				range: "min",
-				min:0,
-				max:100,
-				value:100,
-				slide: slideHandle
-			});
-
-			scrollContainer.mousewheel(function(e, d) {
-				if (!wheel) return false;
-				wheel = false;
-
-				var value = scrollSlider.slider('option', 'value');
-
-				if (d > 0) { value += dH; }
-				else if (d < 0) { value -= dH; }
-
-				value = Math.max(0, Math.min(100, value));
-				scrollSlider.slider('value', value);
-				scrollContainer.stop(true, false).animate({"scrollTop": (1 - value / 100) * delta }, function(){ wheel = true;});
-				e.preventDefault();
-			});
-
-		} else {
-			scrollSlider.hide();
-		}
-
-	},
+//  slide: function(){
+//    var scrollContainer = $('#playlist_content'),
+//      scrollList = $('#playlist_list'),
+//      scrollSlider = $('#playlist_scroll'),
+//      delta = scrollList.height() - scrollContainer.height(),
+//      wheel = true,
+//      itemHeight = 51,
+//      dH = 100 / (delta/itemHeight);
+//
+//
+//    function slideHandle( e, ui ) {
+//      scrollContainer.stop(true, true).animate({"scrollTop": (1 - ui.value / 100) * delta });
+//    }
+//
+//    if ( delta > 0 ) {
+//      scrollSlider.show().slider({
+//        animate:true,
+//        orientation: "vertical",
+//        range: "min",
+//        min:0,
+//        max:100,
+//        value:100,
+//        slide: slideHandle
+//      });
+//
+//      scrollContainer.mousewheel(function(e, d) {
+//        if (!wheel) return false;
+//        wheel = false;
+//
+//        var value = scrollSlider.slider('option', 'value');
+//
+//        if (d > 0) { value += dH; }
+//        else if (d < 0) { value -= dH; }
+//
+//        value = Math.max(0, Math.min(100, value));
+//        scrollSlider.slider('value', value);
+//        scrollContainer.stop(true, false).animate({"scrollTop": (1 - value / 100) * delta }, function(){ wheel = true;});
+//        e.preventDefault();
+//      });
+//
+//    } else {
+//      scrollSlider.hide();
+//    }
+//
+//  },
 	showToggle: function(){
 		var link = $(this).attr('href');
 		$(link).slideToggle();
@@ -535,11 +535,11 @@ $(function(){
 	$('.mc_out').on('click', '.pl_up', CJ.toggleMcList);
 	$('#mess_wind').on('click', '.mess_proj_sl', CJ.toggleMcList2);
 
-	
+
 
 });
 
-	
+
 // вынес в main-header
 //window.onload = CJ.scroller;
 //window.onscroll = CJ.scroller;
@@ -571,12 +571,12 @@ $('.ce_ch').on("change", function(){
 	if($(this).is(':checked')){
 		$(this).parent().addClass('checked');
 	} else{
-		
+
 		$(this).parent().removeClass('checked');
 	}
 	var mesLength = $('.jspPane').find('.checked').length;
 	$('.mes-length').text(mesLength);
-	
+
 });
 $('.modal').addClass('hs');
 $('#chat_btns').hide();
@@ -587,7 +587,7 @@ $('.ico2_dia').click(function(){
 			$('#openDialong').text('Закрыть диалог');
 			$('#chat_btns').show('slow');
 			$('.modal').removeClass('hs');
-		});	
+		});
 	}*/
 	$('.modal').show();
 });
@@ -595,7 +595,7 @@ $('.ico2_dia').click(function(){
 $('#openDialong').click(function(){
 	if($('#chat').is(':visible')){
 		$('#chat').slideUp('1000', function(){
-		$('#openDialong').text('Открыть диалог');	
+		$('#openDialong').text('Открыть диалог');
 		$('#chat_btns').hide();
 		$('.modal').addClass('hs');
 		});

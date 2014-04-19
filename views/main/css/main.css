@@ -75,7 +75,7 @@ header .width { position:relative; /*height: 150px;*/}
 #topmini .top_c { padding:7px 0 7px; width:auto;}
 #topmini .top_r { padding:7px 10px 7px 0; width:170px;}
 #topmini .user_messages { float:left;}
-#topmini .playlist { left:240px; width:520px; height: 270px;}
+#topmini .playlist { left:240px; width:520px;}
 #topmini.user_name { padding-bottom:2px;}
 /* .mini_header_page #c { margin-top:45px;} */
 
@@ -245,11 +245,11 @@ position: absolute;
 right: 0;}
 .search_btn { float:right; width:30px; height:26px; background:url(../img/ico_search.png) no-repeat center; cursor:pointer; border:none; position:relative; text-indent:-999px; overflow:hidden; display:block;}
 .search_txt { padding:5px 14px 6px; height:15px; width:100px; margin-right:-100%; border:none; font:11px/15px "Myriad Pro", "Open sans", Arial, sans-serif; background:transparent; color:#fff;}
-.search_tags { 
-	margin:0; 
-	width:156px; 
-	height:26px; /*background:#646464;*/ 
-	background:#646464; 
+.search_tags {
+	margin:0;
+	width:156px;
+	height:26px; /*background:#646464;*/
+	background:#646464;
 	box-shadow:inset 1px 1px 3px rgba(0,0,0,.55);
 	margin-right: 10px;
 }
@@ -343,11 +343,11 @@ right: 0;}
 .ico7_forw { background-position:0 -326px;}
 
 /* playlist */
-.playlist { 
-	background:url(../img/playlist_bg.png); 
-	background:rgba(0,0,0,.89); 
-	position:absolute; top:100%; 
-	left:0; right:0; /*opacity:1; height:auto;*/ 
+.playlist {
+	background:url(../img/playlist_bg.png);
+	background:rgba(0,0,0,.89);
+	position:absolute; top:100%;
+	left:0; right:0; /*opacity:1; height:auto;*/
 	z-index:999;
 	display: none;
 }
@@ -362,7 +362,7 @@ right: 0;}
 .playlist_chart:hover { color:#ccc;}
 
 .playlist_holder { position:relative; margin:12px 0 10px;}
-.playlist_content { min-height:204px; max-height:204px; overflow:hidden; position:relative;}
+.playlist_content { min-height:204px; max-height:510px; overflow:hidden; position:relative;}
 .playlist_list { width:480px;}
 .playlist_item { padding:5px 0 8px 37px;}
 .playlist_item__cover { float:left; margin:3px 12px 0 0;}
@@ -380,10 +380,11 @@ right: 0;}
 
 .mini_player { float:right; width:76px; margin:10px 0 0; opacity:0;}
 .mini_player_btn { float:left; height:17px; width:17px; background-image:url(../img/mini_player_icos.png); background-repeat:no-repeat; cursor:pointer;}
-.mini_player_play { background-position:4px 4px;}
-.mini_player_md { background-position:-14px 4px;}
-.mini_player_mu { background-position:-31px 4px;}
-.mini_player_re { background-position:-48px 4px;}
+.mini_player_play { background-position:0px 4px;}
+.mini_player_md { background-position:-17px 4px;}
+.mini_player_mu { background-position:-34px 4px;}
+.mini_player_re { background-position:-51px 4px;}
+.mini_player_pause { background-position:-68px 4px;}
 
 .playlist_item:hover .mini_player { opacity:1;}
 
@@ -547,10 +548,10 @@ a:hover .link_yel, a.active_link .link_yel { color:#f90;}
 .ico_bc4 { background-position:0 -72px;}
 
 /* gray blocks */
-.b { 
-	border:1px solid #dbdbdb; 
-	background:#f2f2f2; 
-	padding:14px; 
+.b {
+	border:1px solid #dbdbdb;
+	background:#f2f2f2;
+	padding:14px;
 	margin:0 0 13px;
 	position: relative;
 }
@@ -649,9 +650,9 @@ a:hover .link_yel, a.active_link .link_yel { color:#f90;}
 .last_visit.online { background-position:100% 2px;}
 
 /* searched tags */
-.search_tags_full { 
-	float:none; 
-	width:100%; 
+.search_tags_full {
+	float:none;
+	width:100%;
 	margin:0 0 10px;
 	position: relative;
 }
@@ -746,7 +747,7 @@ a.btn_orange, span.btn_orange { display:inline-block;}
 .left_side, .right_aside { float:left; width:233px; background:#f2f2f2; border-right:1px solid #dbdbdb; margin:0 0 -32000px; padding:0 0 32000px;}
 .left_aside { float:left;}
 .right_aside { float:right;}
-.left_side_s { 
+.left_side_s {
 	width: 233px;
 	padding-top: 12px;
 	position: absolute;
@@ -1950,12 +1951,12 @@ a.custom_a { color:#8b8b8b; text-decoration:none; width:auto; font-size:12px; li
 	top:0;
 	bottom: 20px;
 	width:225px;
-	background:#fff; 
-	overflow: hidden;	
+	background:#fff;
+	overflow: hidden;
 }
 .left_side_s .mc_lists{
 	position:relative;
-	top:106px;	
+	top:106px;
 }
 .lmctop{position: absolute;top:12px;width:205px;}
 .foot_in{width:970px;background:#4f4f4f; font-size:12px;bottom: 0;overflow: hidden;}
@@ -1987,7 +1988,7 @@ noindex:-o-prefocus, .mess-amount {
 /*************new********************/
 
 #topmini {
-  height: 45px;  
+  height: 45px;
   position: relative;
  display: none;
 }
@@ -1998,7 +1999,7 @@ noindex:-o-prefocus, .mess-amount {
 
 #topmini .top_r {
 	padding-top: 9px;
-} 
+}
 
 .user {
 	position: relative;
@@ -2026,7 +2027,7 @@ noindex:-o-prefocus, .mess-amount {
 
 .chat-content {
   position: fixed;
-} 
+}
 nav.cf 	{
 	position: fixed;
 	top: 113px;

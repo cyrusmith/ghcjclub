@@ -1,23 +1,21 @@
 /**
  * Created by Evgeny on 07.04.2014.
  */
-(function(){
+angular.module('CjClubUserApp').directive('addToPlaylist', function (playlist) {
 	'use strict';
-	angular.module('CjClubUserApp').directive('addToPlaylist', function(playlist){
-    var link = function(scope, element){
-      element.on('click', function(){
-        if(scope.track){
-          playlist.add(scope.track);
-        }
-      });
-    };
+	var link = function (scope, element) {
+		element.on('click', function () {
+			if (scope.track) {
+				playlist.add(scope.track);
+			}
+		});
+	};
 
-    return {
-      restrict: 'A',
-      scope: {
-        track: '=addToPlaylist'
-      },
-      link: link
-    };
-  });
-})();
+	return {
+		restrict: 'A',
+		scope: {
+			track: '=addToPlaylist'
+		},
+		link: link
+	};
+});
