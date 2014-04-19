@@ -1,4 +1,5 @@
-App.factory('jplayerInterface', function($rootScope) {
+angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope, playlist) {
+	'use strict';
 	var volume = 1;
 	var volumeMutted;
 	var el;
@@ -8,79 +9,97 @@ App.factory('jplayerInterface', function($rootScope) {
 		info: {
 			playprogress: 0
 		},
-		init: function(e) {
+		init: function (e, options) {
+			var self = this;
 			el = e;
 			el.jPlayer({
 				swfPath: 'views/libs/jplayer',
 				supplied: 'mp3',
 				preload: "auto",
-				timeupdate: function(e) {
+				timeupdate: function (e) {
 					service.info.playprogress = Math.round(e.jPlayer.status.currentPercentAbsolute);
-					$rootScope.$$phase || $rootScope.$apply();
+					if (!$rootScope.$$phase) {
+						$rootScope.$apply();
+					}
 				}
 			});
+
+			if (options.autoNext) {
+				el.bind($.jPlayer.event.ended, function () {
+					var next = playlist.getNext(currentTrackId);
+					if (next) {
+						self.playId(next);
+					}
+				});
+			}
 		},
-		setMedia: function(url) {
+		destroy: function (el, options) {
+			if (options.autoNext) {
+				el.unbind($.jPlayer.event.ended);
+			}
+		},
+		setMedia: function (url) {
 			el.jPlayer("setMedia", {mp3: url});
 		},
-		setId: function(trackId) {
+		setId: function (trackId) {
 			currentTrackId = trackId;
 			var url = '_tracks/' + trackId + '.mp3';
 			service.setMedia(url);
 		},
-		getId: function() {
+		getId: function () {
 			return currentTrackId;
 		},
-		play: function(time) {
+		play: function (time) {
 			el.jPlayer("play", time);
 			isPlayingState = true;
 		},
-		playId: function(trackId) {
+		playId: function (trackId) {
 			service.setId(trackId);
 			service.play();
 		},
-		playIdOrPause: function(trackId) {
-			if (currentTrackId == trackId) {
+		playIdOrPause: function (trackId) {
+			if (currentTrackId === trackId) {
 				service.togglePlay();
 			} else {
 				service.playId(trackId);
 			}
 		},
-		pause: function() {
+		pause: function () {
 			el.jPlayer("pause");
 			isPlayingState = false;
 		},
-		togglePlay: function() {
+		togglePlay: function () {
 			if (isPlayingState) {
 				service.pause();
 			} else {
 				service.play();
 			}
 		},
-		isPlaying: function() {
+		isPlaying: function () {
 			return isPlayingState;
 		},
-		isIdbeingPlayed: function(trackId) {
-			return (currentTrackId == trackId) && service.isPlaying();
+		isIdbeingPlayed: function (trackId) {
+			return (currentTrackId === trackId) && service.isPlaying();
 		},
-		toggleMute: function() {
-			if (volume == 0) {
+		toggleMute: function () {
+			if (volume === 0) {
 				service.setVolume(volumeMutted);
 			} else {
 				volumeMutted = volume;
 				service.setVolume(0);
 			}
 		},
-		getVolume: function() {
+		getVolume: function () {
 			return volume;
 		},
-		setVolume: function(v) {
+		setVolume: function (v) {
 			volume = v;
 			el.jPlayer("volume", v);
 		},
-		getTrackId: function() {
+		getTrackId: function () {
 			return currentTrackId;
 		}
 	};
+
 	return service;
 });
