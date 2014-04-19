@@ -1,34 +1,40 @@
 <div ng-show="isTrackSet()">
-    <!--Template: player-mini | Directive: playerUI -->
-    <div class="pl_c">
-        <div class="pleer_changer pl_act cf">  <!-- rd_act -->
-            <div class="pleer">Плеер</div>
-            <div class="radio">Радио</div>
-        </div>
-        <div id="playlist_opener" class="playlist_opener_mini" data-ng-click="playlist.togglePlaylist()"><span class="dot1">Плейлист Избранное</span> ({{playlist.tracks.length}})</div>
-    </div>
+	<!--Template: player-mini | Directive: playerUI -->
+	<div class="pl_c">
+		<div class="pleer_changer pl_act cf">  <!-- rd_act -->
+			<div class="pleer">Плеер</div>
+			<div class="radio">Радио</div>
+		</div>
+		<div id="playlist_opener" class="playlist_opener_mini" data-ng-click="playlist.togglePlaylist()"><span
+				class="dot1">Плейлист Избранное</span> ({{playlist.tracks.length}})
+		</div>
+	</div>
 
-    <div class="pl_player">
-        <div class="ico5 ico5_prev"></div>
-        <a class="ico5" data-ng-click="togglePlay()" data-ng-class="{ico5_play: !isPlaying(), ico5_pause: isPlaying()}"></a>
-        <div class="ico5 ico5_next"></div>
-        <div class="ico5 ico5_down"></div>
-    </div>
+	<div class="pl_player">
+		<div class="ico5 ico5_prev"></div>
+		<a class="ico5" data-ng-click="togglePlay()"
+		   data-ng-class="{ico5_play: !isPlaying(), ico5_pause: isPlaying()}"></a>
 
-    <div data-ng-click="seekAndPlay($event)" class="track_vision player_visio player_visio_sm" data-ng-style="{background: 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png) no-repeat'}">
-        <div class="track_vision_in" data-ng-style="{'background-image': 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png)', width: playInfo.playprogress + '%'}"></div>
-        <!--<div class="track_vision_in"-->
-             <!--style="background:url(views/main/img/mini_voice.png) no-repeat 0 -60px; width:25%;"></div>-->
-    </div>
+		<div class="ico5 ico5_next"></div>
+		<div class="ico5 ico5_down"></div>
+	</div>
+
+	<div data-ng-click="seekAndPlay($event)" class="track_vision player_visio player_visio_sm"
+		 data-ng-style="{background: 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png) no-repeat'}">
+		<div class="track_vision_in"
+			 data-ng-style="{'background-image': 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png)', width: playInfo.playprogress + '%'}"></div>
+		<!--<div class="track_vision_in"-->
+		<!--style="background:url(views/main/img/mini_voice.png) no-repeat 0 -60px; width:25%;"></div>-->
+	</div>
 
 
-    <div class="pl_name fl">
-        <a class="pl_name1">{{track.project || '&nbsp;'}}</a>
-        <a class="pl_name2">{{track.name}}</a>
-    </div>
+	<div class="pl_name fl">
+		<a class="pl_name1">{{track.project || '&nbsp;'}}</a>
+		<a class="pl_name2">{{track.name}}</a>
+	</div>
 
-    <div class="vol">
-        <!--TODO регулятор громкости-->
-        <div class="vol_in" style="width:50%;"></div>
-    </div>
+	<div class="vol">
+		<!--TODO регулятор громкости-->
+		<div class="vol_in" style="width:50%;"></div>
+	</div>
 </div>

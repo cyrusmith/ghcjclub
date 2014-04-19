@@ -1,122 +1,129 @@
 <!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="robots" content="index, follow"/>
-    <meta name="keywords" content=""/>
-    <meta name="description" content=""/>
-    <base href="<?=CONFIG::$PATH_URL?>/"/>
-    <title>CJ Club</title>
-    <link href="views/main/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
-    <link href="views/main/css/main.css" rel="stylesheet"/>
-    <!--[if lt IE 9]>
-    <script src="views/main/js/html5.js"></script>
-    <link href="views/main/css/ie.css" rel="stylesheet"/>
-    <![endif]-->
-    <script src="views/main/js/prefixfree.min.js"></script>
+	<meta charset="utf-8"/>
+	<meta name="robots" content="index, follow"/>
+	<meta name="keywords" content=""/>
+	<meta name="description" content=""/>
+	<base href="<?=CONFIG::$PATH_URL?>/"/>
+	<title>CJ Club</title>
+	<link href="views/main/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
+	<link href="views/main/css/main.css" rel="stylesheet"/>
+	<!--[if lt IE 9]>
+	<script src="views/main/js/html5.js"></script>
+	<link href="views/main/css/ie.css" rel="stylesheet"/>
+	<![endif]-->
+	<script src="views/main/js/prefixfree.min.js"></script>
+	<?if (ObjectsPool::get('RDS')->isLogged):?>
+	<script>
+		var preloadedDataStorage = {
+			signedUser: <?=json_encode(ObjectsPool::get('RDS')->userInfo)?>
+		};
+	</script>
+	<?endif?>
 </head>
 <body ng-app="CjClubUserApp" ng-controller="RootCtrl">
 <div id="p"> <!-- style="background:#000 url(./img/branding.jpg) no-repeat 50% 0;" -->   <!-- branding -->
-    <!-- header -->
-    <!-- вынес header в директиву -->
-    <main-header></main-header>
-    <nav class="cf" ng-controller="NavCtrl">
-        <a class="error_link">Сообщить об ошибке</a>
-        <header-closer></header-closer>
-        <!--<div class="header_closer"></div>-->
-        <ul class="menu">
-            <li><a href="#tracks">Треки</a></li>
-            <li><a href="#tops">Топы</a></li>
-            <li>
-                <a>Резиденты</a>
-                <ul class="submenu">
-                    <li><a href="#/projects">Авторы</a></li>
-                    <li><a href="#/labels">Лейблы</a></li>
-                    <li>
-                        <a href="#/podcasts">Подкасты</a>
-                        <!--
-                        <ul class="submenu2">
-                            <li><a href="#podcasts/music">О музыке</a></li>
-                            <li><a >О железе</a></li>
-                            <li><a >О людях</a></li>
-                        </ul>
-                        -->
-                    </li>
-                    <li><a href="#/groups">Группы</a></li>
-                </ul>
-            </li>
-            <li ng-class="{act: current == 'articles'}">
-                <a href="#/articles">Статьи</a>
-                <!--
-                <ul class="submenu">
-                    <li><a >Авторы</a></li>
-                    <li><a >Лейблы</a></li>
-                    <li>
-                        <a >Подкасты</a>
-                        <ul class="submenu2">
-                            <li><a >О музыке</a></li>
-                            <li><a >О железе</a></li>
-                            <li><a >О людях</a></li>
-                        </ul>
-                    </li>
-                    <li><a >Группы</a></li>
-                </ul>
-                -->
-            </li>
-            <li><a href="forum/">Форум</a></li>
-            <li><a href="http://cjradio.ru">CJ Radio</a></li>
-            <li><a href="#/about">О проекте</a></li>
-        </ul>
-        <div class="div search" ng-controller="SearchCtrl">
-            <form class="search">
-                <input type="submit" class="search_btn"/>
-                <input type="text" class="search_txt" id="q" ng-model="request" value="Поиск"
-                       onfocus="if(this.value=='Поиск') this.value = '';"
-                       onblur="if(this.value == '') this.value = 'Поиск';"/>
-            </form>
-        </div>
-    </nav>
+	<!-- header -->
+	<!-- вынес header в директиву -->
+	<main-header></main-header>
+	<nav class="cf" ng-controller="NavCtrl">
+		<a class="error_link">Сообщить об ошибке</a>
+		<header-closer></header-closer>
+		<!--<div class="header_closer"></div>-->
+		<ul class="menu">
+			<li><a href="#tracks">Треки</a></li>
+			<li><a href="#tops">Топы</a></li>
+			<li>
+				<a>Резиденты</a>
+				<ul class="submenu">
+					<li><a href="#/projects">Авторы</a></li>
+					<li><a href="#/labels">Лейблы</a></li>
+					<li>
+						<a href="#/podcasts">Подкасты</a>
+						<!--
+						<ul class="submenu2">
+							<li><a href="#podcasts/music">О музыке</a></li>
+							<li><a >О железе</a></li>
+							<li><a >О людях</a></li>
+						</ul>
+						-->
+					</li>
+					<li><a href="#/groups">Группы</a></li>
+				</ul>
+			</li>
+			<li ng-class="{act: current == 'articles'}">
+				<a href="#/articles">Статьи</a>
+				<!--
+				<ul class="submenu">
+					<li><a >Авторы</a></li>
+					<li><a >Лейблы</a></li>
+					<li>
+						<a >Подкасты</a>
+						<ul class="submenu2">
+							<li><a >О музыке</a></li>
+							<li><a >О железе</a></li>
+							<li><a >О людях</a></li>
+						</ul>
+					</li>
+					<li><a >Группы</a></li>
+				</ul>
+				-->
+			</li>
+			<li><a href="forum/">Форум</a></li>
+			<li><a href="http://cjradio.ru">CJ Radio</a></li>
+			<li><a href="#/about">О проекте</a></li>
+		</ul>
+		<div class="div search" ng-controller="SearchCtrl">
+			<form class="search">
+				<input type="submit" class="search_btn"/>
+				<input type="text" class="search_txt" id="q" ng-model="request" value="Поиск"
+					   onfocus="if(this.value=='Поиск') this.value = '';"
+					   onblur="if(this.value == '') this.value = 'Поиск';"/>
+			</form>
+		</div>
+	</nav>
 
-    <div id="main-content">
-        <div ng-view></div>
-    </div>
+	<div id="main-content">
+		<div ng-view></div>
+	</div>
 
-    <!-- footer -->
-    <footer class="width cf">
-        <div class="foot_in">
-            <div class="foot_l">
-                <div class="copy">2002–<?=date('Y')?> © CjClub.Ru</div>
-                <div class="spy">
-                    <a><img src="views/main/img/spy1.png" alt="" title=""/></a>
-                    <a><img src="views/main/img/spy2.png" alt="" title=""/></a>
-                    <a><img src="views/main/img/spy3.png" alt="" title=""/></a>
-                    <a><img src="views/main/img/spy4.png" alt="" title=""/></a>
-                    <a><img src="views/main/img/spy5.png" alt="" title=""/></a>
-                </div>
-            </div>
-            <div class="foot_c">
-                <ul class="foot_menu">
-                    <li><a>Пользовательское соглашение</a></li>
-                    <li><a>Реклама на сайте</a></li>
-                    <li><a>О сайте</a></li>
-                    <li><a>Пожаловаться</a></li>
-                    <li><a>Платные услуги</a></li>
-                </ul>
-                <ul class="foot_menu">
-                    <li><a>Радио</a></li>
-                    <li><a>Музыкальные новинки</a></li>
-                    <li><a>Друзья</a></li>
-                    <li><a>VipLinks</a></li>
-                </ul>
-            </div>
-            <div class="foot_r">
-                <div class="dev">
-                    Дизайн сайта:
-                    <a><img src="views/main/img/logo_bel.png" alt="" title=""/></a>
-                </div>
-            </div>
-        </div>
-    </footer>
+	<!-- footer -->
+	<footer class="width cf">
+		<div class="foot_in">
+			<div class="foot_l">
+				<div class="copy">2002–<?=date('Y')?> © CjClub.Ru</div>
+				<div class="spy">
+					<a><img src="views/main/img/spy1.png" alt="" title=""/></a>
+					<a><img src="views/main/img/spy2.png" alt="" title=""/></a>
+					<a><img src="views/main/img/spy3.png" alt="" title=""/></a>
+					<a><img src="views/main/img/spy4.png" alt="" title=""/></a>
+					<a><img src="views/main/img/spy5.png" alt="" title=""/></a>
+				</div>
+			</div>
+			<div class="foot_c">
+				<ul class="foot_menu">
+					<li><a>Пользовательское соглашение</a></li>
+					<li><a>Реклама на сайте</a></li>
+					<li><a>О сайте</a></li>
+					<li><a>Пожаловаться</a></li>
+					<li><a>Платные услуги</a></li>
+				</ul>
+				<ul class="foot_menu">
+					<li><a>Радио</a></li>
+					<li><a>Музыкальные новинки</a></li>
+					<li><a>Друзья</a></li>
+					<li><a>VipLinks</a></li>
+				</ul>
+			</div>
+			<div class="foot_r">
+				<div class="dev">
+					Дизайн сайта:
+					<a><img src="views/main/img/logo_bel.png" alt="" title=""/></a>
+				</div>
+			</div>
+		</div>
+	</footer>
 </div>
 
 <!-- to top link -->
