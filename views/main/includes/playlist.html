@@ -1,5 +1,5 @@
 <div class="playlist brb22">
-    <!--Template: headerPlaylist | Directive: headerPlaylist -->
+    <!--Template: playlistUI | Directive: playlistUI -->
     <div class="playlist_charts">
         <a class="playlist_chart">Популярные треки</a>
         <a class="playlist_chart">Лучшие треки недели</a>
@@ -8,8 +8,8 @@
 
     <div class="playlist_holder">
 
-        <div class="playlist_content" id="playlist_content">
-            <ul class="playlist_list" id="playlist_list">
+        <div class="playlist_content">
+            <ul class="playlist_list">
                 <li class="playlist_item cf" data-ng-repeat="track in tracks track by track.id">
                     <ins class="draggable"></ins>
                     <img ng-src="http://cjclub.ru/_files/trackpics/{{track.id}}_35" alt="" title=""
@@ -23,16 +23,18 @@
                         </div>
                     </div>
                     <div class="mini_player cf">
-                        <div class="mini_player_btn mini_player_play"></div>
-                        <div class="mini_player_btn mini_player_md"></div>
-                        <div class="mini_player_btn mini_player_mu"></div>
-                        <div class="mini_player_btn mini_player_re"></div>
+                        <div class="mini_player_btn"
+                             data-ng-click="playIdOrPause(track.id)"
+                             data-ng-class="{mini_player_play: !isIdbeingPlayed(track.id), mini_player_pause: isIdbeingPlayed(track.id)}"></div>
+                        <div class="mini_player_btn mini_player_md" data-ng-click="down($index)"></div>
+                        <div class="mini_player_btn mini_player_mu" data-ng-click="up($index)"></div>
+                        <div class="mini_player_btn mini_player_re" data-ng-click="remove(track.id)"></div>
                     </div>
                 </li>
             </ul>
         </div>
 
-        <div class="playlist_scroll" id="playlist_scroll"></div>
+        <div class="playlist_scroll"></div>
     </div>
     <div class="playlist_closer" data-ng-click="close()"><span class="dot1">Свернуть</span></div>
 </div>
