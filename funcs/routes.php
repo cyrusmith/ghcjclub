@@ -44,7 +44,7 @@ function setRoutes() {
 
 	Router::get()->connect(Router::$GET, '^blogs$', 'BlogsCtrl/lists');
     Router::get()->connect(Router::$GET, '^blogs/(?<tags_admin>\d+)$', 'BlogsCtrl/lists');
-    Router::get()->connect(Router::$GET, '^blogs/add/(?<data>.*)$', 'BlogsCtrl/addPost');
+    Router::get()->connect(Router::$GET, '^blogs/?add=(?<data>.*)$', 'BlogsCtrl/addPost');
 	Router::get()->connect(Router::$GET, '^blogs/(?<id>\d+)$', 'BlogsCtrl/show');
 
 	Router::get()->connect(Router::$GET, '^radio/(?<channel>\d)$', 'RadioCtrl/getInfo');
