@@ -1,4 +1,4 @@
-angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootScope, localStorageService) {
+angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootScope, localStorageService, TracksResource) {
 	'use strict';
 	var
 		_trackIds,
@@ -23,11 +23,8 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 		init = function () {
 			_trackIds = localStorageService.get(PLAYLIST_KEY) || [];
 			if (_trackIds.length > 0) {
-				$http({
-					method: 'GET',
-					url: 'tracks?id=' + _trackIds.toString()
-				})
-					.success(function (data) {
+				TracksResource.queryByIds({ids: _trackIds.toString()}).$promise.then(
+					function (data) {
 						if (data) {
 							_trackIds.forEach(function (id) {
 								var index = indexById(data, id);
@@ -37,7 +34,11 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 							});
 						}
 						deferred.resolve();
-					});
+					},
+					function () {
+						deferred.resolve();
+					}
+				);
 			} else {
 				deferred.resolve();
 			}

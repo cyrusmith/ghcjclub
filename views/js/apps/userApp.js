@@ -23,11 +23,48 @@ App.config(function($routeProvider) {
 		}).
 		when('/tracks', {
 			templateUrl: 'views/main/tracks.html',
-			controller: ['$scope', 'Tracks', function($scope, Tracks) {
-				$scope.tracks = Tracks;
-			}],
+			controller: 'TracksCtrl',
 			resolve: {
-				Tracks: function(TracksResource) {return TracksResource.query(); }
+				Styles: function(){
+					return [
+						{
+							name: 'Andrew',
+							count: 100
+						},
+						{
+							name: 'breakbeat',
+							count: 101
+						},
+						{
+							name: 'Club',
+							count: 102
+						},
+						{
+							name: 'drum and bass',
+							count: 103
+						},
+						{
+							name: 'House',
+							count: 104
+						},
+						{
+							name: 'ReMarQ',
+							count: 105
+						},
+						{
+							name: 'trance',
+							count: 106
+						},
+						{
+							name: 'VSTi',
+							count: 107
+						},
+						{
+							name: 'radioshow',
+							count: 108
+						}
+					];
+				}
 			}
 		}).
 		when('/tracks/:id', {

@@ -13,54 +13,22 @@
 					<!-- tracks page -->
 					<h1 class="page_title">Треки</h1>
 
-					<article class="b hide" id="tags">
+					<article class="b" id="tags">
 						<div class="tags">
 							<ul class="tags_list tags_list__selector">
-								<li><a style="font-size:18px;" >Andrew</a></li>
-								<li><a style="font-size:14px;" >Lu auriga</a></li>
-								<li><a style="font-size:16px;" >beatport</a></li>
-								<li><a style="font-size:22px;" >breakbeat</a></li>
-								<li><a style="font-size:20px;" >breaks</a></li>
-								<li><a style="font-size:18px;" >chillout</a></li>
-								<li><a style="font-size:16px;" >cjclub</a></li>
-								<li><a style="font-size:12px;" >Club</a></li>
-								<li><a style="font-size:13px;" >Universe</a></li>
-								<li><a style="font-size:14px;" >Cubase</a></li>
-								<li><a style="font-size:14px;" >DAW</a></li>
-								<li><a style="font-size:15px;" >downtempo</a></li>
-								<li><a style="font-size:17px;" >drum and bass</a></li>
-								<li><a style="font-size:18px;" >Dubstep</a></li>
-								<li><a style="font-size:20px;" >electronic</a></li>
-								<li><a style="font-size:25px;" >experimental</a></li>
-								<li><a style="font-size:22px;" >FL Studio</a></li>
-								<li><a style="font-size:24px;" >freeware</a></li>
-								<li><a style="font-size:18px;" >House</a></li>
-								<li><a style="font-size:12px;" >idm</a></li>
-								<li><a style="font-size:30px;" >MIDI mix</a></li>
-								<li><a style="font-size:28px;" >mp3</a></li>
-								<li><a style="font-size:25px;" >music</a></li>
-								<li><a style="font-size:20px;" >new</a></li>
-								<li><a style="font-size:19px;" >podcast</a></li>
-								<li><a style="font-size:18px;" >progressive house</a></li>
-								<li><a style="font-size:17px;" >progressive trance</a></li>
-								<li><a style="font-size:16px;" >radioshow</a></li>
-								<li><a style="font-size:15px;" >Reason</a></li>
-								<li><a style="font-size:13px;" >ReMarQ</a></li>
-								<li><a style="font-size:14px;" >Remix</a></li>
-								<li><a style="font-size:18px;" >rock</a></li>
-								<li><a style="font-size:18px;" >techno</a></li>
-								<li><a style="font-size:22px;" >trance</a></li>
-								<li><a style="font-size:23px;" >video</a></li>
-								<li><a style="font-size:25px;" >VST</a></li>
-								<li><a style="font-size:16px;" >VSTi</a></li>
-								<li><a style="font-size:13px;" >Youtube</a></li>
+								<li data-ng-repeat="item in styles">
+									<a href data-ng-style="{'font-size': styleFont(item.count) + 'px'}"
+											data-ng-click="selectStyle(item)">{{item.name}}</a>
+								</li>
 							</ul>
 						</div>
 					</article>
 
-					<div ng-if="0" class="b searched_tags">
-						<i class="ico2 ico2_tags_toggle ico2_tags_toggle__open" onclick="$('#tags').slideToggle(300); $(this).toggleClass('ico2_tags_toggle__open');"></i>
-						<span class="searched_tags__title">Выбранный тэг:</span> Dubstep
+					<div class="b searched_tags">
+						<i class="ico2 ico2_tags_toggle"
+						   data-ng-class="{'ico2_tags_toggle__open': isStylesOpened}"
+						   data-ng-click="toggleStyles()"></i>
+						<span class="searched_tags__title">Выбранный стиль:</span> {{selectedStyle.name}}
 					</div>
 
 					<form ng-if="0" class="search search_tags search_tags_full" action="#">
@@ -71,13 +39,17 @@
 					<!-- sorting panel -->
 					<div class="searched_data cf">
 						<div class="searched_data__title">Найдено треков: {{tracks.length}}</div>
-						<div class="searched_data__sort" ng-if="0">
+						<div class="searched_data__sort">
 							<span class="searched_data__sort__title">Сортировать</span>
-							<a class="search_sort">По дате</a>
-							<a class="search_sort search_sort__active">По полезности</a>
+							<a href class="search_sort"
+							   data-ng-click="sort = 'public_date'"
+							   data-ng-class="{'search_sort__active': sort === 'public_date'}">По дате</a>
+							<a href class="search_sort"
+							   data-ng-click="sort = 'pit'"
+							   data-ng-class="{'search_sort__active': sort === 'pit'}">По PiT</a>
 							<span class="searched_data__sort__title">за</span>
-							<a class="search_sort">2 недели</a>
-							<a class="search_sort search_sort__active">Месяц</a>
+							<a href class="search_sort">2 недели</a>
+							<a href class="search_sort search_sort__active">Все</a>
 						</div>
 					</div>
 
@@ -428,7 +400,7 @@
 						<!-- end item 3 -->
 
 						<!-- item 4 NO ADMIN AND DRAG DATA -->
-						<div class="gb" ng-repeat="track in tracks | limitTo: 20">
+						<div class="gb" ng-repeat="track in tracks | limitTo: 20 | orderBy:sort">
 							<track-mini tpl="track_normal.html"></track-mini>
 						</div>
 						<!-- end item 4 -->
