@@ -9,7 +9,9 @@ function setRoutes() {
 
 	Router::get()->connect(Router::$GET, '^dev$', null, 'views/dev/index.html');
 
+	Router::get()->connect(Router::$GET, '^styles', 'StylesCtrl/lists');
 	Router::get()->connect(Router::$GET, '^tracks$', 'TracksCtrl/listsFiltered');
+
 	Router::get()->connect(Router::$GET, '^tracks/(?<id>\d+)$', 'TracksCtrl/show');
 	Router::get()->connect(Router::$GET, '^tracks/promo$', 'TracksCtrl/listsPromo');
 	Router::get()->connect(Router::$GET, '^tracks/best$', 'TracksCtrl/listsBest');

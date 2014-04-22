@@ -301,6 +301,8 @@ function setUserRulesByType($type){
 			/*
 			 * Track
 			 */
+			$RDS->add('access.StylesCtrl.lists');
+
 			$RDS->add('access.TracksCtrl.lists');
 			$RDS->add('access.TracksCtrl.listsFiltered');
 			$RDS->add('access.TracksCtrl.listsPromo');
