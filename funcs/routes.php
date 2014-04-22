@@ -14,8 +14,6 @@ function setRoutes() {
     Router::get()->connect(Router::$GET, '^api/getAlbumTracks(/)?$', 'Album/getTracks', 'views/main/');
 
 
-
-
 	Router::get()->connect(Router::$GET, '^dev$', null, 'views/dev/index.html');
 
 	Router::get()->connect(Router::$GET, '^styles', 'StylesCtrl/lists');
@@ -43,8 +41,7 @@ function setRoutes() {
 	Router::get()->connect(Router::$GET, '^users/(?<id>\d+)$', 'UsersCtrl/show');
 
 	Router::get()->connect(Router::$GET, '^blogs$', 'BlogsCtrl/lists');
-    Router::get()->connect(Router::$GET, '^blogs/(?<tags_admin>\d+)$', 'BlogsCtrl/lists');
-    Router::get()->connect(Router::$GET, '^blogs/?add=(?<data>.*)$', 'BlogsCtrl/addPost');
+    Router::get()->connect(Router::$GET, '^blogs/add=(?<data>.*)$', 'BlogsCtrl/addPost');
 	Router::get()->connect(Router::$GET, '^blogs/(?<id>\d+)$', 'BlogsCtrl/show');
 
 	Router::get()->connect(Router::$GET, '^radio/(?<channel>\d)$', 'RadioCtrl/getInfo');
