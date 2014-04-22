@@ -16,9 +16,9 @@
 					<article class="b" id="tags">
 						<div class="tags">
 							<ul class="tags_list tags_list__selector">
-								<li data-ng-repeat="item in styles">
-									<a href data-ng-style="{'font-size': styleFont(item.count) + 'px'}"
-											data-ng-click="selectStyle(item)">{{item.name}}</a>
+								<li data-ng-repeat="item in styles | orderBy:'value'">
+									<a href data-ng-style="{'font-size': styleFont(item.tracks) + 'px'}"
+											data-ng-click="selectStyle(item)">{{item.value}}</a>
 								</li>
 							</ul>
 						</div>
@@ -28,7 +28,7 @@
 						<i class="ico2 ico2_tags_toggle"
 						   data-ng-class="{'ico2_tags_toggle__open': isStylesOpened}"
 						   data-ng-click="toggleStyles()"></i>
-						<span class="searched_tags__title">Выбранный стиль:</span> {{selectedStyle.name}}
+						<span class="searched_tags__title">Выбранный стиль:</span> {{selectedStyle.value}}
 					</div>
 
 					<form ng-if="0" class="search search_tags search_tags_full" action="#">
@@ -42,14 +42,18 @@
 						<div class="searched_data__sort">
 							<span class="searched_data__sort__title">Сортировать</span>
 							<a href class="search_sort"
-							   data-ng-click="sort = 'public_date'"
-							   data-ng-class="{'search_sort__active': sort === 'public_date'}">По дате</a>
+							   data-ng-click="sort = sortTypes.byDate"
+							   data-ng-class="{'search_sort__active': sort === sortTypes.byDate}">По дате</a>
 							<a href class="search_sort"
-							   data-ng-click="sort = 'pit'"
-							   data-ng-class="{'search_sort__active': sort === 'pit'}">По PiT</a>
+							   data-ng-click="sort = sortTypes.byPit"
+							   data-ng-class="{'search_sort__active': sort === sortTypes.byPit}">По PiT</a>
 							<span class="searched_data__sort__title">за</span>
-							<a href class="search_sort">2 недели</a>
-							<a href class="search_sort search_sort__active">Все</a>
+							<a href class="search_sort"
+							   data-ng-click="period = periodTypes.twoWeeks"
+							   data-ng-class="{'search_sort__active': period === periodTypes.twoWeeks}">2 недели</a>
+							<a href class="search_sort"
+							   data-ng-click="period = periodTypes.all"
+							   data-ng-class="{'search_sort__active': period === periodTypes.all}">Все</a>
 						</div>
 					</div>
 
@@ -400,7 +404,7 @@
 						<!-- end item 3 -->
 
 						<!-- item 4 NO ADMIN AND DRAG DATA -->
-						<div class="gb" ng-repeat="track in tracks | limitTo: 20 | orderBy:sort">
+						<div class="gb" ng-repeat="track in tracks | limitTo: 20 | orderBy:sort:true">
 							<track-mini tpl="track_normal.html"></track-mini>
 						</div>
 						<!-- end item 4 -->

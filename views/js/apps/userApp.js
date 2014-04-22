@@ -25,45 +25,8 @@ App.config(function($routeProvider) {
 			templateUrl: 'views/main/tracks.html',
 			controller: 'TracksCtrl',
 			resolve: {
-				Styles: function(){
-					return [
-						{
-							name: 'Andrew',
-							count: 100
-						},
-						{
-							name: 'breakbeat',
-							count: 101
-						},
-						{
-							name: 'Club',
-							count: 102
-						},
-						{
-							name: 'drum and bass',
-							count: 103
-						},
-						{
-							name: 'House',
-							count: 104
-						},
-						{
-							name: 'ReMarQ',
-							count: 105
-						},
-						{
-							name: 'trance',
-							count: 106
-						},
-						{
-							name: 'VSTi',
-							count: 107
-						},
-						{
-							name: 'radioshow',
-							count: 108
-						}
-					];
+				Styles: function (StylesResource) {
+					return StylesResource.query();
 				}
 			}
 		}).

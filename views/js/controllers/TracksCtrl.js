@@ -2,6 +2,14 @@ angular.module('CjClubUserApp').controller('TracksCtrl', function ($scope, Style
 	'use strict';
 
 	var
+		sortTypes = {
+			byPit: 'pit',
+			byDate: 'public_date'
+		},
+		periodTypes = {
+			all: 'all',
+			twoWeeks: '2week'
+		},
 		tags = $('#tags'),
 		uninterpolate = function (a, b) {
 			b = b - (a = +a) ? 1 / (b - a) : 0;
@@ -14,38 +22,58 @@ angular.module('CjClubUserApp').controller('TracksCtrl', function ($scope, Style
 			return function (t) {
 				return a + b * t;
 			};
+		},
+		getTracks = function () {
+			var params = {};
+			if ($scope.selectedStyle) {
+				params.style = $scope.selectedStyle.id;
+			}
+			if ($scope.period === periodTypes.twoWeeks) {
+				params.date = periodTypes.twoWeeks;
+			}
+			$scope.tracks = TracksResource.query(params);
 		};
 
 	/* Сортровка по дате */
-	$scope.sort = 'public_date';
-
-	$scope.tracks = TracksResource.query();
+	$scope.sortTypes = sortTypes;
+	$scope.sort = sortTypes.byDate;
+	/* За все время */
+	$scope.periodTypes = periodTypes;
+	$scope.period = periodTypes.all;
+	$scope.$watch('period', function () {
+		getTracks();
+	});
 
 	$scope.styles = Styles;
 	$scope.styleFont = (function () {
 		var
+			promise = Styles.$promise,
 			minFont = 12,
 			maxFont = 30,
-			minCount = _.min(Styles, function (style) {
-				return style.count;
-			}).count,
-			maxCount = _.max(Styles, function (style) {
-				return style.count;
-			}).count,
-			u = uninterpolate(minCount, maxCount),
+			minCount, maxCount, u, i;
+
+		promise.then(function (styles) {
+			minCount = _.min(styles, function (style) {
+				return style.tracks;
+			}).tracks;
+			maxCount = _.max(styles, function (style) {
+				return style.tracks;
+			}).tracks;
+			u = uninterpolate(minCount, maxCount);
 			i = interpolate(minFont, maxFont);
+		});
 		return function (count) {
 			return Math.floor(i(u(count)));
 		};
 	})();
 
-	$scope.selectStyle = function(style) {
-		$scope.tracks = TracksResource.query({style: style.name});
+	$scope.selectStyle = function (style) {
 		$scope.selectedStyle = style;
 		$scope.toggleStyles();
+		getTracks();
 	};
 
-	$scope.toggleStyles = function(){
+	$scope.toggleStyles = function () {
 		$scope.isStylesOpened = !$scope.isStylesOpened;
 		tags.slideToggle(300);
 	};
