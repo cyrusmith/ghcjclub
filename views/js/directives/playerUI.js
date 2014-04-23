@@ -57,6 +57,10 @@ angular.module('CjClubUserApp').directive('playerUi', function (jplayerInterface
 			};
 			scope.stopRadio = function() {
 				isRadio = false;
+				var trackIdWas = jplayerInterface.getTrackId();
+				if (trackIdWas) {
+					jplayerInterface.playId(trackIdWas);
+				}
 			};
 			scope.playRadio = function() {
 				isRadio = true;
