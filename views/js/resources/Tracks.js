@@ -1,4 +1,5 @@
-App.factory('TracksResource', function($resource) {
+angular.module('CjClubUserApp').factory('TracksResource', function($resource) {
+	'use strict';
 	return $resource('tracks/:id', {}, {
 		queryBest: {
 			method: 'GET',
@@ -13,6 +14,11 @@ App.factory('TracksResource', function($resource) {
 		queryPromo: {
 			method: 'GET',
 			url: 'tracks/promo',
+			isArray: true
+		},
+		queryByIds: {
+			method: 'GET',
+			url: 'tracks?id=:ids',
 			isArray: true
 		}
 	});

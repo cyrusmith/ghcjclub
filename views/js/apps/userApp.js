@@ -23,11 +23,11 @@ App.config(function($routeProvider) {
 		}).
 		when('/tracks', {
 			templateUrl: 'views/main/tracks.html',
-			controller: ['$scope', 'Tracks', function($scope, Tracks) {
-				$scope.tracks = Tracks;
-			}],
+			controller: 'TracksCtrl',
 			resolve: {
-				Tracks: function(TracksResource) {return TracksResource.query(); }
+				Styles: function (StylesResource) {
+					return StylesResource.query();
+				}
 			}
 		}).
 		when('/tracks/:id', {
