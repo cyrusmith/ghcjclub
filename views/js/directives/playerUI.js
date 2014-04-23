@@ -38,6 +38,39 @@ angular.module('CjClubUserApp').directive('playerUi', function (jplayerInterface
 			);
 
 			scope.playlist = playlist;
+
+			/*
+			 * RADIO
+			 */
+			var isRadio = false;
+			scope.radioBitrateHigh = false;
+
+			scope.setRadioHighBitrate = function(value) {
+				if (scope.radioBitrateHigh == value) return;
+				scope.radioBitrateHigh = !!value;
+				if (scope.isRadio()) {
+					scope.playRadio();
+				}
+			};
+			scope.isRadio = function() {
+				return isRadio;
+			};
+			scope.stopRadio = function() {
+				isRadio = false;
+			};
+			scope.playRadio = function() {
+				isRadio = true;
+				var streamUrl = scope.radioBitrateHigh ? "http://www.cjradio.ru:8000/high-stream" : "http://www.cjradio.ru:8000/low-stream";
+				jplayerInterface.setMedia(streamUrl);
+				jplayerInterface.play();
+			};
+			scope.toggleRadio = function() {
+				if (scope.isRadio()) {
+					scope.stopRadio();
+				} else {
+					scope.playRadio();
+				}
+			};
 		}
 	};
 });

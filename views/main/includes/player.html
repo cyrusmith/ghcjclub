@@ -2,38 +2,43 @@
 
 	<!-- left small btns -->
 	<div class="player_changer_left">
-		<div class="player_changer__item brl7"><span class="player_changer__item_text act">Плеер</span></div>
-		<div class="player_changer__item brl7"><span class="player_changer__item_text">Радио</span></div>
-		<div class="player_changer__item brl7"><span class="player_changer__item_text2">Low</span><span class="player_changer__item_text2 player_changer__item_text_border act">Hi</span></div>
+		<div class="player_changer__item brl7"><span class="player_changer__item_text" ng-class="{act: !isRadio()}" ng-click="stopRadio()">Плеер</span></div>
+		<div class="player_changer__item brl7"><span class="player_changer__item_text" ng-class="{act: isRadio()}" ng-click="playRadio()">Радио</span></div>
+		<div class="player_changer__item brl7"><span class="player_changer__item_text2" ng-click="setRadioHighBitrate(false)" ng-class="{act: !radioBitrateHigh}">Low</span><span class="player_changer__item_text2 player_changer__item_text_border" ng-class="{act: radioBitrateHigh}" ng-click="setRadioHighBitrate(true)">Hi</span></div>
 	</div>
 
 	<!-- composition controls -->
 	<div class="composition_b">
 		<div class="composition cf">
-			<div class="track_image">
-				<img title="" alt="" src="http://cjclub.ru/_files/trackpics/{{track.id}}_60" width="68" height="60" />
-				<div class="track_image__controls">
-					<a ng-click="togglePlay()" ng-class="{cover_play: !isPlaying(), cover_pause: isPlaying()}" ></a>
-					<a class="cover_plus" add-to-playlist="track"></a>
+			<div ng-if="!isRadio()">
+				<div class="track_image">
+					<img title="" alt="" src="http://cjclub.ru/_files/trackpics/{{track.id}}_60" width="68" height="60" />
+					<div class="track_image__controls">
+						<a ng-click="togglePlay()" ng-class="{cover_play: !isPlaying(), cover_pause: isPlaying()}" ></a>
+						<a class="cover_plus" add-to-playlist="track"></a>
+					</div>
+				</div>
+
+				<div class="composition__c" >
+					<div class="composition__title"><a >{{track.project || '&nbsp;'}}</a></div>
+					<div class="composition__title"><a >{{track.name}}</a></div>
+					<div class="composition__data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}}</div>
+				</div>
+
+				<div class="sound_control">
+					<div class="sound_control_mute" ng-click="toggleMute()"></div>
+					<div class="sound_control_slider sound_control_slider_sm"></div>
+				</div>
+
+				<div ng-click="seekAndPlay($event)" class="track_vision player_visio" data-ng-style="{background: 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png) no-repeat'}">
+					<div ng-if="0" class="track_vision_in" style="background-image:url(views/main/img/new_track_vision_g.png); width:75%;"></div>
+					<div class="track_vision_in" data-ng-style="{'background-image': 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png)', width: playInfo.playprogress + '%'}"></div>
 				</div>
 			</div>
 
-			<div class="composition__c" >
-				<div class="composition__title"><a >{{track.project || '&nbsp;'}}</a></div>
-				<div class="composition__title"><a >{{track.name}}</a></div>
-				<div class="composition__data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}}</div>
+			<div ng-if="isRadio()">
+				Radio is here
 			</div>
-
-			<div class="sound_control">
-				<div class="sound_control_mute" ng-click="toggleMute()"></div>
-				<div class="sound_control_slider sound_control_slider_sm"></div>
-			</div>
-
-			<div ng-click="seekAndPlay($event)" class="track_vision player_visio" data-ng-style="{background: 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png) no-repeat'}">
-				<div ng-if="0" class="track_vision_in" style="background-image:url(views/main/img/new_track_vision_g.png); width:75%;"></div>
-				<div class="track_vision_in" data-ng-style="{'background-image': 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png)', width: playInfo.playprogress + '%'}"></div>
-			</div>
-
 		</div>
 		<div id="playlist_opener" class="playlist_opener" data-ng-click="playlist.togglePlaylist()"><span class="dot">Плейлист Избранное</span> ({{playlist.tracks.length}})</div>
 		<playlist-ui></playlist-ui>
