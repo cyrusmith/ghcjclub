@@ -279,6 +279,7 @@ function setUserRulesByType($type){
 			 */
 			$RDS->add('access.Radio.lists');
 			$RDS->add('access.Radio.show');
+			$RDS->add('access.RadioCtrl.getInfo');
 			/*
 			 * Release
 			 */

@@ -36,6 +36,8 @@ function setRoutes() {
 	Router::get()->connect(Router::$GET, '^blogs$', 'BlogsCtrl/lists');
 	Router::get()->connect(Router::$GET, '^blogs/(?<id>\d+)$', 'BlogsCtrl/show');
 
+	Router::get()->connect(Router::$GET, '^radio/(?<channel>\d)$', 'RadioCtrl/getInfo');
+
 	Router::get()->connect(Router::$GET, '^', null, 'views/main/main.html');
 	/*
 	 * GUEST
