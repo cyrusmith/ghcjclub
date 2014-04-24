@@ -110,6 +110,12 @@ header .width { position:relative; /*height: 150px;*/}
 .ico5_pause { background-position:0 -64px;}
 .ico5_letter { background-position:0 -80px; width:auto; padding-left:18px; font-size:11px; line-height:16px; color:#fff;}
 
+.ico5_down[disabled] { background-position:-16px 0; margin-left:6px;}
+.ico5_next[disabled] { background-position:-16px -16px;}
+.ico5_play[disabled] { background-position:-16px -32px;}
+.ico5_prev[disabled] { background-position:-16px -48px;}
+.ico5_pause[disabled] { background-position:-16px -64px;}
+
 /* logo */
 .logo { margin:0 0 6px; display:block;}
 .logo_mini { margin:0 0 0 15px; float:left; width:146px;}
@@ -365,7 +371,7 @@ right: 0;}
 .playlist_content { min-height:204px; max-height:510px; overflow:hidden; position:relative;}
 .playlist_list { width:480px;}
 .playlist_item { padding:5px 0 8px 37px;}
-.playlist_item__cover { float:left; margin:3px 12px 0 0;}
+.playlist_item__cover { float:left; margin:3px 12px 0 0; width:36px; height:36px;}
 .playlist_item__data { float:left; max-width:315px; overflow:hidden;}
 .playlist_item__data__link { font-size:14px; color:#fff; white-space:nowrap; }
 .playlist_item__data__link:hover { color:#ccc;}
@@ -2058,5 +2064,9 @@ div.search {
 .track-left {
 	position: relative;
 	top: 0;
+}
+
+*[disabled] {
+	cursor: default;
 }
 

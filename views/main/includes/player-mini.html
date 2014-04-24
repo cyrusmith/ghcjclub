@@ -11,11 +11,15 @@
 	</div>
 
 	<div class="pl_player">
-		<div class="ico5 ico5_prev"></div>
+		<div class="ico5 ico5_prev"
+			 data-ng-disabled="isRadio || !playlist.hasPrev(track.id)"
+			 data-ng-click="prev(track.id)"></div>
 		<a class="ico5" data-ng-click="togglePlay()"
+		   data-ng-disabled="isRadio"
 		   data-ng-class="{ico5_play: !isPlaying(), ico5_pause: isPlaying()}"></a>
-
-		<div class="ico5 ico5_next"></div>
+		<div class="ico5 ico5_next"
+			 data-ng-disabled="isRadio || !playlist.hasNext(track.id, true)"
+			 data-ng-click="next(track.id)"></div>
 		<div class="ico5 ico5_down"></div>
 	</div>
 

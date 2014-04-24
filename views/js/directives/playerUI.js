@@ -39,6 +39,20 @@ angular.module('CjClubUserApp').directive('playerUi', function (jplayerInterface
 
 			scope.playlist = playlist;
 
+			scope.next = function (id) {
+				var next = playlist.getNext(id, true);
+				if (next) {
+					jplayerInterface.playId(next);
+				}
+			};
+
+			scope.prev = function (id) {
+				var prev = playlist.getPrev(id, true);
+				if (prev) {
+					jplayerInterface.playId(prev);
+				}
+			};
+
 			/*
 			 * RADIO
 			 */
