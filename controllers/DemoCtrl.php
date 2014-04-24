@@ -44,7 +44,7 @@ class DemoCtrl extends DController {
 	private $model;
 	function __construct() {
 		$this->db  = ObjectsPool::get('DataBase');
-		$this->rds = RDS::get();
+		$this->rds = ObjectsPool::get('RDS');
 		/*
 		 * если контроллер использует модель, то создавать модель также в конструкторе
 		 */
