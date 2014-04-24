@@ -916,7 +916,7 @@ class FormElements extends FormElement implements Iterator {
 					$element->setLabel(s($prefix.$element->getName()));
 				}
 			}
-		} 
+		}
 		return $this;
 	}
 	/**
@@ -3947,7 +3947,7 @@ JS;
 				break;
 			}
 		}
-		
+
 JS;
 		return $js;
 	}
@@ -5388,7 +5388,7 @@ class DModelProxyDatabaseCustom extends DModelProxyDatabaseJoins {
 }
 /**
  * Обеспечивает построение формы фильтра.
- 
+
  * (когда пользователь вводит какие-либо параметры для фильтрации списка записей например).
  * По сути является связующим звеном между Model и DForm.
  * Для хранения данных используется DModelDynamic
@@ -6226,14 +6226,14 @@ function dump() {
 		elseif (is_float($var)) $addType = 'float';
 		elseif (is_bool($var)) $addType = 'bool';
 		elseif (is_int($var)) $addType = 'int';
-		
+
 		if ($var === null) $addType = 'null';
-		
+
 		if (!empty($addType)) {
 			$addType = ' <i>('.$addType.')</i>';
 		}
-		
-		
+
+
 		if (is_bool($var)) $var = $var ? '<i>true</i>' : '<i>false</i>';
 		$var = '<td valign="top" style="border-right:1px solid #'.$color.'"><pre style="margin:0;padding:5px">'.print_r($var, true).$addType.'</pre></td>';
 	}
@@ -8693,7 +8693,9 @@ function kernelShutdown() {
 	ObjectsPool::remove('RDS');
 //	dump('shutting down DB');
 	ObjectsPool::remove('DB');
-	exit();
+    if (!class_exists("PHPUnit_Framework_TestCase", false)) { //TODO Пересмотреть политику выходов для PHPUNIT
+        exit();
+    }
 }
 /**
  * Создать фильтр
@@ -8970,12 +8972,12 @@ function getSQLparseRegex() {
 		# либо просто текст
 		.+?
 	)
-	
+
 	(?:
 		\s+ as \s+ # as в окружении пробелов
 		(?<alias>.+?) #alias поля
 	)? # часть "as xxx" необязательна
-	
+
 	(?<end>,|$) #в конце стоит либо запятая, либо конец строки
 	/x';
 	return $regex;

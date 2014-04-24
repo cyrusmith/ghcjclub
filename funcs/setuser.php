@@ -309,7 +309,19 @@ function setUserRulesByType($type){
 			$RDS->add('access.TracksCtrl.show');
             $RDS->add('access.Track.actionPlus');
             $RDS->add('access.Track.getPluses');
-			break;
+
+        /**
+         * PlaylistCtrl
+         * TODO: Разбросать по правам
+         */
+        $RDS->add('access.PlaylistsCtrl.actionNew');
+        $RDS->add('access.PlaylistsCtrl.actionUpdate');
+        $RDS->add('access.PlaylistsCtrl.actionDelete');
+        $RDS->add('access.PlaylistsCtrl.actionTracksSet');
+        $RDS->add('access.PlaylistsCtrl.actionTracksList');
+        $RDS->add('access.PlaylistsCtrl.actionList');
+
+        break;
 	}
 }
 ?>

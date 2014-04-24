@@ -24,7 +24,14 @@ function setRoutes() {
 	Router::get()->connect(Router::$GET, '^tracks/best$', 'TracksCtrl/listsBest');
 	Router::get()->connect(Router::$GET, '^tracks/latest$', 'TracksCtrl/listsLatest');
 
-	Router::get()->connect(Router::$GET, '^projects$', 'ProjectsCtrl/lists');
+    Router::get()->connect(Router::$POST, '^playlists/new$', 'PlaylistsCtrl/actionNew'); //t
+    Router::get()->connect(Router::$POST, '^playlists/update$', 'PlaylistsCtrl/actionUpdate'); //t
+    Router::get()->connect(Router::$DELETE, '^playlists/delete$', 'PlaylistsCtrl/actionDelete');
+    Router::get()->connect(Router::$POST, '^playlists/tracks/set$', 'PlaylistsCtrl/actionTracksSet'); //t
+    Router::get()->connect(Router::$GET, '^playlists/list$', 'PlaylistsCtrl/actionList');//t
+    Router::get()->connect(Router::$GET, '^playlists/tracks/list$', 'PlaylistsCtrl/actionTracksList'); //t
+
+    Router::get()->connect(Router::$GET, '^projects$', 'ProjectsCtrl/lists');
 	Router::get()->connect(Router::$GET, '^projects/(?<id>\d+)$', 'ProjectsCtrl/show');
 
 	Router::get()->connect(Router::$GET, '^projects/(?<projectId>\d+)/albums/?$', 'AlbumsCtrl/lists');
