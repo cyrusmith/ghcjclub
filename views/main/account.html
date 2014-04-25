@@ -1,0 +1,629 @@
+<div id="c">
+
+<!-- main section -->
+<section class="main">
+<div class="width">
+
+<!-- content -->
+<section class="content cf">
+
+<!-- right colum -->
+<section class="left_aside">
+
+<!-- control center page -->
+<h1 class="page_title">{{user.name}}</h1>
+
+<ul class="gray_menu">
+	<li class="gray_menu__item gray_menu__active"><a href="#">Профиль</a></li>
+	<li class="gray_menu__item"><a href="#">Статистика</a></li>
+	<li class="gray_menu__item"><a href="#">Группы</a></li>
+</ul>
+
+<!-- USER -->
+<div class="gb gb_center">
+	<div class="gb_in cf">
+
+		<!-- menu -->
+		<div class="gb_menu">
+			<a href="#" class="ico2 ico2_set"></a>
+			<a href="#" class="ico2 ico2_del"></a>
+		</div>
+
+		<!-- gray block labels -->
+		<ul class="gb_labels">
+			<li class="gb_label">
+				<div class="gb_label_in">Слушатель</div>
+			</li>
+		</ul>
+
+		<!-- gray block data -->
+		<div class="gb_data">
+			<div class="gb_data_in">Регистрация: {{user.regdate | date : 'longDate'}}</div>
+		</div>
+
+		<!-- img -->
+		<div class="col_img">
+			<img ng-src="http://cjclub.ru/_files/avatars/{{user.id}}" alt="" title=""/>
+			<span class="col_rating">{{user.rating}}</span>
+
+			<div class="col_img__contr">
+				<a href="#" class="col_img__contr_edit">
+					<i class="col_img__contr_edit_ico"></i>
+					редактировать
+				</a>
+				<a href="#" class="col_img__contr_change">
+					<i class="col_img__contr_change_ico"></i>
+					сменить
+				</a>
+			</div>
+		</div>
+
+		<!-- description -->
+		<div class="col_desc">
+			<div ng-class="{last_visit: true, online: user.isOnline}">Последнее посещение сайта: {{user.lastdateuse |
+				date:
+				dd.mm.yyyy}}
+			</div>
+
+			<div class="col_title">{{user.name}} <i class="ico2 ico2_{{user.gander}}"></i></div>
+			<div class="col_text">{{user.description}}
+			</div>
+
+			<div class="col_data">
+				<div class="col_data_soc">
+					<a ng-if="user.contacts.vk.isVisible" ng-href="http://vk.com/{{user.contacts.vk.value}}"
+					   target="_blank" class="ico2 col_vk"></a>
+					<a ng-if="user.contacts.twitter.isVisible"
+					   ng-href="http://twitter.com/{{user.contacts.twitter.value}}"
+					   target="_blank" class="ico2 col_tw"></a>
+					<a ng-if="user.contacts.skype.isVisible" ng-href="skype:{{user.contacts.skype.value}}?add"
+					   class="ico2 col_sk"></a>
+					<a ng-if="user.contacts.icq.isVisible"
+					   ng-href="http://www.icq.com/whitepages/cmd.php?uin={{user.contacts.icq.value}}&action=message"
+					   class="ico2 col_icq"></a>
+				</div>
+				<div class="col_data_l">
+					Дислокация: {{user.location}} <br/>
+					Дата рождения: {{user.birthDate |date:dd.mm.yyyy}}
+				</div>
+				<div class="col_data_r">
+					E-mail:
+					<a ng-show="!showEmail" ng-click="showEmail = true">показать...</a>
+					<a ng-if="showEmail">{{user.email}}</a>
+					</br>
+					Сайт:
+					<a ng-show="!showSite" ng-click="showSite = true">показать...</a>
+					<a ng-if="showSite">{{user.site}}</a>
+				</div>
+			</div>
+
+			<div class="col_styles">
+				<div class="col_styles_line">Работает в стилях: Trance, House. Rap, Jazz, Rock-n-roll, Acid Tance,
+					<script type="text/ng-template" id="allStyles">
+						<div class="tooltip col_styles__tooltip">
+							<a href="#">Trance</a> <a href="#">House</a> <a href="#">Rap</a> <a href="#">Jazz</a> <a
+								href="#">Rock-n-roll</a> <a href="#">Acid Tance</a> <a href="#">Drumm and Bass</a> <a
+								href="#">Vocal Trance</a> <a href="#">Club</a> <a href="#">Indie Rock</a> <a
+								href="#">Pop</a> <a href="#">Post punk</a> <a href="#">Indietronica</a> <a href="#">Progressive</a>
+							<a href="#">Jungle</a> <a href="#">Dubstep</a> <a href="#">Electro pop</a> <a
+								href="#">Melodic</a> <a href="#">Trance</a> <a href="#">Psydelic</a>
+							<a href="#">ambient</a> <a href="#">Goa Trance</a> <a href="#">Techstep</a>
+						</div>
+					</script>
+					<a data-trigger="click" data-placement="bottom" data-template="allStyles" bs-tooltip
+					   class="link_g show_link">показать все...</a>
+
+				</div>
+			</div>
+
+			<div class="col_btns">
+				<a href="#" class="btn_orange"><i class="ico2 ico2_mess"></i> Написать сообщение</a>
+				<a href="#" class="btn_orange"><i class="ico2 ico2_friend"></i> В друзья</a>
+				<a href="#" class="btn_orange"><i class="ico2 ico2_ignore"></i> Игнорировать</a>
+				<a href="#" class="btn_orange"><i class="ico2 ico2_ban"></i> Забанить</a>
+			</div>
+		</div>
+
+	</div>
+</div>
+<span id="testing"></span>
+<script type="text/ng-template" id="fullInfo">
+	<div class="account_info">
+		<img class="img_left" src="http://placehold.it/100x100" alt="" title="" />
+		<p>Независимый цифровой лейбл основан в 2012 году, расположение лейбла - Москва. Музыкальные предпочтения
+			лейбла,
+			House и поджанры (progressive, tech, deep, minimal) Дистрибьюция: Beatport и многие другие Мы принимаем
+			Demo. У
+			нас есть несколько стандартных правил. Пожалуйста, прочитайте их, прежде чем отправлять нам свое демо, если
+			вам
+			не впервой),можете не читать.</p>
+		<img class="img_right" src="http://placehold.it/100x100" alt="" title="" />
+		<p>Независимый цифровой лейбл основан в 2012 году, расположение лейбла - Москва. Музыкальные предпочтения
+			лейбла,
+			House и поджанры (progressive, tech, deep, minimal) Дистрибьюция: Beatport и многие другие Мы принимаем
+			Demo. У
+			нас есть несколько стандартных правил. Пожалуйста, прочитайте их, прежде чем отправлять нам свое демо, если
+			вам
+			не впервой), вы мне читать это.</p>
+	</div>
+</script>
+<div class="account_info_link cf">
+	<a data-template="fullInfo" bs-aside data-container="#testing"
+	   class="link_g show_link fr">Показать полную информацию</a>
+</div>
+
+<div>
+
+</div>
+<div class="acc_projects_menu cf">
+
+	<!-- ACCOUNT PROJECTS COUNT -->
+	<h2 class="block_title">Участие в Проектах</h2>
+
+	<ul class="acc_menu">
+		<li class="acc_menu__item">Вы не участвуете ни в однои Проекте. СОЗДАТЬ <a href="#" class="black_link"><i
+				class="ico2 ico2_plus20"></i></a></li>
+		<li class="acc_menu__item">Всего проектов: 3</li>
+	</ul>
+
+
+	<!-- ACCOUNT PROJECTS SORTING -->
+	<div class="acc_sorting cf">
+		<div class="searched_data__sort">
+			<span class="searched_data__sort__title">Сортировать</span>
+			<a href="#" class="search_sort">По дате</a>
+			<a href="#" class="search_sort search_sort__active">По рейтингу</a>
+		</div>
+	</div>
+</div>
+
+
+<!-- ACCOUNT PROJECTS -->
+<div class="acc_projects">
+
+<!-- item 1 -->
+<div class="gb cf">
+	<div class="gb_in">
+		<!-- labels -->
+		<ul class="gb_labels">
+			<li class="gb_label">
+				<div class="gb_label_in">Музыкальный коллектив</div>
+			</li>
+			<li class="gb_label gb_letter"><a href="#" class="gb_label_in gb_letter_in"><i class="ico2 ico2_letter"></i>
+				+3</a></li>
+		</ul>
+		<!-- labels -->
+		<ul class="gb_labels gb_labels_center2">
+			<li class="gb_label"><a href="#" class="gb_label_in green2"><i class="ico2 ico2_load"></i> Загрузить
+				трек</a></li>
+			<li class="gb_label"><a href="#" class="gb_label_in green2"><i class="ico2 ico2_write"></i> Написать в блог</a>
+			</li>
+		</ul>
+		<!-- article menu -->
+		<div class="gb_menu">
+			<a class="ico2 ico2_set" href="#"></a>
+			<a class="ico2 ico2_plus" href="#"></a>
+			<a class="ico2 ico2_exit" href="#"></a>
+			<a class="ico2 ico2_del" href="#"></a>
+		</div>
+
+		<!-- gray block data -->
+		<div class="gb_data">
+			<div class="gb_data_in">04 марта 2003</div>
+		</div>
+
+
+		<div class="new_track acc_group cf">
+
+			<!-- left side -->
+			<div class="track_image new_track__image gbt__l">
+				<img title="" alt="" src="http://placehold.it/100x100">
+				<i class="ico_top100"></i>
+			</div>
+
+			<!-- top -->
+			<div class="gbt__t">
+				<div class="gbt__name"><a href="#">Jazz -
+					2013333333333333333333333333333333333333333333333333333333333333</a> <a
+						class="user_stat user_stat_2" href="#"></a></div>
+			</div>
+
+			<!-- bottom -->
+			<div class="gbt__b cf">
+
+				<!-- left side -->
+				<div class="gbt__l2">
+					<div class="gbt__group">
+						<b>Состав:</b><br/>
+						Вадим Изофатов<br/>
+						Алина Константинова<br/>
+						Дарья Богушевская
+					</div>
+					<a href="#" class="green2 gbt_group__more"><i class="ico2 ico2_arr_g_d"></i> смотреть всех</a>
+				</div>
+
+
+				<!-- right side -->
+				<div class="gbt__r2">
+					<div class="gbt__desc2">Джаз бэнд Twins интересен необычным звучанием расширенного состава,
+						нестандартным сочетанием духовых инструментов для джазового ансамбля,
+						а именно;
+					</div>
+
+					<a href="#" class="btn_orange btn_orange_sm gbt__join">Вступить</a>
+					<ul class="gbt__menu">
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_vol"></i> 1 340</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_disc"></i> 28</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_wrotes"></i> 56</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_people"></i> 30257</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_img"></i> 78</a></li>
+					</ul>
+				</div>
+
+			</div>
+
+		</div>
+
+		<!-- more faces -->
+		<div class="gbt__more cf">
+			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
+		</div>
+
+	</div>
+</div>
+<!-- end item 1 -->
+
+<!-- item 2 -->
+<div class="gb cf">
+	<div class="gb_in">
+		<!-- labels -->
+		<ul class="gb_labels">
+			<li class="gb_label">
+				<div class="gb_label_in">Профессональный диджей</div>
+			</li>
+			<li class="gb_label gb_letter gb_label__inactive"><a href="#"
+			                                                     class="gb_label_in gb_letter_in gb_label__inactive_in"><i
+					class="ico2 ico2_letter"></i> 0</a></li>
+		</ul>
+		<!-- labels -->
+		<ul class="gb_labels gb_labels_center2">
+			<li class="gb_label"><a href="#" class="gb_label_in green2"><i class="ico2 ico2_load"></i> Загрузить
+				трек</a></li>
+			<li class="gb_label"><a href="#" class="gb_label_in green2"><i class="ico2 ico2_write"></i> Написать в блог</a>
+			</li>
+		</ul>
+		<!-- article menu -->
+		<div class="gb_menu">
+			<a class="ico2 ico2_set" href="#"></a>
+			<a class="ico2 ico2_plus" href="#"></a>
+			<a class="ico2 ico2_exit" href="#"></a>
+			<a class="ico2 ico2_del" href="#"></a>
+		</div>
+
+		<!-- gray block data -->
+		<div class="gb_data">
+			<div class="gb_data_in">04 марта 2003</div>
+		</div>
+
+
+		<div class="new_track acc_group cf">
+
+			<!-- left side -->
+			<div class="track_image new_track__image gbt__l">
+				<img title="" alt="" src="http://placehold.it/100x100">
+				<i class="ico_top100"></i>
+			</div>
+
+			<!-- top -->
+			<div class="gbt__t">
+				<div class="gbt__name"><a href="#">ATB (Andre Tanneberger)</a> <a class="user_stat user_stat_1"
+				                                                                  href="#"></a></div>
+			</div>
+
+			<!-- bottom -->
+			<div class="gbt__b cf">
+
+				<!-- left side -->
+				<div class="gbt__l2">
+					<div class="gbt__group">
+						<b>Состав:</b><br/>
+						Вадим Изофатов<br/>
+						Алина Константинова<br/>
+						Дарья Богушевская
+					</div>
+					<a href="#" class="green2 gbt_group__more"><i class="ico2 ico2_arr_g_d"></i> смотреть всех</a>
+				</div>
+
+
+				<!-- right side -->
+				<div class="gbt__r2">
+					<div class="gbt__desc2">Джаз бэнд Twins интересен необычным звучанием расширенного состава,
+						нестандартным сочетанием духовых инструментов для джазового ансамбля,
+						а именно;
+					</div>
+
+					<a href="#" class="btn_orange btn_orange_sm gbt__join">Вступить</a>
+					<ul class="gbt__menu">
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_vol"></i> 1 340</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_disc"></i> 28</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_wrotes"></i> 56</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_people"></i> 30257</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_img"></i> 78</a></li>
+					</ul>
+				</div>
+
+			</div>
+
+		</div>
+
+		<!-- more faces -->
+		<div class="gbt__more cf">
+			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
+		</div>
+
+	</div>
+</div>
+<!-- end item 2 -->
+
+<!-- item 3 -->
+<div class="gb cf">
+	<div class="gb_in">
+		<!-- labels -->
+		<ul class="gb_labels">
+			<li class="gb_label">
+				<div class="gb_label_in">Профессональный диджей</div>
+			</li>
+			<li class="gb_label gb_letter"><a href="#" class="gb_label_in gb_letter_in"><i class="ico2 ico2_letter"></i>
+				+123</a></li>
+		</ul>
+		<!-- labels -->
+		<ul class="gb_labels gb_labels_center2">
+			<li class="gb_label"><a href="#" class="gb_label_in green2"><i class="ico2 ico2_load"></i> Загрузить
+				трек</a></li>
+			<li class="gb_label"><a href="#" class="gb_label_in green2"><i class="ico2 ico2_write"></i> Написать в блог</a>
+			</li>
+		</ul>
+		<!-- article menu -->
+		<div class="gb_menu">
+			<a class="ico2 ico2_set" href="#"></a>
+			<a class="ico2 ico2_plus" href="#"></a>
+			<a class="ico2 ico2_exit" href="#"></a>
+			<a class="ico2 ico2_del" href="#"></a>
+		</div>
+
+		<!-- gray block data -->
+		<div class="gb_data">
+			<div class="gb_data_in">24 марта 2013</div>
+		</div>
+
+
+		<div class="new_track acc_group cf">
+
+			<!-- left side -->
+			<div class="track_image new_track__image gbt__l">
+				<img title="" alt="" src="http://placehold.it/100x100" width="100">
+				<i class="ico_top100"></i>
+			</div>
+
+			<!-- top -->
+			<div class="gbt__t">
+				<div class="gbt__name"><a href="#"> Armin van Buuren</a> <a class="user_stat user_stat_3" href="#"></a>
+				</div>
+			</div>
+
+			<!-- bottom -->
+			<div class="gbt__b cf">
+
+				<!-- left side -->
+				<div class="gbt__l2">
+					<div class="gbt__group">
+						<b>Состав:</b><br/>
+						Вадим Изофатов<br/>
+						Алина Константинова<br/>
+						Дарья Богушевская
+					</div>
+					<a href="#" class="green2 gbt_group__more"><i class="ico2 ico2_arr_g_d"></i> смотреть всех</a>
+				</div>
+
+
+				<!-- right side -->
+				<div class="gbt__r2">
+					<div class="gbt__desc2">Джаз бэнд Twins интересен необычным звучанием расширенного состава,
+						нестандартным сочетанием духовых инструментов для джазового ансамбля,
+						а именно;
+					</div>
+
+					<a href="#" class="btn_orange btn_orange_sm gbt__join">Вступить</a>
+					<ul class="gbt__menu">
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_vol"></i> 1 340</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_disc"></i> 28</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_wrotes"></i> 56</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_people"></i> 30257</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_img"></i> 78</a></li>
+					</ul>
+				</div>
+
+			</div>
+
+		</div>
+
+		<!-- more faces -->
+		<div class="gbt__more cf">
+			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
+			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
+		</div>
+
+	</div>
+</div>
+<!-- end item 3 -->
+
+<!-- item 4 NO TECH DATA AND MENUS -->
+<div class="gb cf">
+	<div class="gb_in">
+		<!-- labels -->
+		<ul class="gb_labels">
+			<li class="gb_label">
+				<div class="gb_label_in">Профессональный диджей</div>
+			</li>
+		</ul>
+		<!-- labels -->
+		<ul class="gb_labels gb_labels_center2">
+			<li class="gb_label"><a href="#" class="gb_label_in green2"><i class="ico2 ico2_load"></i> Загрузить
+				трек</a></li>
+			<li class="gb_label"><a href="#" class="gb_label_in green2"><i class="ico2 ico2_write"></i> Написать в блог</a>
+			</li>
+		</ul>
+
+		<!-- gray block data -->
+		<div class="gb_data">
+			<div class="gb_data_in">24 марта 2013</div>
+		</div>
+
+
+		<div class="new_track acc_group cf">
+
+			<!-- left side -->
+			<div class="track_image new_track__image gbt__l">
+				<img title="" alt="" src="http://placehold.it/100x100" width="100">
+				<i class="ico_top100"></i>
+			</div>
+
+			<!-- top -->
+			<div class="gbt__t">
+				<div class="gbt__name"><a href="#"> Armin van Buuren</a> <a class="user_stat user_stat_1" href="#"></a>
+				</div>
+			</div>
+
+			<!-- bottom -->
+			<div class="gbt__b cf">
+
+				<!-- left side -->
+				<div class="gbt__l2">
+					<div class="gbt__group">
+						<b>Состав:</b><br/>
+						Вадим Изофатов<br/>
+						Алина Константинова<br/>
+						Дарья Богушевская
+					</div>
+				</div>
+
+				<!-- right side -->
+				<div class="gbt__r2">
+					<div class="gbt__desc2">Джаз бэнд Twins интересен необычным звучанием расширенного состава,
+						нестандартным сочетанием духовых инструментов для джазового ансамбля,
+						а именно;
+					</div>
+
+					<a href="#" class="btn_orange btn_orange_sm gbt__join">Вступить</a>
+					<ul class="gbt__menu">
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_vol"></i> 1 340</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_disc"></i> 28</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_wrotes"></i> 56</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_people"></i> 30257</a></li>
+						<li class="gbt_menu__item"><a href="#" class="gbt_menu__link link_gray"><i
+								class="ico2 ico2_img"></i> 78</a></li>
+					</ul>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+</div>
+<!-- end item 4 -->
+
+
+</div>
+
+<div class="nav center">
+	<a class="act" href="#">1</a>
+	<a href="#">2</a>
+	<a href="#">3</a>
+	<a href="#">4</a>
+	<a href="#">5</a>
+	<a href="#">6</a>
+	<a href="#">...</a>
+	<a href="#">187</a>
+</div>
+
+
+<article class="bnn">
+	<a href="#"><img title="" alt="" src="http://placehold.it/741x61"></a>
+</article>
+
+</section>
+
+
+<!-- ASIDE -->
+
+<section class="right_aside">
+
+	<!-- here was aside blocks -->
+	...
+
+</section>
+</section>
+</div>
+
+</section>
+</div>
