@@ -18,11 +18,18 @@ class BlogsCtrl extends DController {
 		}
 	}
 
+	private function getSQLForParamLike($name, $values) {
+		if ($values !== null) {
+			# пока ограничим только когда одно значение
+			return "$name like '%$values%'";
+		}
+	}
+
 	public function lists($authorId = null, $tags_cached = null, $tags_admin = null)
 	{
 		$sql = ['true'];
 
-		if ($t = $this->getSQLForParam('tags_cached', $tags_cached)) $sql[] = $t;
+		if ($t = $this->getSQLForParamLike('tags_cached', $tags_cached)) $sql[] = $t;
 		if ($t = $this->getSQLForParam('authorId', $authorId)) $sql[] = $t;
 
 		$sql = implode(' AND ', $sql);
@@ -36,7 +43,6 @@ class BlogsCtrl extends DController {
 			$t = $this->getSQLForParam(CONFIG::$DB->prefix . 'articles_has_tags.tag_id', $tags_admin);
 			$proxy->addJoinedTable('articles_has_tags', $t, 'right');
 			$this->model = new ArticleModel($proxy);
-
 		} 
 		else
 		{
