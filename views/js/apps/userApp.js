@@ -64,25 +64,7 @@ App.config(function($routeProvider) {
 		}).
 		when('/projects/:id', {
 			templateUrl: 'views/main/project.html',
-			controller: ['$scope', 'Project', 'Albums', 'Tracks', 'Blogs', function($scope, Project, Albums, Tracks, Blogs) {
-				$scope.project = Project;
-				$scope.project.$promise.then(function() {
-					$scope.project.styles = [
-						{
-							id: 2,
-							style: 'Trance'
-						},
-						{
-							id: 14,
-							style: 'DnB'
-						}
-					];
-				}); // todo mockup
-				$scope.blog = Blogs;
-				$scope.tracks = Tracks;
-				$scope.albums = Albums;
-				$scope.isAccessGranted = false; // доступ к изменению
-			}],
+			controller: 'ProjectCtrl',
 			resolve: {
 				Project: function(Projects, $route) {
 					return Projects.get({id: $route.current.params.id});
