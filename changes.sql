@@ -1,0 +1,1 @@
+ALTER TABLE cjclub_articles ADD COLUMN authorId int(10) NOT NULL DEFAULT '0' AFTER tags_cached;
