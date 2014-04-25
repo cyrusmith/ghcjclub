@@ -31,16 +31,17 @@ class BlogsCtrl extends DController {
 
 		if ($t = $this->getSQLForParamLike('tags_cached', $tags_cached)) $sql[] = $t;
 		if ($t = $this->getSQLForParam('authorId', $authorId)) $sql[] = $t;
+		$sql[] = 'id is not null';
 
 		$sql = implode(' AND ', $sql);
-
-		$sql .= ' order by id';
+		$sql .= ' order by id';	
 		$sql .= ' limit 0,10';
 
 		if($tags_admin !== null)
 		{
 			$proxy = new DModelProxyDatabaseJoins('articles');
-			$t = $this->getSQLForParam(CONFIG::$DB->prefix . 'articles_has_tags.tag_id', $tags_admin);
+			$t = $this->getSQLForParam('articles_has_tags.tag_id', $tags_admin);
+			$t .= ' and articles_has_tags.article_id = articles.id';
 			$proxy->addJoinedTable('articles_has_tags', $t, 'right');
 			$this->model = new ArticleModel($proxy);
 		} 

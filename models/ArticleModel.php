@@ -50,7 +50,7 @@ class ArticleModel extends DModelValidated {
 
 	}
 
-	public function __constructor($proxy = null)
+	public function __construct($proxy = null)
 	{
 		$this->setup();
 		$this->proxy = $proxy ? $proxy : new DModelProxyDatabase('articles');
