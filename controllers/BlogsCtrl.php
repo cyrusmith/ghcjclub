@@ -57,7 +57,7 @@ class BlogsCtrl extends DController {
 		{
 			try
 			{
-				$model = (new ArticleModel)->sets($data)
+				$model = (new ArticleModel)->sets($data);
 				$_m = $model->create();
 			}
 			catch(Exception $e)
