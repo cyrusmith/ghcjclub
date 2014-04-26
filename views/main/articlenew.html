@@ -67,19 +67,28 @@
     Если ваш текст небольшой, то имеет смысл полностью вписать текст в анонс и оставить поле основного текста пустым.
 </div>
 
-<div>
+<div class="wys_editor_container">
     <h2 class="block_title block_title_nm">Анонс</h2>
+
     <div class="wys_editor" ng-show="announcement">
-        <textarea class="wiki_editor" wiki-editor ng-model="article.announcement"></textarea>
+        <span class="dfTextArea"><textarea class="wiki_editor" wiki-editor ng-model="article.announcement"
+                                           id="ae_textarea_announcement"
+                                           onfocus='attachObject.currentArea = $(this);'></textarea></span>
     </div>
+    <div class='markItUpPreview'></div>
 </div>
 
 <!-- description -->
 <h2 class="block_title block_title_nm">Описание</h2>
 <!-- визуальный редактор -->
 
-<div class="wys_editor">
-    <textarea class="wiki_editor" wiki-editor ng-model="article.text"></textarea>
+<div class="attach_dialog"></div>
+<div class="wys_editor_container">
+    <div class="wys_editor">
+        <span class="dfTextArea"><textarea class="wiki_editor" wiki-editor ng-model="article.text" id="ae_textarea_text"
+                                           onfocus='attachObject.currentArea = $(this);'></textarea></span>
+    </div>
+    <div class='markItUpPreview'></div>
 </div>
 
 <!-- poll form -->
