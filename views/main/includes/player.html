@@ -27,10 +27,7 @@
 				<div class="composition__data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}}</div>
 			</div>
 
-			<div class="sound_control">
-				<div class="sound_control_mute" data-ng-click="toggleMute()"></div>
-				<div class="sound_control_slider sound_control_slider_sm"></div>
-			</div>
+			<sound-control></sound-control>
 
 			<!-- TODO заменить на waveform -->
 			<!--<div ng-click="seekAndPlay($event)" class="track_vision player_visio" data-ng-style="{background: 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png) no-repeat'}">-->
