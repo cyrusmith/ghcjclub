@@ -101,7 +101,7 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 					next = index + 1;
 
 				if (index === -1) {
-					return false;
+					return true;
 				}
 
 				// current the last, if not "repeat" there are no tracks more

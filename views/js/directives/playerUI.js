@@ -1,4 +1,4 @@
-angular.module('CjClubUserApp').directive('playerUi', function (jplayerInterface, playlist, radioUrls) {
+angular.module('CjClubUserApp').directive('playerUi', function (jplayerInterface, playlist) {
 	'use strict';
 	var
 		link = function (scope) {
@@ -6,6 +6,9 @@ angular.module('CjClubUserApp').directive('playerUi', function (jplayerInterface
 			scope.playlist = playlist;
 
 			scope.next = function (id) {
+				if (jplayerInterface.isRadio()) {
+					return;
+				}
 				var next = playlist.getNext(id, true);
 				if (next) {
 					jplayerInterface.playId(next);
@@ -13,47 +16,20 @@ angular.module('CjClubUserApp').directive('playerUi', function (jplayerInterface
 			};
 
 			scope.prev = function (id) {
+				if (jplayerInterface.isRadio()) {
+					return;
+				}
 				var prev = playlist.getPrev(id, true);
 				if (prev) {
 					jplayerInterface.playId(prev);
 				}
 			};
 
-			/*
-			 * RADIO
-			 */
-			scope.isRadio = false;
-			scope.radioBitrateHigh = false;
-
-			scope.setRadioHighBitrate = function (value) {
-				if (scope.radioBitrateHigh === value) {
-					return;
-				}
-				scope.radioBitrateHigh = value;
-				if (scope.isRadio()) {
-					scope.playRadio();
-				}
-			};
-			scope.stopRadio = function () {
-				var trackIdWas = jplayerInterface.getTrackId();
-				if (trackIdWas) {
-					jplayerInterface.playId(trackIdWas);
-				}
-				scope.isRadio = false;
-			};
-			scope.playRadio = function () {
-				var streamUrl = scope.radioBitrateHigh ? radioUrls.high : radioUrls.low;
-				jplayerInterface.setMedia(streamUrl);
-				jplayerInterface.play();
-				scope.isRadio = true;
-			};
-			scope.toggleRadio = function () {
-				if (scope.isRadio()) {
-					scope.stopRadio();
-				} else {
-					scope.playRadio();
-				}
-			};
+			scope.isRadio = jplayerInterface.isRadio;
+			scope.radioBitrateHigh = jplayerInterface.isBitrateHigh;
+			scope.setRadioHighBitrate = jplayerInterface.setRadioHighBitrate;
+			scope.playRadio = jplayerInterface.playRadio;
+			scope.stopRadio = jplayerInterface.stopRadio;
 		};
 
 	return {

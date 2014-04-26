@@ -2,11 +2,11 @@
 
 	<!-- left small btns -->
 	<div class="player_changer_left">
-		<div class="player_changer__item brl7"><span class="player_changer__item_text" data-ng-class="{act: !isRadio}" data-ng-click="stopRadio()">Плеер</span></div>
-		<div class="player_changer__item brl7"><span class="player_changer__item_text" data-ng-class="{act: isRadio}" data-ng-click="playRadio()">Радио</span></div>
+		<div class="player_changer__item brl7"><span class="player_changer__item_text" data-ng-class="{act: !isRadio()}" data-ng-click="stopRadio()">Плеер</span></div>
+		<div class="player_changer__item brl7"><span class="player_changer__item_text" data-ng-class="{act: isRadio()}" data-ng-click="playRadio()">Радио</span></div>
 		<div class="player_changer__item brl7">
-			<span class="player_changer__item_text2" data-ng-click="setRadioHighBitrate(false)" data-ng-class="{act: !radioBitrateHigh}">Low</span>
-			<span class="player_changer__item_text2 player_changer__item_text_border" data-ng-class="{act: radioBitrateHigh}" data-ng-click="setRadioHighBitrate(true)">Hi</span>
+			<span class="player_changer__item_text2" data-ng-click="setRadioHighBitrate(false)" data-ng-class="{act: !radioBitrateHigh() && isRadio()}">Low</span>
+			<span class="player_changer__item_text2 player_changer__item_text_border" data-ng-class="{act: radioBitrateHigh() && isRadio()}" data-ng-click="setRadioHighBitrate(true)">Hi</span>
 		</div>
 	</div>
 
@@ -16,8 +16,8 @@
 			<div class="track_image">
 				<img title="" alt="" src="http://cjclub.ru/_files/trackpics/{{track.id}}_60" width="68" height="60" />
 				<div class="track_image__controls">
-					<a data-ng-show="!isRadio" data-ng-click="togglePlay()" data-ng-class="{cover_play: !isPlaying(), cover_pause: isPlaying()}" ></a>
-					<a class="cover_plus" toggle-to-playlist="track"></a>
+					<a data-ng-show="!isRadio()" data-ng-click="togglePlay()" data-ng-class="{cover_play: !isPlaying(), cover_pause: isPlaying()}" ></a>
+					<a class="cover_plus" toggle-to-playlist="track" data-ng-class="{w100: isRadio()}"></a>
 				</div>
 			</div>
 
@@ -30,7 +30,7 @@
 			<sound-control></sound-control>
 
 			<!-- TODO заменить на waveform -->
-			<div data-ng-click="seekAndPlay($event)" class="track_vision player_visio">
+			<div data-ng-click="seekAndPlay($event, 260)" class="track_vision player_visio">
 				<waveform></waveform>
 			</div>
 		</div>
@@ -40,7 +40,7 @@
 	<!-- right small btns -->
 	<div class="player_changer_right">
 		<div class="player cf">
-			<div class="player_changer__item brr7"><a class="player_ico" ng-click="togglePlay()" ng-class="{player_play: !isPlaying(), player_pause: isPlaying()}">{{track.count_listen}}</a></div>
+			<div class="player_changer__item brr7"><a class="player_ico" ng-click="togglePlay()" ng-class="{player_play: !isPlaying() || isRadio(), player_pause: isPlaying() && !isRadio()}">{{track.count_listen}}</a></div>
 			<div class="player_changer__item brr7"><a class="player_ico player_dwnl">{{track.count_download}}</a></div>
 			<div class="player_changer__item brr7"><a class="player_ico player_like">{{track.count_liked}}</a></div>
 		</div>

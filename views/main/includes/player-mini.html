@@ -1,9 +1,9 @@
 <div ng-show="isTrackSet()">
 	<!--Template: player-mini | Directive: playerUI -->
 	<div class="pl_c">
-		<div class="pleer_changer pl_act cf">  <!-- rd_act -->
-			<div class="pleer">Плеер</div>
-			<div class="radio">Радио</div>
+		<div class="pleer_changer cf" data-ng-class="{pl_act: !isRadio(), rd_act: isRadio()}">
+			<div data-ng-click="stopRadio()" class="pleer">Плеер</div>
+			<div data-ng-click="playRadio()" class="radio">Радио</div>
 		</div>
 		<div id="playlist_opener" class="playlist_opener_mini" data-ng-click="playlist.togglePlaylist()"><span
 				class="dot1">Плейлист Избранное</span> ({{playlist.tracks.length}})
@@ -12,19 +12,19 @@
 
 	<div class="pl_player">
 		<div class="ico5 ico5_prev"
-			 data-ng-disabled="isRadio || !playlist.hasPrev(track.id)"
+			 data-ng-disabled="isRadio() || !playlist.hasPrev(track.id)"
 			 data-ng-click="prev(track.id)"></div>
 		<a class="ico5" data-ng-click="togglePlay()"
-		   data-ng-disabled="isRadio"
-		   data-ng-class="{ico5_play: !isPlaying(), ico5_pause: isPlaying()}"></a>
+		   data-ng-disabled="isRadio()"
+		   data-ng-class="{ico5_play: !isPlaying() || isRadio(), ico5_pause: isPlaying() && !isRadio()}"></a>
 
 		<div class="ico5 ico5_next"
-			 data-ng-disabled="isRadio || !playlist.hasNext(track.id, true)"
+			 data-ng-disabled="isRadio() || !playlist.hasNext(track.id, true)"
 			 data-ng-click="next(track.id)"></div>
 		<div class="ico5 ico5_down"></div>
 	</div>
 
-	<div data-ng-click="seekAndPlay($event)" class="track_vision player_visio player_visio_sm fl">
+	<div data-ng-click="seekAndPlay($event, 200)" class="track_vision player_visio player_visio_sm fl">
 		<waveform></waveform>
 	</div>
 

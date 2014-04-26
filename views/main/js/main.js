@@ -328,13 +328,13 @@ CJ = {
 		$('#galery_overlay').hide();
 		return false;
 	},
-	togglePeerRadio: function(){
-		$(this)
-			.toggleClass('pl_act')
-			.toggleClass('rd_act');
-
-		return false;
-	},
+//	togglePeerRadio: function(){
+//		$(this)
+//			.toggleClass('pl_act')
+//			.toggleClass('rd_act');
+//
+//		return false;
+//	},
 	togglePlay: function(){
 		$(this)
 			.toggleClass('ico5_pause');
@@ -523,7 +523,7 @@ $(function(){
 	$(".wiki_editor").markItUp( wikiSettings );
 
 	$('.gal_img__show_comment').on('click', CJ.showGaleryComments);
-	$('.pleer_changer').on('click', CJ.togglePeerRadio);
+//	$('.pleer_changer').on('click', CJ.togglePeerRadio);
 	$('.ico5_play').on('click', CJ.togglePlay);
 
 	$('.scroll_small').jScrollPane(CJ.scrollOpts);
