@@ -24,6 +24,8 @@ angular.module('CjClubUserApp').factory('TracksResource', function ($resource) {
 		getWave: {
 			method: 'GET',
 			url: '_files/waves/:id.json',
+			responseType: 'json',
+			cache: true,
 			transformResponse: function (data) {
 				return {points: angular.fromJson(data)};
 			}

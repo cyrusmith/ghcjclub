@@ -22,9 +22,9 @@
 			</div>
 
 			<div class="composition__c" >
-				<div class="composition__title"><a >{{track.project || '&nbsp;'}}</a></div>
-				<div class="composition__title"><a >{{track.name}}</a></div>
-				<div class="composition__data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}}</div>
+				<div marquee class="composition__title"><a href>{{track.project || '&nbsp;'}}</a></div>
+				<div marquee class="composition__title"><a href>{{track.name}}</a></div>
+				<div marquee class="composition__data"><span>Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}}</span></div>
 			</div>
 
 			<sound-control></sound-control>

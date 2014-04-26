@@ -93,7 +93,7 @@ header .width { position:relative; /*height: 150px;*/}
 .pl_player { float:left; margin:10px 2px 0 5px;}
 .pl_player .ico5 { margin-right:5px;}
 .pl_name { font-size:11px; line-height:1.5; color:#fff; width:140px; max-width:140px; overflow:hidden; white-space:nowrap;}
-.pl_name a { color:#fff; display:block;}
+.pl_name a { color:#fff; display:inline-block; }
 .pl_name a:hover { color:#999;}
 .playlist_opener_mini {}
 .playlist_opener_mini .dot { color:#fff;}
@@ -335,11 +335,12 @@ right: 0;}
 .composition .sound_control_mute { margin-bottom:8px;}
 .composition .sound_control_slider { height:38px; border-left-color:#000; border-right-color:#434343;}
 .composition .track_image { margin-right:-100%;}
-.composition__c { float:left; margin-left:79px; width:132px;}
+.composition__c { float:left; margin-left:79px; width:132px; overflow: hidden; }
 .composition__title { font-size:12px; line-height:1.2; margin:1px 0 8px;}
-.composition__title a { color:#fff; text-decoration:underline;}
+.composition__title a { color:#fff; text-decoration:underline; display:inline-block; }
 .composition__data { font-size:11px; color:#fff; letter-spacing:-.01em;}
-.composition__title, .composition__data {white-space:nowrap; overflow:hidden;}
+.composition__data span { display:inline-block; }
+.composition__title, .composition__data {white-space:nowrap;}
 
 .ico7 { margin-top:0;}
 .ico7_plus { background-position:0 -166px;}
@@ -2072,5 +2073,81 @@ div.search {
 
 *[disabled] {
 	cursor: default;
+}
+
+.marquee {
+	animation: marquee 8s linear infinite;
+	-webkit-animation: marquee 10s linear infinite;
+	-moz-animation: marquee 10s linear infinite;
+	-o-animation: marquee 10 linear infinite;
+
+	animation-delay: 3s;
+	-webkit-animation-delay: 3s;
+	-moz-animation-delay: 3s;
+	-o-animation-delay: 3s;
+}
+
+@keyframes marquee {
+	0%, 30% {
+		transform: translate(0, 0);
+	}
+	60% {
+		transform: translate(-100%, 0);
+	}
+	90%, 100% {
+		transform: translate(0%, 0);
+	}
+}
+
+@-webkit-keyframes marquee /* Safari and Chrome */
+{
+	0%, 30% {
+		transform: translate(0, 0);
+	}
+	60% {
+		transform: translate(-100%, 0);
+	}
+	90%, 100% {
+		transform: translate(0%, 0);
+	}
+}
+
+@-moz-keyframes marquee /* Safari and Chrome */
+{
+	0%, 30% {
+		transform: translate(0, 0);
+	}
+	60% {
+		transform: translate(-100%, 0);
+	}
+	90%, 100% {
+		transform: translate(0%, 0);
+	}
+}
+
+@-o-keyframes marquee /* Safari and Chrome */
+{
+	0%, 30% {
+		transform: translate(0, 0);
+	}
+	60% {
+		transform: translate(-100%, 0);
+	}
+	90%, 100% {
+		transform: translate(0%, 0);
+	}
+}
+
+@-ms-keyframes marquee /* Safari and Chrome */
+{
+	0%, 30% {
+		transform: translate(0, 0);
+	}
+	60% {
+		transform: translate(-100%, 0);
+	}
+	90%, 100% {
+		transform: translate(0%, 0);
+	}
 }
 
