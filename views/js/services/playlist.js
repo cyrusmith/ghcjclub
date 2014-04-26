@@ -53,6 +53,9 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 				});
 			}
 		},
+		contains = function (id) {
+			return _trackIds.indexOf(id) !== -1;
+		},
 		remove = function (id) {
 			var index = _trackIds.indexOf(id);
 			if (index !== -1) {
@@ -181,6 +184,7 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 	return {
 		add: add,
 		remove: remove,
+		contains: contains,
 		clearPlaylist: clearPlaylist,
 		hasNext: hasNext,
 		hasPrev: hasPrev,
@@ -193,6 +197,7 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 		isEmpty: isEmpty,
 		changeOrder: changeOrder,
 		moveUp: moveUp,
-		moveDown: moveDown
+		moveDown: moveDown,
+		promise: promise
 	};
 });
