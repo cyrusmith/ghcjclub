@@ -1,4 +1,4 @@
-angular.module('CjClubUserApp').factory('TracksResource', function($resource) {
+angular.module('CjClubUserApp').factory('TracksResource', function ($resource) {
 	'use strict';
 	return $resource('tracks/:id', {}, {
 		queryBest: {
@@ -20,6 +20,13 @@ angular.module('CjClubUserApp').factory('TracksResource', function($resource) {
 			method: 'GET',
 			url: 'tracks?id=:ids',
 			isArray: true
+		},
+		getWave: {
+			method: 'GET',
+			url: '_files/waves/:id.json',
+			transformResponse: function (data) {
+				return {points: angular.fromJson(data)};
+			}
 		}
 	});
 });

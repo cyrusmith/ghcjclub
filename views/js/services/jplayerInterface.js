@@ -7,7 +7,10 @@ angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope
 	var isPlayingState = false;
 	var service = {
 		info: {
-			playprogress: 0
+			position: 0,
+			durationEstimate: 100,
+			bytesLoaded: 0,
+			bytesTotal: 100
 		},
 		init: function (e, options) {
 			var self = this;
@@ -17,7 +20,13 @@ angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope
 				supplied: 'mp3',
 				preload: "auto",
 				timeupdate: function (e) {
-					service.info.playprogress = Math.round(e.jPlayer.status.currentPercentAbsolute);
+					service.info.position = e.jPlayer.status.currentPercentAbsolute;
+					if (!$rootScope.$$phase) {
+						$rootScope.$apply();
+					}
+				},
+				progress: function (e) {
+					service.info.bytesLoaded = e.jPlayer.status.seekPercent;
 					if (!$rootScope.$$phase) {
 						$rootScope.$apply();
 					}
@@ -42,6 +51,9 @@ angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope
 			el.jPlayer("setMedia", {mp3: url});
 		},
 		setId: function (trackId) {
+			service.info.position = 0;
+			service.info.bytesLoaded = 0;
+
 			currentTrackId = trackId;
 			var url = '_tracks/' + trackId + '.mp3';
 			service.setMedia(url);
