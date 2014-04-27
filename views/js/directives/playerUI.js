@@ -30,6 +30,15 @@ angular.module('CjClubUserApp').directive('playerUi', function (jplayerInterface
 			scope.setRadioHighBitrate = jplayerInterface.setRadioHighBitrate;
 			scope.playRadio = jplayerInterface.playRadio;
 			scope.stopRadio = jplayerInterface.stopRadio;
+
+			scope.$on('jplayerInterface:trackUpdated', function ($e, track) {
+				scope.track = track;
+			});
+
+			scope.track = jplayerInterface.getCurrentTrack();
+			scope.isTrackSet = function () {
+				return scope.track !== null && scope.track !== undefined;
+			};
 		};
 
 	return {

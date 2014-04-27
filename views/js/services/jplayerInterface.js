@@ -1,12 +1,40 @@
-angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope, playlist, radioUrls) {
+angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope, $interval, playlist, radioUrls, TracksResource, radioUpdateTime) {
 	'use strict';
-	var volume = 1,
+	var
+		volume = 1,
 		volumeMutted,
 		el,
 		currentTrackId,
 		isRadio,
 		radioBitrateHigh = true,
 		isPlayingState,
+		radioUpdateInterval,
+		currentTrack,
+		updateCurrent = function (id) {
+			if (angular.isNumber(id)) {
+				currentTrack = TracksResource.get({id: id});
+				$rootScope.$broadcast('jplayerInterface:trackUpdated', currentTrack);
+			}
+		},
+		updateRadioInfo = function () {
+			currentTrack = TracksResource.getRadio();
+			$rootScope.$broadcast('jplayerInterface:trackUpdated', currentTrack);
+
+			if (angular.isUndefined(radioUpdateInterval)) {
+				radioUpdateInterval = $interval(
+					function () {
+						currentTrack = TracksResource.getRadio();
+						$rootScope.$broadcast('jplayerInterface:trackUpdated', currentTrack);
+					},
+					radioUpdateTime
+				);
+			}
+		},
+		stopUpdateRadio = function () {
+			$interval.cancel(radioUpdateInterval);
+			radioUpdateInterval = undefined;
+			updateCurrent(service.getTrackId());
+		},
 		service = {
 			info: {
 				position: 0,
@@ -59,6 +87,7 @@ angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope
 				currentTrackId = trackId;
 				var url = '_tracks/' + trackId + '.mp3';
 				service.setMedia(url);
+				updateCurrent(trackId);
 			},
 			getId: function () {
 				return currentTrackId;
@@ -129,6 +158,7 @@ angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope
 				service.setMedia(streamUrl);
 				service.play();
 				isRadio = true;
+				updateRadioInfo();
 			},
 			stopRadio: function () {
 				var prevTrackId = service.getTrackId();
@@ -136,13 +166,7 @@ angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope
 					service.playId(prevTrackId);
 				}
 				isRadio = false;
-			},
-			toggleRadio: function () {
-				if (isRadio) {
-					service.stopRadio();
-				} else {
-					service.playRadio();
-				}
+				stopUpdateRadio();
 			},
 			setRadioHighBitrate: function (value) {
 				if (radioBitrateHigh === value) {
@@ -155,6 +179,9 @@ angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope
 			},
 			isBitrateHigh: function () {
 				return radioBitrateHigh;
+			},
+			getCurrentTrack: function () {
+				return currentTrack;
 			}
 		};
 

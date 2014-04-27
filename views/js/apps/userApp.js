@@ -1,5 +1,9 @@
 var App = angular.module('CjClubUserApp', ['ngResource', 'ngRoute', 'LocalStorageModule','mgcrea.ngStrap']);
-App.config(function ($routeProvider) {
+App.run(function (singlePlayer) {
+	'use strict';
+	singlePlayer.run();
+});
+App.config(function($routeProvider) {
 	$routeProvider.
 		when('/news', {
 			templateUrl: 'views/main/articles.html',

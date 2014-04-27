@@ -29,6 +29,10 @@ angular.module('CjClubUserApp').factory('TracksResource', function ($resource) {
 			transformResponse: function (data) {
 				return {points: angular.fromJson(data)};
 			}
+		},
+		getRadio: {
+			method: 'GET',
+			url: 'radio/0'
 		}
 	});
 });
