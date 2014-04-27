@@ -14,7 +14,7 @@
 	<div class="composition_b">
 		<div class="composition cf">
 			<div class="track_image">
-				<img title="" alt="" src="http://cjclub.ru/_files/trackpics/{{track.id}}_60" width="68" height="60" />
+				<img title="" alt="" src="/_files/trackpics/{{track.id}}_60" width="68" height="60" />
 				<div class="track_image__controls">
 					<a data-ng-show="!isRadio()" data-ng-click="togglePlay()" data-ng-class="{cover_play: !isPlaying(), cover_pause: isPlaying()}" ></a>
 					<a class="cover_plus" toggle-to-playlist="track" data-ng-class="{w100: isRadio()}"></a>
@@ -22,8 +22,8 @@
 			</div>
 
 			<div class="composition__c" >
-				<div marquee class="composition__title"><a href>{{track.project || '&nbsp;'}}</a></div>
-				<div marquee class="composition__title"><a href>{{track.name}}</a></div>
+				<div marquee class="composition__title"><a href data-ng-href="#/projects/{{track.id}}">{{track.project || '&nbsp;'}}</a></div>
+				<div marquee class="composition__title"><a href data-ng-href="#/tracks/{{track.id}}">{{track.name}}</a></div>
 				<div marquee class="composition__data"><span>Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}}</span></div>
 			</div>
 
