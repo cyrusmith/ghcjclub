@@ -57,9 +57,7 @@ App.config(function ($routeProvider) {
 		}).
 		when('/projects', {
 			templateUrl: 'views/main/projects.html',
-			controller: ['$scope', 'Projects', function ($scope, Projects) {
-				$scope.projects = Projects;
-			}],
+			controller: 'ProjectsCtrl',
 			resolve: {
 				Projects: function (Projects) {
 					return Projects.query();
