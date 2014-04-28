@@ -99,6 +99,10 @@ App.config(function($routeProvider) {
 				}
 			}
 		}).
+		when('/articles/new', {
+             templateUrl: 'views/main/articlenew.html',
+             controller: 'ArticleEditCtrl'
+         }).
 		otherwise({
 			redirectTo: '/',
 			templateUrl: 'views/main/index.html'
