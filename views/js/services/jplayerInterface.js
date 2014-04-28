@@ -101,12 +101,12 @@ angular.module('CjClubUserApp').factory('jplayerInterface', function ($rootScope
 				service.play();
 			},
 			playIdOrPause: function (trackId) {
+				if (isRadio) {
+					service.stopRadio();
+				}
+
 				if (currentTrackId === trackId) {
-					if (isRadio) {
-						service.stopRadio();
-					} else {
-						service.togglePlay();
-					}
+					service.togglePlay();
 				} else {
 					service.playId(trackId);
 				}

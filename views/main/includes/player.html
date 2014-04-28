@@ -14,7 +14,8 @@
 	<div class="composition_b">
 		<div class="composition cf">
 			<div class="track_image">
-				<img title="" alt="" src="/_files/trackpics/{{track.id}}_60" width="68" height="60" />
+				<!--TODO заменить на верный урл-->
+				<img title="" alt="" data-ng-src="http://cjclub.ru/_files/trackpics/{{track.id}}_60" width="68" height="60" />
 				<div class="track_image__controls">
 					<a data-ng-show="!isRadio()" data-ng-click="togglePlay()" data-ng-class="{cover_play: !isPlaying(), cover_pause: isPlaying()}" ></a>
 					<a class="cover_plus" toggle-to-playlist="track" data-ng-class="{w100: isRadio()}"></a>
@@ -40,9 +41,15 @@
 	<!-- right small btns -->
 	<div class="player_changer_right">
 		<div class="player cf">
-			<div class="player_changer__item brr7"><a class="player_ico" ng-click="togglePlay()" ng-class="{player_play: !isPlaying() || isRadio(), player_pause: isPlaying() && !isRadio()}">{{track.count_listen}}</a></div>
-			<div class="player_changer__item brr7"><a class="player_ico player_dwnl">{{track.count_download}}</a></div>
-			<div class="player_changer__item brr7"><a class="player_ico player_like">{{track.count_liked}}</a></div>
+			<div class="player_changer__item brr7">
+				<a class="player_ico" ng-click="togglePlay()"
+				   data-ng-class="{player_play: !isPlaying() || isRadio(), player_pause: isPlaying() && !isRadio()}"
+				   data-ng-disabled="isRadio()">
+					{{track.count_listen || '&nbsp;' }}
+				</a>
+			</div>
+			<div class="player_changer__item brr7"><a class="player_ico player_dwnl">{{track.count_download || '&nbsp;' }}</a></div>
+			<div class="player_changer__item brr7"><a class="player_ico player_like">{{track.count_liked || '&nbsp;' }}</a></div>
 		</div>
 	</div>
 </div>

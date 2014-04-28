@@ -317,6 +317,7 @@ right: 0;}
 .pl_dw, .mess_proj_sl_open .pl_up { background-position:0 -470px;}
 
 .player_changer__item .player_ico, .ico7 { background-image:url(../img/player_btns_w.png); color:#fff;}
+.player_changer__item a.player_ico[disabled] { background-image:url(../img/player_btns.png); color:#fff;}
 
 .player_changer_left { float:left; width:48px; padding:8px 0 0;}
 .player_changer_right { float:right; width:41px; padding:8px 0 0;}
@@ -2076,10 +2077,10 @@ div.search {
 }
 
 .marquee {
-	animation: marquee 8s linear infinite;
-	-webkit-animation: marquee 10s linear infinite;
-	-moz-animation: marquee 10s linear infinite;
-	-o-animation: marquee 10 linear infinite;
+	animation: marquee 15s linear infinite;
+	-webkit-animation: marquee 15s linear infinite;
+	-moz-animation: marquee 15s linear infinite;
+	-o-animation: marquee 15s linear infinite;
 
 	animation-delay: 3s;
 	-webkit-animation-delay: 3s;
@@ -2092,7 +2093,7 @@ div.search {
 		transform: translate(0, 0);
 	}
 	60% {
-		transform: translate(-100%, 0);
+		transform: translate(-50%, 0);
 	}
 	90%, 100% {
 		transform: translate(0%, 0);
@@ -2105,7 +2106,7 @@ div.search {
 		transform: translate(0, 0);
 	}
 	60% {
-		transform: translate(-100%, 0);
+		transform: translate(-50%, 0);
 	}
 	90%, 100% {
 		transform: translate(0%, 0);
@@ -2118,7 +2119,7 @@ div.search {
 		transform: translate(0, 0);
 	}
 	60% {
-		transform: translate(-100%, 0);
+		transform: translate(-50%, 0);
 	}
 	90%, 100% {
 		transform: translate(0%, 0);
@@ -2131,7 +2132,7 @@ div.search {
 		transform: translate(0, 0);
 	}
 	60% {
-		transform: translate(-100%, 0);
+		transform: translate(-50%, 0);
 	}
 	90%, 100% {
 		transform: translate(0%, 0);
@@ -2144,7 +2145,7 @@ div.search {
 		transform: translate(0, 0);
 	}
 	60% {
-		transform: translate(-100%, 0);
+		transform: translate(-50%, 0);
 	}
 	90%, 100% {
 		transform: translate(0%, 0);
