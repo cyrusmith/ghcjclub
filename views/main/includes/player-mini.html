@@ -1,9 +1,9 @@
 <div ng-show="isTrackSet()">
 	<!--Template: player-mini | Directive: playerUI -->
 	<div class="pl_c">
-		<div class="pleer_changer pl_act cf">  <!-- rd_act -->
-			<div class="pleer">Плеер</div>
-			<div class="radio">Радио</div>
+		<div class="pleer_changer cf" data-ng-class="{pl_act: !isRadio(), rd_act: isRadio()}">
+			<div data-ng-click="stopRadio()" class="pleer">Плеер</div>
+			<div data-ng-click="playRadio()" class="radio">Радио</div>
 		</div>
 		<div id="playlist_opener" class="playlist_opener_mini" data-ng-click="playlist.togglePlaylist()"><span
 				class="dot1">Плейлист Избранное</span> ({{playlist.tracks.length}})
@@ -11,30 +11,27 @@
 	</div>
 
 	<div class="pl_player">
-		<div class="ico5 ico5_prev"></div>
+		<div class="ico5 ico5_prev"
+			 data-ng-disabled="isRadio() || !playlist.hasPrev(track.id)"
+			 data-ng-click="prev(track.id)"></div>
 		<a class="ico5" data-ng-click="togglePlay()"
-		   data-ng-class="{ico5_play: !isPlaying(), ico5_pause: isPlaying()}"></a>
+		   data-ng-disabled="isRadio()"
+		   data-ng-class="{ico5_play: !isPlaying() || isRadio(), ico5_pause: isPlaying() && !isRadio()}"></a>
 
-		<div class="ico5 ico5_next"></div>
+		<div class="ico5 ico5_next"
+			 data-ng-disabled="isRadio() || !playlist.hasNext(track.id, true)"
+			 data-ng-click="next(track.id)"></div>
 		<div class="ico5 ico5_down"></div>
 	</div>
 
-	<div data-ng-click="seekAndPlay($event)" class="track_vision player_visio player_visio_sm"
-		 data-ng-style="{background: 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png) no-repeat'}">
-		<div class="track_vision_in"
-			 data-ng-style="{'background-image': 'url(http://www.cjclub.ru/_files/waves/' + track.id + '.png)', width: playInfo.playprogress + '%'}"></div>
-		<!--<div class="track_vision_in"-->
-		<!--style="background:url(views/main/img/mini_voice.png) no-repeat 0 -60px; width:25%;"></div>-->
+	<div data-ng-click="seekAndPlay($event, 200)" class="track_vision player_visio player_visio_sm fl">
+		<waveform></waveform>
 	</div>
 
 
 	<div class="pl_name fl">
-		<a class="pl_name1">{{track.project || '&nbsp;'}}</a>
-		<a class="pl_name2">{{track.name}}</a>
+		<div marquee><a href data-ng-href="#/projects/{{track.id}}" class="pl_name1">{{track.project || '&nbsp;'}}</a></div>
+		<div marquee><a href data-ng-href="#/tracks/{{track.id}}" class="pl_name2">{{track.name}}</a></div>
 	</div>
-
-	<div class="vol">
-		<!--TODO регулятор громкости-->
-		<div class="vol_in" style="width:50%;"></div>
-	</div>
+	<sound-control data-orientation="horizontal" data-tpl="mini-sound-control.html"></sound-control>
 </div>

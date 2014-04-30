@@ -139,6 +139,7 @@
 <script src="views/libs/jquery.mousewheel.js"></script>
 <script src="views/libs/underscore-min.js"></script>
 <script src="views/libs/jquery.caret.js"></script>
+<script src="views/libs/waveform.js"></script>
 
 <script src="<?=CONFIG::$PATH_URL?>/views/libs/angular.min.js"></script>
 <script src="<?=CONFIG::$PATH_URL?>/views/libs/angular-locale_ru.js"></script>
@@ -153,7 +154,7 @@
 <script src="//oss.maxcdn.com/angular.strap/2.0.0/angular-strap.tpl.min.js"></script>
 
 <script src="<?=CONFIG::$PATH_URL?>/views/js/apps/userApp.js"></script>
-
+<script src="<?=CONFIG::$PATH_URL?>/views/js/apps/constants.js"></script>
 <?
 	$files = scandir(CONFIG::$PATH_ABS.'/views/js/resources');
 	foreach ($files as $file): if(substr($file, 0, 1) == '.') continue;?>

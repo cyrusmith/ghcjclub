@@ -53,6 +53,9 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 				});
 			}
 		},
+		contains = function (id) {
+			return _trackIds.indexOf(id) !== -1;
+		},
 		remove = function (id) {
 			var index = _trackIds.indexOf(id);
 			if (index !== -1) {
@@ -62,6 +65,55 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 					tracks.splice(index, 1);
 				});
 			}
+		},
+		hasPrev = function (id) {
+			if (_trackIds.length > 0) {
+				var index = _trackIds.indexOf(id);
+
+				return index > 0;
+			}
+			// empty tracklist
+			return false;
+		},
+		getPrev = function (id) {
+			if (_trackIds.length > 0) {
+				var index = _trackIds.indexOf(id);
+
+				// playlist does not contain current track, start from the beginning
+				if (index === -1) {
+					return _trackIds[0];
+				}
+
+				if (index === 0) {
+					return null;
+				}
+
+				return _trackIds[index - 1];
+			}
+
+			// empty tracklist
+			return null;
+		},
+		hasNext = function (id, repeat) {
+			if (_trackIds.length > 0) {
+				var
+					index = _trackIds.indexOf(id),
+					next = index + 1;
+
+				if (index === -1) {
+					return true;
+				}
+
+				// current the last, if not "repeat" there are no tracks more
+				if (next >= _trackIds.length) {
+					return repeat ? true : false;
+				}
+
+				return true;
+			}
+
+			// empty tracklist
+			return false;
 		},
 		getNext = function (id, repeat) {
 			if (_trackIds.length > 0) {
@@ -132,7 +184,11 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 	return {
 		add: add,
 		remove: remove,
+		contains: contains,
 		clearPlaylist: clearPlaylist,
+		hasNext: hasNext,
+		hasPrev: hasPrev,
+		getPrev: getPrev,
 		getNext: getNext,
 		tracks: tracks,
 		togglePlaylist: togglePlaylist,
@@ -141,6 +197,7 @@ angular.module('CjClubUserApp').factory('playlist', function ($q, $http, $rootSc
 		isEmpty: isEmpty,
 		changeOrder: changeOrder,
 		moveUp: moveUp,
-		moveDown: moveDown
+		moveDown: moveDown,
+		promise: promise
 	};
 });

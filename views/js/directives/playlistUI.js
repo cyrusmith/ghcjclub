@@ -1,24 +1,22 @@
 angular.module('CjClubUserApp').directive('playlistUi', function (playlist, jplayerInterface) {
 	'use strict';
 	var
-		slide = function (element, scope) {
+		itemHeight = 51,
+		slide = function (scope) {
 			var
 				value,
-				scrollContainer = element.find('.playlist_content'),
-				scrollList = element.find('.playlist_list'),
-				delta = scrollList.height() - scrollContainer.height(),
+				delta = scope.scrollList.height() - scope.scrollContainer.height(),
 				wheel = true,
-				itemHeight = 51,
 				dH = 100 / (delta / itemHeight);
 
 			function slideHandle(e, ui) {
-				scrollContainer.stop(true, true).animate({"scrollTop": (1 - ui.value / 100) * delta });
+				scope.scrollContainer.stop(true, true).animate({"scrollTop": (1 - ui.value / 100) * delta });
 			}
 
 			if (delta > 0) {
 				scope.scrollSlider.show().off('slide').on('slide', slideHandle);
 
-				scrollContainer.unmousewheel().mousewheel(function (e, d) {
+				scope.scrollContainer.unmousewheel().mousewheel(function (e, d) {
 					if (!wheel) {
 						return false;
 					}
@@ -35,7 +33,7 @@ angular.module('CjClubUserApp').directive('playlistUi', function (playlist, jpla
 
 					value = Math.max(0, Math.min(100, value));
 					scope.scrollSlider.slider('value', value);
-					scrollContainer.stop(true, false).animate({"scrollTop": (1 - value / 100) * delta }, function () {
+					scope.scrollContainer.stop(true, false).animate({"scrollTop": (1 - value / 100) * delta }, function () {
 						wheel = true;
 					});
 					e.preventDefault();
@@ -54,14 +52,34 @@ angular.module('CjClubUserApp').directive('playlistUi', function (playlist, jpla
 
 			scope.prevDelta = delta;
 		},
-		toggle = function (elemtnt, scrollSlider, isOpen) {
-			elemtnt.slideToggle(300, function () {
-				if (isOpen) {
-					slide(elemtnt, scrollSlider);
+		scroll = function (scope, top) {
+			if (scope.scrollInterval) {
+				return;
+			}
+
+			var
+				delta = scope.scrollList.height() - scope.scrollContainer.height(),
+				dH = 100 / (delta / itemHeight);
+
+			scope.scrollInterval = setInterval(function () {
+				var
+					value = scope.scrollSlider.slider('option', 'value'),
+					initial = value;
+
+				if (top) {
+					value += dH;
 				}
-			});
+				else {
+					value -= dH;
+				}
+				if (initial !== value) {
+					value = Math.max(0, Math.min(100, value));
+					scope.scrollSlider.slider('value', value);
+					scope.scrollContainer.stop(true, false).animate({"scrollTop": (1 - value / 100) * delta });
+				}
+			}, 300);
 		},
-		link = function (scope, element) {
+		initSortable = function (scope, element){
 			var sortableList = element.find('.playlist_list');
 			sortableList.sortable({
 				handle: '.draggable',
@@ -69,6 +87,7 @@ angular.module('CjClubUserApp').directive('playlistUi', function (playlist, jpla
 					ui.item.data('start', ui.item.index());
 				},
 				stop: function (e, ui) {
+					clearInterval(scope.scrollInterval);
 					var
 						start = ui.item.data('start'),
 						end = ui.item.index();
@@ -76,9 +95,33 @@ angular.module('CjClubUserApp').directive('playlistUi', function (playlist, jpla
 					playlist.changeOrder(start, end);
 
 					scope.$apply();
+				},
+				change: function ($e, ui) {
+					if (ui.position.top - scope.scrollContainer.scrollTop() < 0 ) {
+						scroll(scope, true);
+					}
+					else if (ui.position.top - scope.scrollContainer.scrollTop() > scope.scrollContainer.height() ) {
+						scroll(scope, false);
+					} else {
+						clearInterval(scope.scrollInterval);
+						scope.scrollInterval = 0;
+					}
 				}
 			});
 
+			return sortableList;
+		},
+		toggle = function (elemtnt, scope, isOpen) {
+			elemtnt.slideToggle(300, function () {
+				if (isOpen) {
+					slide(scope);
+				}
+			});
+		},
+		link = function (scope, element) {
+			scope.scrollInterval = 0;
+			scope.scrollContainer = element.find('.playlist_content');
+			scope.scrollList = element.find('.playlist_list');
 			scope.scrollSlider = element.find('.playlist_scroll');
 			scope.scrollSlider.slider({
 				animate: true,
@@ -88,6 +131,8 @@ angular.module('CjClubUserApp').directive('playlistUi', function (playlist, jpla
 				max: 100,
 				value: 100
 			});
+
+			var sortableList = initSortable(scope, element);
 
 			scope.tracks = playlist.tracks;
 			scope.close = function () {
@@ -109,13 +154,14 @@ angular.module('CjClubUserApp').directive('playlistUi', function (playlist, jpla
 			scope.$watch(function () {
 				return playlist.tracks.length;
 			}, function () {
-				slide(element, scope);
+				slide(scope);
 				sortableList.sortable("refresh");
 			});
 
 			scope.$on('$destroy', function () {
 				scope.scrollSlider.slider('destroy');
 				sortableList.sortable("destroy");
+				clearInterval(scope.scrollInterval);
 			});
 		};
 

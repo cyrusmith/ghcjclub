@@ -12,11 +12,12 @@
 			<ul class="playlist_list">
 				<li class="playlist_item cf" data-ng-repeat="track in tracks track by track.id">
 					<ins class="draggable"></ins>
+					<!--TODO заменить на верный урл-->
 					<img ng-src="http://cjclub.ru/_files/trackpics/{{track.id}}_35" alt="" title=""
 						 class="playlist_item__cover"/>
 
 					<div class="playlist_item__data">
-						<a class="playlist_item__data__link" href="#tracks/{{track.id}}" class="black_link">{{track.name}}</a>
+						<a class="playlist_item__data__link" data-ng-href="#tracks/{{track.id}}" class="black_link">{{track.name}}</a>
 
 						<div class="playlist_item__data__data">Track | {{track.style}} | {{track.timelengthStr}} |
 							{{track.filesizeStr}} MB
