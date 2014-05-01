@@ -14,7 +14,9 @@
  * @property enum $status 
  */
 class CommentModel extends DModelValidated {
-	function __construct($fillWithDefault = DModel::DONT_FILL_WITH_DEFAULTS) {
+	private $db;
+	function __construct() {
+		$this->db = ObjectsPool::get('DataBase');
 		$this->keyName = 'id';
 		/*
 		 * структура таблицы
@@ -34,7 +36,7 @@ class CommentModel extends DModelValidated {
 			->addProperty('complaint_date', 'datetime', "", null)
 			->addProperty('status', 'enum', "'active','deleted','recovered'", 'active')
 		;
-		parent::__construct($fillWithDefault);
+		parent::__construct();
 	}
 	/**
 	 * связываем с таблицей БД
@@ -52,7 +54,7 @@ class CommentModel extends DModelValidated {
 		switch ($field) {
 			case 'authorId':
                 if (!empty($value))
-                    $value = dbSelect('rds_users', 'id,name', "id = $value", DB_SELECT_OBJ);
+                    $value = $this->db->select('rds_users', 'id,name', "id = $value", DB_SELECT_OBJ);
                 if (empty($value)) {
                     $value = new stdClass();
                     $value->id   = '';
