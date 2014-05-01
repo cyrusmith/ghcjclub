@@ -211,8 +211,8 @@ function setUserRulesByType($type){
 			/*
 			 * Comment
 			 */
-			$RDS->add('access.Comment.lists');
-			$RDS->add('access.Comment.show');
+			$RDS->add('access.CommentsCtrl.lists');
+			$RDS->add('access.CommentsCtrl.create');
 			/*
 			 * Content
 			 */

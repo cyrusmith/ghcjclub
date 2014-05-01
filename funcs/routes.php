@@ -52,10 +52,10 @@ function setRoutes() {
 	Router::get()->connect(Router::$GET, '^blogs/(?<id>\d+)$', 'BlogsCtrl/show');
 
 	Router::get()->connect(Router::$GET, '^radio/(?<channel>\d)$', 'RadioCtrl/getInfo');
+	Router::get()->connect(Router::$GET, '^comments/(?<objectType>.+)/(?<id>\d+)$', 'CommentsCtrl/lists');
 
+	// все остальные
 	Router::get()->connect(Router::$GET, '^', null, 'views/main/main.html');
-
-
 	/*
 	 * GUEST
 	 */
