@@ -30,8 +30,8 @@
 
 
 	<div class="pl_name fl">
-		<div marquee><a href data-ng-href="#/projects/{{track.id}}" class="pl_name1">{{track.project || '&nbsp;'}}</a></div>
-		<div marquee><a href data-ng-href="#/tracks/{{track.id}}" class="pl_name2">{{track.name}}</a></div>
+		<div><a href data-ng-href="#/projects/{{track.id}}" title="{{track.project}}" class="pl_name1 gbt_gr">{{track.project || '&nbsp;'}}</a></div>
+		<div><a href data-ng-href="#/tracks/{{track.id}}" title="{{track.name}}" class="pl_name2 gbt_gr">{{track.name}}</a></div>
 	</div>
 	<sound-control data-orientation="horizontal" data-tpl="mini-sound-control.html"></sound-control>
 </div>

@@ -13,6 +13,7 @@ angular.module('CjClubUserApp').directive('toggleToPlaylist', function (playlist
 					}
 				}
 			});
+			// TODO иконка добавления/удаления
 		};
 
 		return {
