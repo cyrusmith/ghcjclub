@@ -11,31 +11,12 @@
 
 	<a  class="promo_what">что это?</a>
 
-	<!-- Вынести в директиву -->
+	<!-- TODO Вынести в директиву -->
 	<div class="promo_list cf" ng-controller="PromoTracksCtrl">
 		<div ng-if="!tracks.$resolved">Загрузка промо-треков...</div>
 		<div ng-cloak ng-repeat="track in tracks | limitTo: 5" class="promo_item">
-			<div class="promo_item__name"><a title="{{track.project}}">{{track.project}}</a> <a ng-if="0" class="user_stat user_stat_1"></a></div>
-			<div class="promo_item__cover">
-				<div class="track_image">
-					<img ng-src="http://cjclub.ru/_files/trackpics/{{track.id}}_68" alt="" title="" />
-					<div class="track_image__controls">
-						<a ng-click="player.playIdOrPause(track.id)" ng-class="{cover_pause: player.isIdbeingPlayed(track.id), cover_play: !player.isIdbeingPlayed(track.id)}"></a>
-						<a class="cover_plus" toggle-to-playlist="track"></a>
-					</div>
-				</div>
-			</div>
-			<a href="#/tracks/{{track.id}}" class="promo_item__title" title="{{track.name}}">{{track.name}}</a>
-			<div class="promo_item__data">Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}} </div>
-			<div class="player cf">
-				<a href class="player_ico player_start" ng-click="player.playIdOrPause(track.id)">{{track.count_listen}}</a>
-				<a href class="player_ico player_dwnl">{{track.count_download}}</a>
-				<!--<a class="player_ico player_like">126</a>-->
-				<!--TODO смена иконки в зависимости от добавления в плейлист-->
-				<a href class="player_ico player_plus" toggle-to-playlist="track">+</a>
-			</div>
+			<track-mini data-tpl="track_promo.html"></track-mini>
 		</div>
-
 	</div>
 </section>
 

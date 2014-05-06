@@ -1,7 +1,6 @@
-angular.module('CjClubUserApp').controller('RootCtrl', function($rootScope, jplayerInterface, playlist) {
+angular.module('CjClubUserApp').controller('RootCtrl', function($rootScope, jplayerInterface) {
 	'use strict';
 	$rootScope.player = jplayerInterface;
-	$rootScope.playlist = playlist;
 });
 /*
  * установкой свойств этого сервиса выставляются статусные и ошибочные сообщения

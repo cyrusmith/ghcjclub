@@ -1,0 +1,28 @@
+<div>
+	<div class="promo_item__name"><a title="{{track.project}}">{{track.project}}</a> <a ng-if="0"
+																						class="user_stat user_stat_1"></a>
+	</div>
+	<div class="promo_item__cover">
+		<div class="track_image">
+			<img ng-src="http://cjclub.ru/_files/trackpics/{{track.id}}_68" alt="" title=""/>
+
+			<div class="track_image__controls">
+				<a ng-click="player.playIdOrPause(track.id)"
+				   ng-class="{cover_pause: player.isIdbeingPlayed(track.id), cover_play: !player.isIdbeingPlayed(track.id)}"></a>
+				<a data-ng-class="{'cover_plus': !playlist.contains(track.id), 'cover_minus': playlist.contains(track.id)}"
+				   toggle-to-playlist="track"></a>
+			</div>
+		</div>
+	</div>
+	<a href="#/tracks/{{track.id}}" class="promo_item__title" title="{{track.name}}">{{track.name}}</a>
+
+	<div class="promo_item__data">Track | <span title="{{track.style}}" class="gbt_gr">{{track.style}}</span> | {{track.timelengthStr}} | {{track.filesizeStr}}</div>
+	<div class="player cf">
+		<a href class="player_ico player_start" ng-click="player.playIdOrPause(track.id)">{{track.count_listen}}</a>
+		<a href class="player_ico player_dwnl">{{track.count_download}}</a>
+		<!--<a class="player_ico player_like">126</a>-->
+		<a href class="player_ico"
+		   data-ng-class="{'player_plus': !playlist.contains(track.id), 'player_minus': playlist.contains(track.id)}"
+		   toggle-to-playlist="track">+</a>
+	</div>
+</div>

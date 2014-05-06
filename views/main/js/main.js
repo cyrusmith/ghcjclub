@@ -98,7 +98,6 @@ window.CJ = window.CJ || {};
 
 // count
 CJ = {
-  //TODO приделать scrollpane к плейлисту
 //  slide: function(){
 //    var scrollContainer = $('#playlist_content'),
 //      scrollList = $('#playlist_list'),

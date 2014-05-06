@@ -18,19 +18,18 @@
 				<img title="" alt="" data-ng-src="http://cjclub.ru/_files/trackpics/{{track.id}}_60" width="68" height="60" />
 				<div class="track_image__controls">
 					<a data-ng-show="!isRadio()" data-ng-click="togglePlay()" data-ng-class="{cover_play: !isPlaying(), cover_pause: isPlaying()}" ></a>
-					<a class="cover_plus" toggle-to-playlist="track" data-ng-class="{w100: isRadio()}"></a>
+					<a data-ng-class="{'cover_plus': !playlist.contains(track.id), 'cover_minus': playlist.contains(track.id), w100: isRadio()}" class="cover_plus" toggle-to-playlist="track"></a>
 				</div>
 			</div>
 
 			<div class="composition__c" >
-				<div marquee class="composition__title"><a href data-ng-href="#/projects/{{track.id}}">{{track.project || '&nbsp;'}}</a></div>
-				<div marquee class="composition__title"><a href data-ng-href="#/tracks/{{track.id}}">{{track.name}}</a></div>
-				<div marquee class="composition__data"><span>Track | {{track.style}} | {{track.timelengthStr}} | {{track.filesizeStr}}</span></div>
+				<div class="composition__title"><a class="gbt_gr" title="{{track.project}}" href data-ng-href="#/projects/{{track.id}}">{{track.project || '&nbsp;'}}</a></div>
+				<div class="composition__title"><a class="gbt_gr" title="{{track.name}}" href data-ng-href="#/tracks/{{track.id}}">{{track.name}}</a></div>
+				<div class="composition__data"><span>Track | <span class="gbt_gr" title="{{track.style}}">{{track.style}}</span> | {{track.timelengthStr}}</span></div>
 			</div>
 
 			<sound-control></sound-control>
 
-			<!-- TODO заменить на waveform -->
 			<div data-ng-click="seekAndPlay($event, 260)" class="track_vision player_visio">
 				<waveform></waveform>
 			</div>
