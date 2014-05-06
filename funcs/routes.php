@@ -1,18 +1,10 @@
 <?
 function setRoutes() {
     /*
-     * API
+     * AUTH
      */
-    Router::get()->connect(Router::$GET, '^api/getTop(/)?$', 'Top/getTracks', 'views/main/');
-    Router::get()->connect(Router::$GET, '^api/getTracks(/)?$', 'Track/lists', 'views/main/');
-
-    Router::get()->connect(Router::$GET, '^api/getAuthorsInfo(/)?$', 'CjclubUser/lists', 'views/main/');
-    Router::get()->connect(Router::$GET, '^api/getAuthor(/)?$', 'CjclubUser/show', 'views/main/');
-
-    Router::get()->connect(Router::$GET, '^api/getProjectAlbums(/)?$', 'Project/getAlbums', 'views/main/');
-
-    Router::get()->connect(Router::$GET, '^api/getAlbumTracks(/)?$', 'Album/getTracks', 'views/main/');
-
+	Router::get()->connect(Router::$PUT, '^api/auth', 'AuthCtrl/login');
+	Router::get()->connect(Router::$DELETE, '^api/auth', 'AuthCtrl/logout');
 
 	Router::get()->connect(Router::$GET, '^dev$', null, 'views/dev/index.html');
 

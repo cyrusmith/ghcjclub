@@ -1,4 +1,4 @@
-var App = angular.module('CjClubUserApp', ['ngResource', 'ngRoute', 'LocalStorageModule','mgcrea.ngStrap']);
+var App = angular.module('CjClubUserApp', ['ngResource', 'ngRoute', 'LocalStorageModule','mgcrea.ngStrap', 'ngAnimate']);
 App.run(function (singlePlayer) {
 	'use strict';
 	singlePlayer.run();

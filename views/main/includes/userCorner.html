@@ -1,12 +1,12 @@
 <div ng-controller="SignedUserCtrl" class="top_r">
 	<!-- user section -->
 	<div ng-if="!isSigned()">
-		<div class="enter_reg">
+		<div class="enter_reg" ng-init="popupShown = false">
 			<div id="btn_enter" class="f_btn enter_reg_btn"><a href="#/signup">Регистрация</a></div>
-			<div id="btn_reg" class="f_btn enter_reg_btn" onclick="$('#popup_auth').fadeToggle();">Войти</div>
+			<div id="btn_reg" class="f_btn enter_reg_btn" ng-click="popupShown = !popupShown">Войти</div>
 		</div>
 
-		<form class="popup popup_auth center hide" id="popup_auth" ng-submit="sendForm()">
+		<form class="popup popup_auth center" ng-show="popupShown" id="popup_auth" ng-submit="sendForm()">
 			<input type="text" ng-model="model.login" placeholder="Логин" class="f_text" />
 			<input type="password" ng-model="model.password" value="" placeholder="Пароль" class="f_text" />
 			<input type="submit" value="Войти" class="f_btn" />

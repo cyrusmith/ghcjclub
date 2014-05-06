@@ -194,6 +194,28 @@ header .width { position:relative; /*height: 150px;*/}
 .popup_auth .f_text { display:block; margin:0 0 6px;}
 .popup_auth .f_btn { display:block; margin:1px auto 6px; width:73px;}
 
+.popup_auth {
+    opacity:1;
+    -webkit-transition:all linear 0.3s;
+    transition:all linear 0.3s;
+}
+
+.popup_auth.ng-hide-add,
+.popup_auth.ng-hide-remove {
+    display:block!important;
+}
+
+.popup_auth.ng-hide-add.ng-hide-add-active,
+.popup_auth.ng-hide-remove.ng-hide-remove-active {
+    -webkit-transition:all linear 0.3s;
+    transition:all linear 0.3s;
+}
+
+.popup_auth.ng-hide {
+    opacity:0;
+}
+
+
 .f_text { color:#2b2b2b; background:#d2d2d2; border:none; border-radius:12px; height:15px; box-shadow:inset 1px 1px 2px rgba(0,0,0,1); padding:3px 12px; width:118px; font-size:12px; line-height:15px;}
 .f_baloon_text { width:103px; padding:1px 12px 2px;}
 .f_btn { padding:0 15px; background:url(../img/btn_bg.png) repeat-x 0 0; border-radius:12px; height:21px; box-shadow:1px 1px 2px rgba(0,0,0,1); color:#fff; cursor:pointer; border:none; font-size:12px; text-align:center; line-height:21px;}
