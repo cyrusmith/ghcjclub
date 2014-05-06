@@ -126,10 +126,11 @@
 
 	</div>
 </div>
-<span id="testing"></span>
+<span id="fullInfoContainer"></span>
 <script type="text/ng-template" id="fullInfo">
 	<div class="account_info">
-		<img class="img_left" src="http://placehold.it/100x100" alt="" title="" />
+		<img class="img_left" src="http://placehold.it/100x100" alt="" title=""/>
+
 		<p>Независимый цифровой лейбл основан в 2012 году, расположение лейбла - Москва. Музыкальные предпочтения
 			лейбла,
 			House и поджанры (progressive, tech, deep, minimal) Дистрибьюция: Beatport и многие другие Мы принимаем
@@ -137,7 +138,8 @@
 			нас есть несколько стандартных правил. Пожалуйста, прочитайте их, прежде чем отправлять нам свое демо, если
 			вам
 			не впервой),можете не читать.</p>
-		<img class="img_right" src="http://placehold.it/100x100" alt="" title="" />
+		<img class="img_right" src="http://placehold.it/100x100" alt="" title=""/>
+
 		<p>Независимый цифровой лейбл основан в 2012 году, расположение лейбла - Москва. Музыкальные предпочтения
 			лейбла,
 			House и поджанры (progressive, tech, deep, minimal) Дистрибьюция: Beatport и многие другие Мы принимаем
@@ -148,7 +150,7 @@
 	</div>
 </script>
 <div class="account_info_link cf">
-	<a data-template="fullInfo" bs-aside data-container="#testing"
+	<a data-template="fullInfo" bs-aside data-container="#fullInfoContainer"
 	   class="link_g show_link fr">Показать полную информацию</a>
 </div>
 
@@ -239,7 +241,8 @@
 						Алина Константинова<br/>
 						Дарья Богушевская
 					</div>
-					<a href="#" class="green2 gbt_group__more"><i class="ico2 ico2_arr_g_d"></i> смотреть всех</a>
+					<a data-template="fullFace" bs-aside data-container="#fullFaceContainer"
+					   class="green2 gbt_group__more"><i class="ico2 ico2_arr_g_d"></i> смотреть всех</a>
 				</div>
 
 
@@ -270,24 +273,26 @@
 		</div>
 
 		<!-- more faces -->
-		<div class="gbt__more cf">
-			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
-		</div>
-
+		<script type="text/ng-template" id="fullFace">
+			<div class="gbt__more cf">
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+			</div>
+		</script>
+		<span id="fullFaceContainer"></span>
 	</div>
 </div>
 <!-- end item 1 -->
@@ -350,7 +355,8 @@
 						Алина Константинова<br/>
 						Дарья Богушевская
 					</div>
-					<a href="#" class="green2 gbt_group__more"><i class="ico2 ico2_arr_g_d"></i> смотреть всех</a>
+					<a data-template="fullFace2" bs-aside data-container="#fullFaceContainer2"
+					   class="green2 gbt_group__more"><i class="ico2 ico2_arr_g_d"></i> смотреть всех</a>
 				</div>
 
 
@@ -381,23 +387,26 @@
 		</div>
 
 		<!-- more faces -->
-		<div class="gbt__more cf">
-			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
-		</div>
+		<script type="text/ng-template" id="fullFace2">
+			<div class="gbt__more cf">
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+			</div>
+		</script>
+		<span id="fullFaceContainer2"></span>
 
 	</div>
 </div>
@@ -460,7 +469,8 @@
 						Алина Константинова<br/>
 						Дарья Богушевская
 					</div>
-					<a href="#" class="green2 gbt_group__more"><i class="ico2 ico2_arr_g_d"></i> смотреть всех</a>
+					<a data-template="fullFace3" bs-aside data-container="#fullFaceContainer3"
+					   class="green2 gbt_group__more"><i class="ico2 ico2_arr_g_d"></i> смотреть всех</a>
 				</div>
 
 
@@ -491,23 +501,26 @@
 		</div>
 
 		<!-- more faces -->
-		<div class="gbt__more cf">
-			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/face1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa1.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa2.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa3.jpg" alt="" title=""/></a>
-			<a href="#" class="gbt_face"><img src="./img/fa4.jpg" alt="" title=""/></a>
-		</div>
+		<script type="text/ng-template" id="fullFace3">
+			<div class="gbt__more cf">
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+				<a href="#" class="gbt_face"><img src="http://placehold.it/36x36" alt="" title=""/></a>
+			</div>
+		</script>
+		<span id="fullFaceContainer3"></span>
 
 	</div>
 </div>
