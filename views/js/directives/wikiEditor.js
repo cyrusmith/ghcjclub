@@ -140,7 +140,7 @@ App.directive('wikiEditor', function () {
 
                     var dialog = $('.attach_dialog:last');
                     var area;
-                    if (this.currentArea != 0)
+                    if (this.currentArea)
                         area = this.currentArea;
                     else {
                         var areaId = $('textarea').attr('id');
@@ -153,7 +153,7 @@ App.directive('wikiEditor', function () {
                         case 'getAttachForm':
                             var area_id;
                             if (type == 'smile') {
-                                if (this.currentArea != 0)
+                                if (this.currentArea)
                                     area_id = this.currentArea.attr('id');
                                 else area_id = $('textarea').attr('id');
 
