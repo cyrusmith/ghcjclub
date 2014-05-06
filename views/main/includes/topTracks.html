@@ -1,0 +1,29 @@
+<!-- best tracks  -->
+<h1 class="page_title" ng-if="topTrackStyle">{{topTrackTitle}}</h1>
+
+<div class="promo_list promo_list_onpage cf" ng-if="topTrackStyle">
+	<div class="promo_item" ng-repeat="topTrack in topTracks |limitTo: 4" ng-init="getProject($index)">
+		<div class="promo_item__name"><a title="{{topTrack.project}}" href="#">{{topTrack.project}}</a> <a
+				ng-if="0" class="user_stat user_stat_1" href="#"></a></div>
+		<div class="promo_item__cover">
+			<div class="track_image">
+				<img style="height: 90px" title="" alt="" src="http://cjclub.ru/_files/trackpics/{{topTrack.id}}_110">
+
+				<div class="track_image__controls">
+					<a class="cover_play cover_pause" href="#"></a>
+					<a class="cover_plus" href="#"></a>
+				</div>
+			</div>
+		</div>
+		<a title="{{topTrack.name}}" class="promo_item__title" href="#">{{topTrack.name}}</a>
+
+		<div class="promo_item__data">Track | <span title="{{topTrack.style}}" class="gbt_gr">{{topTrack.style}}</span> | {{topTrack.timelengthStr}} | {{topTrack.filesizeStr}}</div>
+		<div class="player cf">
+			<a class="player_ico player_start">{{topTrack.count_listen}}</a>
+			<a class="player_ico player_dwnl">{{topTrack.count_download}}</a>
+			<a class="player_ico player_like">126</a>
+			<a class="player_ico player_plus">+</a>
+		</div>
+	</div>
+
+</div>
