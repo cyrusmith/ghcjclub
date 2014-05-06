@@ -62,7 +62,7 @@ header .width { position:relative; /*height: 150px;*/}
 .top { height:113px;}
 .top_l { float:left; width:147px; margin:0 28px 0 10px; padding:8px 0;}
 .top_c { float:left; width:609px; padding:13px 0 8px; position:relative; z-index:101;}
-.top_r { float:right; width:180px; padding:13px 0 8px; /*height:70px;*/ position:relative;} /*убрал height - перекрывает поиск*/
+.top_r { float:right; width:180px; padding:7px 0 8px; /*height:70px;*/ position:relative;} /*убрал height - перекрывает поиск*/
 /* mini header */
 .mini_header { height:45px;}
 .header_opener, .header_closer { width:15px; height:45px; position:absolute; left:0; top:0; z-index:10; background:url(../img/header_oc.png) no-repeat 0 0; cursor:pointer;}
