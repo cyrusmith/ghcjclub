@@ -7,6 +7,7 @@ function setRoutes() {
 	Router::get()->connect(Router::$DELETE, '^api/auth', 'AuthCtrl/logout');
 
 	Router::get()->connect(Router::$GET, '^dev$', null, 'views/dev/index.html');
+	Router::get()->connect(Router::$GET, '^dev/post/(?<route>.+)$', null, 'views/dev/post.html');
 
 	Router::get()->connect(Router::$GET, '^styles', 'StylesCtrl/lists');
 	Router::get()->connect(Router::$GET, '^tracks$', 'TracksCtrl/listsFiltered');
@@ -40,7 +41,7 @@ function setRoutes() {
 	Router::get()->connect(Router::$GET, '^users/(?<id>\d+)$', 'UsersCtrl/show');
 
 	Router::get()->connect(Router::$GET, '^blogs$', 'BlogsCtrl/lists');
-    Router::get()->connect(Router::$POST, '^blogs/add/$', 'BlogsCtrl/addPost');
+    Router::get()->connect(Router::$POST, '^blogs/add$', 'BlogsCtrl/addPost');
 	Router::get()->connect(Router::$GET, '^blogs/(?<id>\d+)$', 'BlogsCtrl/show');
 
 	Router::get()->connect(Router::$GET, '^radio/(?<channel>\d)$', 'RadioCtrl/getInfo');

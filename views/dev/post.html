@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Post dev</title>
+	<style>
+		label {
+			font-weight: bold;
+			display: block;
+		}
+		textarea {
+			width: 100%;
+			height: 50px;
+		}
+
+	</style>
+</head>
+<body>
+<form method="post" action="<?=CONFIG::$PATH_URL?>/<?=$_REQUEST['route']?>">
+	<?
+			// получить класс контроллера
+			list($class, $method) = explode('/', $_REQUEST['controller']);
+			// получить аргументы метода
+			$classReflection = new ReflectionClass($class);
+			$methodReflection = $classReflection->getMethod($method);
+			if ($methodReflection->getNumberOfParameters() > 0) {
+				// построить форму для каждого аргумента
+				$params = $methodReflection->getParameters();
+				foreach ($params as $param):
+				?>
+	<label><?=$param->getName()?>:</label>
+	<textarea name="<?=$param->getName()?>"></textarea>
+				<?
+				endforeach;
+			}
+	?>
+	<button type="submit">send</button>
+</form>
+</body>
+</html>
