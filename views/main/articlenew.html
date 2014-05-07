@@ -24,7 +24,9 @@
             <a href="#" class="am_link">Здесь скрыто меню</a>
             <ul class="am_submenu hide">  <!-- hidden menu -->
                 <li class="am_submenu_item"><a href="#" class="am_submenu_link">Название подраздела 1</a></li>
-                <li class="am_submenu_item"><a href="#" class="am_submenu_link am_submenu_link_active">Название активного подраздела</a></li> <!-- active -->
+                <li class="am_submenu_item"><a href="#" class="am_submenu_link am_submenu_link_active">Название
+                    активного подраздела</a></li>
+                <!-- active -->
                 <li class="am_submenu_item"><a href="#" class="am_submenu_link">Название подраздела 3</a></li>
             </ul>
         </li>
@@ -41,7 +43,8 @@
             <a href="#" class="am_link">Здесь открыто меню</a>
             <ul class="am_submenu"> <!-- just open menu -->
                 <li class="am_submenu_item"><a href="#" class="am_submenu_link">Название подраздела 1</a></li>
-                <li class="am_submenu_item"><a href="#" class="am_submenu_link am_submenu_link_active">Название активного подраздела</a></li>
+                <li class="am_submenu_item"><a href="#" class="am_submenu_link am_submenu_link_active">Название
+                    активного подраздела</a></li>
             </ul>
         </li>
         <li class="am_item">
@@ -49,7 +52,6 @@
         </li>
     </ul>
 </div>
-
 
 
 <!-- page title -->
@@ -67,39 +69,35 @@
     Если ваш текст небольшой, то имеет смысл полностью вписать текст в анонс и оставить поле основного текста пустым.
 </div>
 
-<div class="wys_editor_container">
+<div class="wys_editor_container" ng-show="announcement">
     <h2 class="block_title block_title_nm">Анонс</h2>
 
-    <div class="wys_editor" ng-show="announcement">
-        <span class="dfTextArea"><textarea class="wiki_editor" wiki-editor ng-model="article.announcement"
-                                           id="ae_textarea_announcement"
-                                           onfocus='attachObject.currentArea = $(this);'></textarea></span>
-    </div>
-    <div class='markItUpPreview'></div>
+    <div wiki-editor model-name="article.announcement" textarea-id="ae_article_announcement"/>
+
 </div>
 
 <!-- description -->
 <h2 class="block_title block_title_nm">Описание</h2>
 <!-- визуальный редактор -->
 
-<div class="attach_dialog"></div>
 <div class="wys_editor_container">
-    <div class="wys_editor">
-        <span class="dfTextArea"><textarea class="wiki_editor" wiki-editor ng-model="article.text" id="ae_textarea_text"
-                                           onfocus='attachObject.currentArea = $(this);'></textarea></span>
-    </div>
-    <div class='markItUpPreview'></div>
+    <div wiki-editor model-name="article.text" textarea-id="ae_article_text"/>
 </div>
 
 <!-- poll form -->
 <div class="ae_checkbox">
-    <input class="f_checkbox" type="checkbox" value="1" name="ae_ch1" id="ae_ch1" /> <label class="ae_spec_label" for="ae_ch1">Голосование</label>
+    <input class="f_checkbox" type="checkbox" value="1" name="ae_ch1" id="ae_ch1"/> <label class="ae_spec_label"
+                                                                                           for="ae_ch1">Голосование</label>
+
     <div class="ae_checkbox_variants">
-        <input class="f_checkbox" type="checkbox" value="1" name="ae_checkbox_variants" id="ae_checkbox_variants" /> <label class="ae_spec_label" for="ae_checkbox_variants">Разрешить несколько ответов</label>
+        <input class="f_checkbox" type="checkbox" value="1" name="ae_checkbox_variants" id="ae_checkbox_variants"/>
+        <label class="ae_spec_label" for="ae_checkbox_variants">Разрешить несколько ответов</label>
 
         <div class="ae_checkbox_q cf">
             <label for="ae_checkbox_q1" class="ae_spec_label ae_checkbox_q_text">Вопрос:</label>
-            <div class="ae_checkbox_q_field"><input class="f_text2" type="text" value="" name="ae_checkbox_q1" id="ae_checkbox_q1" /></div>
+
+            <div class="ae_checkbox_q_field"><input class="f_text2" type="text" value="" name="ae_checkbox_q1"
+                                                    id="ae_checkbox_q1"/></div>
         </div>
 
         <div class="ae_add"><span class="link_g">+ <span class="tdu">Добавить варианты</span></span></div>
@@ -110,7 +108,8 @@
 
 <!-- photo form -->
 <div class="ae_checkbox">
-    <input class="f_checkbox" type="checkbox" value="1" name="ae_ch2" id="ae_ch2" /> <label class="ae_spec_label" for="ae_ch2">Фотоальбом</label>
+    <input class="f_checkbox" type="checkbox" value="1" name="ae_ch2" id="ae_ch2"/> <label class="ae_spec_label"
+                                                                                           for="ae_ch2">Фотоальбом</label>
 
     <!-- photo album -->
     <div class="ae_album" id="ae_album">
@@ -118,12 +117,13 @@
         <label class="ae_album__item">
             <div class="ae_album__image">
                 <div class="ae_album__image_in">
-                    <img src="./img/img_prev1.jpg" alt="" title="" />
+                    <img src="./img/img_prev1.jpg" alt="" title=""/>
                 </div>
             </div>
             <!-- WTF are doing radio button here -->
             <input class="ae_image__radio" type="radio" name="ae_album__1" id="ae_album__image1">
-            <input class="ae_image__desc" type="hidden" name="ae_album__image1_desc" value="" />
+            <input class="ae_image__desc" type="hidden" name="ae_album__image1_desc" value=""/>
+
             <div><a href="#" class="link_g ae_image__remove">Удалить</a></div>
             <div><a href="#" class="link_g ae_image__desc_add">Добавить описание</a></div>
         </label>
@@ -131,11 +131,12 @@
         <label class="ae_album__item">
             <div class="ae_album__image">
                 <div class="ae_album__image_in">
-                    <img src="./img/img_prev2.jpg" alt="" title="" />
+                    <img src="./img/img_prev2.jpg" alt="" title=""/>
                 </div>
             </div>
             <input class="ae_image__radio" type="radio" name="ae_album__1" id="ae_album__image2">
-            <input class="ae_image__desc" type="hidden" name="ae_album__image2_desc" value="" />
+            <input class="ae_image__desc" type="hidden" name="ae_album__image2_desc" value=""/>
+
             <div><a href="#" class="link_g ae_image__remove">Удалить</a></div>
             <div><a href="#" class="link_g ae_image__desc_add">Добавить описание</a></div>
         </label>
@@ -143,11 +144,12 @@
         <label class="ae_album__item">
             <div class="ae_album__image">
                 <div class="ae_album__image_in">
-                    <img src="./img/img_prev1.jpg" alt="" title="" />
+                    <img src="./img/img_prev1.jpg" alt="" title=""/>
                 </div>
             </div>
             <input class="ae_image__radio" type="radio" name="ae_album__1" id="ae_album__image3">
-            <input class="ae_image__desc" type="hidden" name="ae_album__image3_desc" value="" />
+            <input class="ae_image__desc" type="hidden" name="ae_album__image3_desc" value=""/>
+
             <div><a href="#" class="link_g ae_image__remove">Удалить</a></div>
             <div><a href="#" class="link_g ae_image__desc_add">Добавить описание</a></div>
         </label>
@@ -155,11 +157,12 @@
         <label class="ae_album__item">
             <div class="ae_album__image">
                 <div class="ae_album__image_in">
-                    <img src="./img/img_prev2.jpg" alt="" title="" />
+                    <img src="./img/img_prev2.jpg" alt="" title=""/>
                 </div>
             </div>
             <input class="ae_image__radio" type="radio" name="ae_album__1" id="ae_album__image4">
-            <input class="ae_image__desc" type="hidden" name="ae_album__image4_desc" value="" />
+            <input class="ae_image__desc" type="hidden" name="ae_album__image4_desc" value=""/>
+
             <div><a href="#" class="link_g ae_image__remove">Удалить</a></div>
             <div><a href="#" class="link_g ae_image__desc_add">Добавить описание</a></div>
         </label>
@@ -167,11 +170,12 @@
         <label class="ae_album__item">
             <div class="ae_album__image">
                 <div class="ae_album__image_in">
-                    <img src="./img/img_prev2.jpg" alt="" title="" />
+                    <img src="./img/img_prev2.jpg" alt="" title=""/>
                 </div>
             </div>
             <input class="ae_image__radio" type="radio" name="ae_album__1" id="ae_album__image5">
-            <input class="ae_image__desc" type="hidden" name="ae_album__image5_desc" value="" />
+            <input class="ae_image__desc" type="hidden" name="ae_album__image5_desc" value=""/>
+
             <div><a href="#" class="link_g ae_image__remove">Удалить</a></div>
             <div><a href="#" class="link_g ae_image__desc_add">Добавить описание</a></div>
         </label>
@@ -179,11 +183,12 @@
         <label class="ae_album__item">
             <div class="ae_album__image">
                 <div class="ae_album__image_in">
-                    <img src="./img/img_prev1.jpg" alt="" title="" />
+                    <img src="./img/img_prev1.jpg" alt="" title=""/>
                 </div>
             </div>
             <input class="ae_image__radio" type="radio" name="ae_album__1" id="ae_album__image6">
-            <input class="ae_image__desc" type="hidden" name="ae_album__image6_desc" value="" />
+            <input class="ae_image__desc" type="hidden" name="ae_album__image6_desc" value=""/>
+
             <div><a href="#" class="link_g ae_image__remove">Удалить</a></div>
             <div><a href="#" class="link_g ae_image__desc_add">Добавить описание</a></div>
         </label>
@@ -191,11 +196,12 @@
         <label class="ae_album__item">
             <div class="ae_album__image">
                 <div class="ae_album__image_in">
-                    <img src="./img/img_prev2.jpg" alt="" title="" />
+                    <img src="./img/img_prev2.jpg" alt="" title=""/>
                 </div>
             </div>
             <input class="ae_image__radio" type="radio" name="ae_album__1" id="ae_album__image7">
-            <input class="ae_image__desc" type="hidden" name="ae_album__image7_desc" value="" />
+            <input class="ae_image__desc" type="hidden" name="ae_album__image7_desc" value=""/>
+
             <div><a href="#" class="link_g ae_image__remove">Удалить</a></div>
             <div><a href="#" class="link_g ae_image__desc_add">Добавить описание</a></div>
         </label>
@@ -205,35 +211,43 @@
         <!-- hidden form -->
         <div class="ae_image__description cf" id="ae_image__description">
             <div class="ae_image__desc_title">Описание фотографии (не более 100 символов)</div>
-            <input type="button" class="btn_orange btn_orange_sm" value="OK" />
-            <input type="text" class="f_text2 ae_image__description__text" value="" name="ae_image__description_text" id="ae_image__description_text" />
+            <input type="button" class="btn_orange btn_orange_sm" value="OK"/>
+            <input type="text" class="f_text2 ae_image__description__text" value="" name="ae_image__description_text"
+                   id="ae_image__description_text"/>
         </div>
 
     </div>
 
     <div class="ae_checkbox_variants">
         <b class="ae_checkbox_title">Выберите файлы для загрузки (не более 10 за один раз)</b>
+
         <div class="ae_checkbox_text">
-            Максимальный размер: 2Мб<br />
+            Максимальный размер: 2Мб<br/>
             Допустимые разрешения: jpg, jpeg, png, gif
         </div>
 
         <div class="file">
             <input type="text" class="f_text2 file_text">
+
             <div class="file_btn">Обзор...</div>
-            <input class="file_file" type="file" value="" name="file1" id="file1" onchange="$(this).prevAll('.file_text').val(this.value);" />
+            <input class="file_file" type="file" value="" name="file1" id="file1"
+                   onchange="$(this).prevAll('.file_text').val(this.value);"/>
         </div>
 
         <div class="file">
             <input type="text" class="f_text2 file_text">
+
             <div class="file_btn">Обзор...</div>
-            <input class="file_file" type="file" value="" name="file2" id="file2" onchange="$(this).prevAll('.file_text').val(this.value);" />
+            <input class="file_file" type="file" value="" name="file2" id="file2"
+                   onchange="$(this).prevAll('.file_text').val(this.value);"/>
         </div>
 
         <div class="file">
             <input type="text" class="f_text2 file_text">
+
             <div class="file_btn">Обзор...</div>
-            <input class="file_file" type="file" value="" name="file3" id="file3" onchange="$(this).prevAll('.file_text').val(this.value);" />
+            <input class="file_file" type="file" value="" name="file3" id="file3"
+                   onchange="$(this).prevAll('.file_text').val(this.value);"/>
         </div>
 
         <!-- add file button -->
@@ -241,7 +255,7 @@
             <span class="link_g">+ <span class="tdu">Добавить еще файл</span></span>
         </div>
 
-        <input type="button" value="Загрузить" class="btn_orange" />
+        <input type="button" value="Загрузить" class="btn_orange"/>
     </div>
 </div>
 
@@ -249,17 +263,23 @@
 <!-- special checkboxes -->
 <div class="ae_spec">
     <div class="ae_spec__line">
-        <input class="f_checkbox" type="checkbox" value="1" name="ae_draft" id="ae_draft" ng-model="article.is_draft"/> <label class="ae_spec_label" for="ae_draft">Черновик</label>
+        <input class="f_checkbox" type="checkbox" value="1" name="ae_draft" id="ae_draft" ng-model="article.is_draft"/>
+        <label class="ae_spec_label" for="ae_draft">Черновик</label>
     </div>
     <div class="ae_spec__line">
-        <input class="f_checkbox" type="checkbox" value="1" name="ae_blog" id="ae_blog" ng-model="article.is_important"/> <label class="ae_spec_label" for="ae_blog">Важный блог</label>
+        <input class="f_checkbox" type="checkbox" value="1" name="ae_blog" id="ae_blog"
+               ng-model="article.is_important"/> <label class="ae_spec_label" for="ae_blog">Важный блог</label>
     </div>
     <div class="ae_spec__line">
-        <input class="f_checkbox" type="checkbox" value="1" name="ae_comm" id="ae_comm" ng-model="article.deny_comments"/> <label class="ae_spec_label" for="ae_comm">Запретить комментирование</label>
+        <input class="f_checkbox" type="checkbox" value="1" name="ae_comm" id="ae_comm"
+               ng-model="article.deny_comments"/> <label class="ae_spec_label" for="ae_comm">Запретить
+        комментирование</label>
     </div>
 </div>
 
-<div class="warning_line">За выставление тегов, не соответствующих содержанию статьи – запрет на их использование пожизненно!</div>
+<div class="warning_line">За выставление тегов, не соответствующих содержанию статьи – запрет на их использование
+    пожизненно!
+</div>
 
 <!-- personal tags -->
 <h2 class="block_title block_title_nm">Личные теги</h2>
@@ -275,6 +295,7 @@
 
 <!-- adding tags -->
 <h2 class="block_title block_title_nm">Метки (теги), через запятую</h2>
+
 <div class="ae_input">
     <input type="text" class="f_text2" value="" name="ae_tags__add" id="ae_tags__add" ng-model="article.tags"/>
 </div>
@@ -306,8 +327,8 @@
 </ul>
 
 <div class="f_btns">
-    <input class="btn_orange" type="submit" value="Создать" />
-    <input class="btn_orange" type="button" value="Сохранить" />
+    <input class="btn_orange" type="submit" value="Создать"/>
+    <input class="btn_orange" type="button" value="Сохранить"/>
 </div>
 </form>
 
@@ -320,30 +341,34 @@
     <!-- aside poll block -->
     <div class="aside">
         <h3 class="aside_title">Опрос: Что это такое?</h3>
+
         <form class="poll" action="#">
             <div class="poll_item">
-                <input class="poll_input" type="radio" name="r1" value="r11" id="r11" />
+                <input class="poll_input" type="radio" name="r1" value="r11" id="r11"/>
                 <label for="r11" class="poll_label">Я знаю, но не скажу! :P</label>
+
                 <div class="poll_line" style="width:180px;"> <!-- !!!! aside max width 180px -->
                     <span class="poll_line__data">70</span>
                 </div>
             </div>
             <div class="poll_item">
-                <input class="poll_input" type="radio" name="r1" value="r11" id="r12" />
+                <input class="poll_input" type="radio" name="r1" value="r11" id="r12"/>
                 <label for="r12" class="poll_label">Я не заню (</label>
+
                 <div class="poll_line" style="width:115px;">
                     <span class="poll_line__data">37</span>
                 </div>
             </div>
             <div class="poll_item">
-                <input class="poll_input" type="radio" name="r1" value="r11" id="r13" />
+                <input class="poll_input" type="radio" name="r1" value="r11" id="r13"/>
                 <label for="r13" class="poll_label">Я знаю!</label>
+
                 <div class="poll_line" style="width:145px;">
                     <span class="poll_line__data">51</span>
                 </div>
             </div>
 
-            <input type="submit" value="Голосовать" class="btn_orange" />
+            <input type="submit" value="Голосовать" class="btn_orange"/>
         </form>
     </div>
 

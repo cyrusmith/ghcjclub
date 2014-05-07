@@ -1,0 +1,61 @@
+<h3 class="block_title">Комментарии</h3>
+
+<div class="wys">
+    <div wiki-editor model-name="newcommentText" textarea-id="newcomment-textarea"/>
+    <div class="btns_wys">
+        <input type="submit" value="Отправить (Ctrl+Enter)" class="btn_orange btn_orange_sm" ng-click="submit(null)"/>
+        <em class="btns_wys_text">Важно: не оскорблять, не флудить, не спамить. Иначе — тра-та-та!</em>
+    </div>
+</div>
+
+<div id="comments" class="comments">
+
+    <div ng-repeat="comment in comments">
+        <div class="com" ng-class="{com_deleted : comment.data.status != 'active', com_deleted_prev : comment.isMine()}">
+
+            <div class="com_pre gray" ng-show="comment.data.status!='active'">Когда-то здесь был комментарий — <a href="#" class="link_g com_deleted" ng-click="comment.setVisibility(true); $event.preventDefault();" ng-hide="comment.isVisible()">Оригинал</a><a ng-show="comment.isVisible()" href="#" class="link_g com_deleted" ng-click="comment.setVisibility(false); $event.preventDefault();">Скрыть</a></div>
+            <div class="com_pre red2" ng-show="comment.data.complaint">Комментарий скрыт по причине жалобы — <a href="#" class="link_g com_appeal" ng-click="comment.setVisibility(true); $event.preventDefault();" ng-hide="comment.isVisible()">Смотреть</a><a ng-show="comment.isVisible()" href="#" class="link_g com_appeal" ng-click="comment.setVisibility(false); $event.preventDefault();">Скрыть</a></div>
+
+            <div class="com_in" ng-class="{hide : !comment.isVisible()}">
+                <div class="com_img">
+                    <div class="com_img_img">
+                        <img src="views/main/img/fa1.jpg" alt="" title=""/>
+                    </div>
+                    <div class="com_rat">
+                        <div class="hd" ng-click="comment.rate(-1); $event.preventDefault();"></div>
+                        <div class="hu" ng-click="comment.rate(1); $event.preventDefault();"></div>
+                        <div class="hr {{comment.data.rating >= 0 && 'green'||'red'}}">{{comment.data.rating > 0 && '+'||''}}{{comment.data.rating}}</div>
+                    </div>
+                </div>
+                <div class="com_data">
+                    <div class="fl">
+                        <a href="#"><span class="link_g tdu">Milky</span></a> — {{comment.data.datewritten}}
+                    </div>
+                    <div class="fr">
+                        <a href="#" ng-click="response(comment); $event.preventDefault();"><i class="ico2 ico2_c_mail"></i> <span class="link_g2 tdu">Ответить</span></a>
+                        <a href="#" ng-click="response(comment, true); $event.preventDefault();"><i class="ico2 ico2_c_mail_pk"></i> <span class="link_g2 tdu">Ответить лчино</span></a>
+                        <a href="#" ng-click="addToFriends(comment.data.authorId); $event.preventDefault();" ><i class="ico2 ico2_c_plus"></i> <span class="link_gre tdu">В друзья</span></a>
+                        <a href="#" ng-click="ignore(comment.data.authorId); $event.preventDefault();"><i class="ico2 ico2_c_minus"></i> <span class="link_red tdu">В игнор</span></a>
+                        <a href="#" ng-click="complain(comment); $event.preventDefault();"><i class="ico2 ico2_c_warn"></i> <span class="link_yel tdu">Пожаловаться</span></a>
+                    </div>
+                </div>
+                <div class="com_mess">
+                    <div class="quote" ng-if="comment.getParent()" ng-bind-html="comment.getParent().data.message"></div>
+                    <div ng-bind-html="comment.data.message"></div>
+                </div>
+                <div class="com_menu">
+                    <a class="ico2 ico2_come_edit" ng-click="edit(comment); $event.preventDefault();"></a>
+                    <a class="ico2 ico2_come_del" ng-click="delete(comment); $event.preventDefault();"></a>
+                </div>
+            </div>
+            <div class="com_response" ng-show="responding[comment.data.id]">
+                <h4>Ваш ответ:</h4>
+                <div wiki-editor model-name="responseText" textarea-id="response-textarea-{{comment.data.id}}" />
+                <input type="submit" value="Отправить (Ctrl+Enter)" class="btn_orange btn_orange_sm" ng-click="submit(comment)"/>
+                <em class="btns_wys_text">Важно: не оскорблять, не флудить, не спамить. Иначе — тра-та-та!</em>
+            </div>
+        </div>
+
+    </div>
+
+</div>

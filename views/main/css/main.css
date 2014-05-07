@@ -1116,6 +1116,10 @@ textarea.f_text2 { overflow:auto; resize:vertical;}
 .com_menu a { float:left; margin:0 0 0 8px; }
 .com_menu .ico2 { width:13px; height:15px;}
 .com_menu .ico2_come_refresh { width:15px;}
+.com_response {
+    margin: 0 0 0 57px;
+    padding: 10px 0;
+}
 
 .com_deleted_prev, .com_appeal_prev { background:#ccc;}
 .com_deleted_prev .com_pre { display:none;}
@@ -2128,7 +2132,6 @@ div.search {
     position: absolute;
     top: 0;
     left: 0;
-    padding: .2em;
     outline: 0;
 }
 
@@ -2176,7 +2179,8 @@ div.search {
     position: relative;
     border: 0;
     padding: .5em 1em;
-    background: none;
+    background: #FFF;
     overflow: auto;
     clear: both;
+    border: 1px solid #dedede
 }
