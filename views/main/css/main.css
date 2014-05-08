@@ -2122,3 +2122,61 @@ div.search {
 	cursor: default;
 }
 
+/**************editor******************/
+.ui-dialog {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: .2em;
+    outline: 0;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    padding: .4em 1em;
+    position: relative;
+    background-color: #ed5f00;
+}
+
+.ui-dialog .ui-dialog-titlebar:hover
+{
+    cursor: move;
+}
+
+.ui-dialog .ui-dialog-titlebar-close {
+    position: absolute;
+    right: .3em;
+    top: 50%;
+    width: 20px;
+    margin: -10px 0 0 0;
+    padding: 1px;
+    height: 20px;
+    border: none;
+    overflow: hidden;
+    text-indent: -1000px;
+    background-color: transparent;
+    background-image: url(../img/jqueryui/ui-icons_ffffff_256x240.png);
+    background-repeat: no-repeat;
+    background-position: -95px -125px;
+    cursor: pointer;
+}
+
+.ui-dialog .ui-dialog-title {
+    display: block;
+    margin: .1em 0;
+    white-space: nowrap;
+    width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #FFF;
+}
+.ui-dialog .ui-dialog-content {
+    position: relative;
+    border: 0;
+    padding: .5em 1em;
+    background: none;
+    overflow: auto;
+    clear: both;
+}
