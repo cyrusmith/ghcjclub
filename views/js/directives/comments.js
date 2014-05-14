@@ -65,15 +65,15 @@ App.directive('comments', ['$log', 'SignedUser', function ($log, SignedUser) {
              * Type of resource to which these comments are being added
              * Currently supported values are: "article", "track"
              */
-            resourceType: "@",
+            objectType: "@",
 
             /**
              * Resource identifier
              */
-            resourceId: "@"
+            objectId: "@"
 
         },
-        controller: ['$scope', '$element', '$attrs', '$sce', 'Comments', function ($scope, $element, $attrs, $sce, Comments) {
+        controller: ['$scope', '$element', '$attrs', '$http', '$sce', 'Comments', 'BackendUtils', function ($scope, $element, $attrs, $http, $sce, Comments, BackendUtils) {
 
             $log.log("Comments:", $scope);
 
@@ -117,7 +117,7 @@ App.directive('comments', ['$log', 'SignedUser', function ($log, SignedUser) {
 
             $scope.comments = [];
             var commentsHash = {};
-            Comments.query({resourceType: $scope.resourceType, id: $scope.resourceId}).$promise.then(function (result) {
+            Comments.query({objectType: $scope.objectType, objectId: $scope.objectId}).$promise.then(function (result) {
                 $log.log(result);
 
                 var hash = {};
@@ -163,12 +163,33 @@ App.directive('comments', ['$log', 'SignedUser', function ($log, SignedUser) {
                 $log.log("delete:", comment);
             }
 
-            $scope.submit = function (comment) {
-                $log.log("Submit:", comment, $scope.newcomment);
+            $scope.submit = function (parentComment) {
+
+                $log.log("Submit:", parentComment, $scope.newcomment);
+
+                var message = parentComment == null ? $scope.newcommentText : $scope.responseText;
+
+                $http({
+                    method: 'post',
+                    url: '/comments/' + $scope.objectType + '/' + $scope.objectId,
+                    data: {
+                        authorId: "42491",
+                        message: message,
+                        object_type: $scope.objectType,
+                        object_id: $scope.objectId,
+                        track_sharing: false //TODO
+                    },
+                    transformRequest: BackendUtils.transformRequestToForm
+                }).success(function () {
+                        alert('Ok!');
+                    }).error(function () {
+                        alert('Error!');
+                    });
+
                 $scope.newcommentText = "";
                 $scope.responseText = "";
-                if (comment) {
-                    $scope.responding= {};
+                if (parentComment != null) {
+                    $scope.responding = {};
                 }
             }
 
@@ -190,30 +211,35 @@ App.directive('comments', ['$log', 'SignedUser', function ($log, SignedUser) {
                 $log.log("complain:", comment);
             }
 
-            $(document).on('keydown', function (e) {
-                if (e.ctrlKey && e.keyCode == 13) {
-                    var focusedEl = $(document.activeElement),
-                        id = focusedEl.attr('id');
+            function handleCtrlEnter(e) {
+                if (!e.ctrlKey || e.keyCode != 13) return;
+                var focusedEl = $(document.activeElement),
+                    id = focusedEl.attr('id');
 
-                    if (!id) {
-                        return;
-                    }
-
-                    if ("newcomment-textarea" == id) {
-                        $scope.submit(null)
-                    }
-                    else if (id.indexOf("response-textarea-") !== -1) {
-                        var matches = id.match(/^response-textarea-([0-9]*)$/);
-                        if (matches) {
-                            $scope.submit(commentsHash[matches[1]])
-                        }
-                    }
-                    $scope.$apply();
+                if (!id) {
+                    return;
                 }
-            });
+
+                if ("newcomment-textarea" == id) {
+                    $scope.submit(null);
+                    focusedEl.val('');
+                }
+                else if (id.indexOf("response-textarea-") !== -1) {
+                    var matches = id.match(/^response-textarea-([0-9]*)$/);
+                    if (matches) {
+                        $scope.submit(commentsHash[matches[1]])
+                        focusedEl.val('');
+                    }
+                }
+                $scope.$apply();
+
+            }
+
+            $(document).on('keydown', handleCtrlEnter);
 
             $element.on('$destroy', function () {
                 $log.log("Destroy comments");
+                $(document).off('keydown', handleCtrlEnter);
             });
 
         }],

@@ -1,4 +1,4 @@
 App.factory('Comments', function($resource) {
-    return $resource('comments/:resourceType/:id', {}, {
+    return $resource('comments/:objectType/:objectId', {}, {
     });
 });

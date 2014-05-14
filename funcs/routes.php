@@ -46,6 +46,7 @@ function setRoutes() {
 
 	Router::get()->connect(Router::$GET, '^radio/(?<channel>\d)$', 'RadioCtrl/getInfo');
 	Router::get()->connect(Router::$GET, '^comments/(?<objectType>.+)/(?<id>\d+)$', 'CommentsCtrl/lists');
+	Router::get()->connect(Router::$POST, '^comments/(?<objectType>.+)/(?<id>\d+)', 'CommentsCtrl/create');
 
 	// все остальные
 	Router::get()->connect(Router::$GET, '^', null, 'views/main/main.html');
